@@ -13,6 +13,15 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="light" />
   <title>AGHU Notes</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="AGHU Notes" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -1083,6 +1092,65 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
     }
   </style>
 
+
+  <style id="aghu-v7-enhancements">
+    .login-memory-hint{
+      margin:6px 2px 0;
+      font-size:6.5px;
+      line-height:1.3;
+      color:#bdbdbd;
+      text-align:center;
+    }
+    .install-app-btn{
+      height:30px;
+      padding:0 10px;
+      border:1px solid #c5cdd4;
+      border-radius:2px;
+      background:#fff;
+      color:#3e596d;
+      font-size:10px;
+      cursor:pointer;
+    }
+    .install-app-btn:hover{background:#eef5fa}
+    .patient-source-badge{
+      display:inline-block;
+      margin-left:5px;
+      color:#7b8d96;
+      font-size:9px;
+      font-weight:400;
+      vertical-align:middle;
+    }
+    @media(max-width:700px){
+      .install-app-btn{height:28px;padding:0 7px;font-size:9px}
+    }
+  </style>
+
+
+  <style id="fix-close-notes-tab">
+    .tab-with-close.hidden{display:none!important}
+  </style>
+
+
+  <style id="autosave-offline-style">
+    .autosave-state.local-saved{color:#8a7416!important}
+    .autosave-state.cloud-saved{color:#26744b!important}
+    .autosave-state.save-error{color:#a52626!important}
+  </style>
+
+
+  <style id="indexeddb-autosave-style">
+    .autosave-state.local-saved{color:#8a7416!important}
+    .autosave-state.cloud-saved{color:#26744b!important}
+    .autosave-state.save-error{color:#a52626!important}
+    .local-pending-image{position:relative}
+    .local-pending-image small{
+      display:block;
+      margin:4px 0;
+      font-size:10px;
+      color:#8a7416;
+    }
+  </style>
+
 </head>
 <body>
   <div id="authScreen" class="auth-screen">
@@ -1105,6 +1173,7 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
         <label for="loginPassword">Senha</label>
         <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Senha" required />
         <button type="submit" class="btn btn-primary">Entrar</button>
+        <div class="login-memory-hint">Este aparelho permanecerá conectado após o primeiro login.</div>
         <div id="loginError" class="form-error"></div>
       </form>
 
@@ -1133,7 +1202,7 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
       <nav id="sideMenu" class="side-menu">
         <button id="panelMenuBtn" class="menu-item" data-static="true"><span>▣</span>Painel Geral</button>
         <button class="menu-item" data-static="true"><span>▰</span>Prontuário Online</button>
-        <button id="keepMenuBtn" class="menu-item active" data-page="keep"><span>🗒</span>Keep</button>
+        <button id="keepMenuBtn" class="menu-item active" data-page="keep"><span>🗒</span>Notas</button>
         <label class="keep-mode-switch" title="Quando marcado, o módulo de notas abre em uma janela central em primeiro plano">
           <input id="keepModeToggle" type="checkbox" />
           <span>Abrir em primeiro plano</span>
@@ -1202,6 +1271,7 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
         </div>
         <div class="topbar-right">
           <span id="syncStatus" class="sync-status">● Sincronizado</span>
+          <button id="installAppBtn" class="install-app-btn hidden" type="button" title="Instalar neste dispositivo">⬇ Instalar</button>
           <button id="logoutBtn" class="logout-btn">↪ Sair</button>
         </div>
       </header>
@@ -1229,8 +1299,8 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
         <div class="tabs">
           <button id="panelTab" class="tab" type="button">▣ Painel Geral</button>
           <div id="keepTab" class="tab active tab-with-close" role="tab" aria-selected="true">
-            <button id="keepTabOpenBtn" class="tab-main-btn" type="button">🗒 Keep</button>
-            <button id="closeKeepTabBtn" class="tab-close-btn" type="button" title="Fechar Keep" aria-label="Fechar Keep">×</button>
+            <button id="keepTabOpenBtn" class="tab-main-btn" type="button">🗒 Notas</button>
+            <button id="closeKeepTabBtn" class="tab-close-btn" type="button" title="Fechar Notas" aria-label="Fechar Notas">×</button>
           </div>
         </div>
 
@@ -1536,7 +1606,7 @@ window.APP_CONFIG = {
 
   const els = {
     auth: $('authScreen'), app: $('appShell'), login: $('loginForm'), loginEmail: $('loginEmail'), loginPassword: $('loginPassword'), loginError: $('loginError'),
-    logout: $('logoutBtn'), syncStatus: $('syncStatus'), tbody: $('notesTbody'), empty: $('emptyState'), newNote: $('newNoteBtn'), noteSearch: $('noteSearch'), labelFilter: $('labelFilter'),
+    logout: $('logoutBtn'), syncStatus: $('syncStatus'), installApp: $('installAppBtn'), tbody: $('notesTbody'), empty: $('emptyState'), newNote: $('newNoteBtn'), noteSearch: $('noteSearch'), labelFilter: $('labelFilter'),
     emptyTrash: $('emptyTrashBtn'), openSelected: $('openSelectedBtn'), restoreSelected: $('restoreSelectedBtn'), deleteSelected: $('deleteSelectedBtn'),
     manageLabels: $('manageLabelsBtn'), labelsDialog: $('labelsDialog'), labelsManagerList: $('labelsManagerList'),
     firstSyncDialog: $('firstSyncDialog'), confirmFirstSync: $('confirmFirstSyncBtn'), cancelFirstSync: $('cancelFirstSyncBtn'),
@@ -1558,6 +1628,303 @@ window.APP_CONFIG = {
     const div=document.createElement('div');div.innerHTML=value;return (div.textContent||div.innerText||'').trim();
   }
   function showToast(message,ms=2600){if(!els.toast)return;els.toast.textContent=message;els.toast.classList.remove('hidden');clearTimeout(showToast._t);showToast._t=setTimeout(()=>els.toast.classList.add('hidden'),ms);}
+
+  const LEGACY_NOTES_CACHE_PREFIX='aghuNotes.notesCache:';
+  const LEGACY_LABELS_CACHE_PREFIX='aghuNotes.labelsCache:';
+  const LEGACY_DRAFT_PREFIX='aghuNotes.draft:';
+
+  let localDbPromise=null;
+
+  function persistenceError(err){
+    console.error('Persistência local:',err);
+    const name=String(err?.name||'');
+    if(name==='QuotaExceededError'){
+      showToast('O espaço reservado pelo navegador para este app está cheio. Sincronize e libere espaço.',5000);
+    }else if(name==='SecurityError'||name==='InvalidStateError'){
+      showToast('O navegador bloqueou o armazenamento local deste app.',4500);
+    }else{
+      showToast('Não foi possível salvar a cópia local neste aparelho.',4200);
+    }
+  }
+
+  function openLocalDb(){
+    if(localDbPromise)return localDbPromise;
+    localDbPromise=new Promise((resolve,reject)=>{
+      const req=indexedDB.open('AGHUNotesLocal',2);
+      req.onupgradeneeded=()=>{
+        const db=req.result;
+        if(!db.objectStoreNames.contains('cache')){
+          db.createObjectStore('cache',{keyPath:'key'});
+        }
+        if(!db.objectStoreNames.contains('drafts')){
+          const s=db.createObjectStore('drafts',{keyPath:'key'});
+          s.createIndex('userId','userId',{unique:false});
+          s.createIndex('noteId','noteId',{unique:false});
+        }
+        if(!db.objectStoreNames.contains('attachments')){
+          const s=db.createObjectStore('attachments',{keyPath:'id'});
+          s.createIndex('userId','userId',{unique:false});
+          s.createIndex('noteId','noteId',{unique:false});
+        }
+      };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+      req.onblocked=()=>reject(new Error('IndexedDB bloqueado por outra aba.'));
+    });
+    return localDbPromise;
+  }
+
+  async function idbGet(store,key){
+    const db=await openLocalDb();
+    return await new Promise((resolve,reject)=>{
+      const tx=db.transaction(store,'readonly');
+      const req=tx.objectStore(store).get(key);
+      req.onsuccess=()=>resolve(req.result||null);
+      req.onerror=()=>reject(req.error);
+    });
+  }
+
+  async function idbPut(store,value){
+    const db=await openLocalDb();
+    return await new Promise((resolve,reject)=>{
+      const tx=db.transaction(store,'readwrite');
+      tx.objectStore(store).put(value);
+      tx.oncomplete=()=>resolve(true);
+      tx.onerror=()=>reject(tx.error);
+      tx.onabort=()=>reject(tx.error||new Error('Transação abortada.'));
+    });
+  }
+
+  async function idbDelete(store,key){
+    const db=await openLocalDb();
+    return await new Promise((resolve,reject)=>{
+      const tx=db.transaction(store,'readwrite');
+      tx.objectStore(store).delete(key);
+      tx.oncomplete=()=>resolve(true);
+      tx.onerror=()=>reject(tx.error);
+    });
+  }
+
+  async function idbGetAllByIndex(store,indexName,value){
+    const db=await openLocalDb();
+    return await new Promise((resolve,reject)=>{
+      const tx=db.transaction(store,'readonly');
+      const req=tx.objectStore(store).index(indexName).getAll(value);
+      req.onsuccess=()=>resolve(req.result||[]);
+      req.onerror=()=>reject(req.error);
+    });
+  }
+
+  function notesCacheId(){return state.user?`notes:${state.user.id}`:null;}
+  function labelsCacheId(){return state.user?`labels:${state.user.id}`:null;}
+  function draftId(noteId){return state.user?`${state.user.id}:${noteId}`:null;}
+
+  async function migrateLegacyLocalStorage(userId){
+    try{
+      const notesKey=LEGACY_NOTES_CACHE_PREFIX+userId;
+      const labelsKey=LEGACY_LABELS_CACHE_PREFIX+userId;
+
+      const rawNotes=localStorage.getItem(notesKey);
+      if(rawNotes){
+        try{
+          const value=JSON.parse(rawNotes);
+          await idbPut('cache',{key:`notes:${userId}`,value,updatedAt:Date.now()});
+        }catch{}
+        localStorage.removeItem(notesKey);
+      }
+
+      const rawLabels=localStorage.getItem(labelsKey);
+      if(rawLabels){
+        try{
+          const value=JSON.parse(rawLabels);
+          await idbPut('cache',{key:`labels:${userId}`,value,updatedAt:Date.now()});
+        }catch{}
+        localStorage.removeItem(labelsKey);
+      }
+
+      const prefix=LEGACY_DRAFT_PREFIX+userId+':';
+      const keys=[];
+      for(let i=0;i<localStorage.length;i++){
+        const k=localStorage.key(i);
+        if(k&&k.startsWith(prefix))keys.push(k);
+      }
+      for(const k of keys){
+        try{
+          const data=JSON.parse(localStorage.getItem(k)||'null');
+          if(data?.id){
+            await idbPut('drafts',{
+              key:`${userId}:${data.id}`,userId,noteId:data.id,data,updatedAt:Date.now()
+            });
+          }
+        }catch{}
+        localStorage.removeItem(k);
+      }
+    }catch(err){
+      console.warn('Migração local:',err);
+    }
+  }
+
+  async function initLocalPersistence(userId){
+    try{
+      await openLocalDb();
+      await migrateLegacyLocalStorage(userId);
+
+      const [notesRec,labelsRec,draftRows]=await Promise.all([
+        idbGet('cache',`notes:${userId}`),
+        idbGet('cache',`labels:${userId}`),
+        idbGetAllByIndex('drafts','userId',userId)
+      ]);
+
+      state.localNotesCache=Array.isArray(notesRec?.value)?notesRec.value:[];
+      state.localLabelsCache=Array.isArray(labelsRec?.value)?labelsRec.value:[];
+      state.localDrafts=new Map(
+        (draftRows||[]).filter(r=>r?.noteId&&r?.data).map(r=>[r.noteId,r.data])
+      );
+      state.localPersistenceReady=true;
+    }catch(err){
+      state.localPersistenceReady=false;
+      persistenceError(err);
+    }
+  }
+
+  function cacheNotes(){
+    state.localNotesCache=state.notes.map(n=>({...n}));
+    if(!state.user||!state.localPersistenceReady)return;
+    idbPut('cache',{
+      key:notesCacheId(),value:state.localNotesCache,updatedAt:Date.now()
+    }).catch(persistenceError);
+  }
+
+  function cacheLabels(){
+    state.localLabelsCache=state.labels.map(l=>({...l}));
+    if(!state.user||!state.localPersistenceReady)return;
+    idbPut('cache',{
+      key:labelsCacheId(),value:state.localLabelsCache,updatedAt:Date.now()
+    }).catch(persistenceError);
+  }
+
+  function setAutosave(text,mode=''){
+    els.autosave.textContent=text;
+    els.autosave.classList.remove('local-saved','cloud-saved','save-error');
+    if(mode)els.autosave.classList.add(mode);
+  }
+
+  function buildDraft(){
+    if(!state.current)return null;
+    return {
+      id:state.current.id,
+      user_id:state.user.id,
+      title:els.title.value.trim()||'Sem título',
+      content_html:els.body.innerHTML,
+      color:els.color.value,
+      reminder_at:els.reminder.value?new Date(els.reminder.value).toISOString():null,
+      labels_text:els.labelsInput.value||'',
+      updated_at:new Date().toISOString(),
+      created_at:state.current.created_at||new Date().toISOString(),
+      synthetic_local:state.current.synthetic_local,
+      synthetic_age:state.current.synthetic_age,
+      synthetic_record:state.current.synthetic_record,
+      pending_create:!!state.current.local_only
+    };
+  }
+
+  function persistDraftNow(){
+    const d=buildDraft();
+    if(!d)return;
+
+    state.localDrafts.set(d.id,d);
+
+    const idx=state.notes.findIndex(n=>n.id===d.id);
+    const patch={
+      title:d.title,content_html:d.content_html,color:d.color,
+      reminder_at:d.reminder_at,updated_at:d.updated_at
+    };
+    if(idx>=0)Object.assign(state.notes[idx],patch);
+    Object.assign(state.current,patch);
+    cacheNotes();
+
+    if(state.localPersistenceReady){
+      idbPut('drafts',{
+        key:draftId(d.id),userId:state.user.id,noteId:d.id,data:d,updatedAt:Date.now()
+      }).catch(persistenceError);
+    }
+  }
+
+  function getDraft(noteId){
+    return state.localDrafts.get(noteId)||null;
+  }
+
+  function clearDraft(noteId){
+    state.localDrafts.delete(noteId);
+    if(state.localPersistenceReady&&state.user){
+      idbDelete('drafts',draftId(noteId)).catch(err=>console.warn('Falha ao limpar rascunho local:',err));
+    }
+  }
+
+  function pendingDrafts(){
+    return [...state.localDrafts.values()]
+      .filter(Boolean)
+      .sort((a,b)=>new Date(a.updated_at)-new Date(b.updated_at));
+  }
+
+  async function queueLocalAttachment(blob,fileName,noteId){
+    if(!state.localPersistenceReady)throw new Error('IndexedDB indisponível.');
+    const item={
+      id:crypto.randomUUID(),
+      userId:state.user.id,
+      noteId,
+      fileName:fileName||`arquivo-${Date.now()}`,
+      blob,
+      createdAt:Date.now()
+    };
+    await idbPut('attachments',item);
+    return item;
+  }
+
+  async function localAttachmentsForNote(noteId){
+    if(!state.localPersistenceReady||!state.user)return[];
+    const rows=await idbGetAllByIndex('attachments','noteId',noteId);
+    return (rows||[]).filter(r=>r.userId===state.user.id);
+  }
+
+  async function deleteLocalAttachment(id){
+    if(!state.localPersistenceReady)return;
+    await idbDelete('attachments',id);
+  }
+
+  async function deleteLocalAttachmentsForNote(noteId){
+    const rows=await localAttachmentsForNote(noteId);
+    for(const row of rows)await deleteLocalAttachment(row.id);
+  }
+
+  async function syncPendingLocalAttachments(){
+    if(!navigator.onLine||!state.user||!state.localPersistenceReady)return;
+    const rows=await idbGetAllByIndex('attachments','userId',state.user.id);
+    for(const item of rows){
+      try{
+        const noteExists=state.notes.some(n=>n.id===item.noteId&&!n.local_only);
+        if(!noteExists)continue;
+
+        const safe=(item.fileName||'arquivo').replace(/[^a-zA-Z0-9._-]/g,'_');
+        const path=`${state.user.id}/${item.noteId}/${Date.now()}-${safe}`;
+        const up=await supabase.storage.from('note-images').upload(path,item.blob,{upsert:false});
+        if(up.error)continue;
+
+        const {error}=await supabase.from('attachments').insert({
+          user_id:state.user.id,note_id:item.noteId,storage_path:path,
+          public_url:'',file_name:item.fileName||safe
+        });
+        if(error){
+          await supabase.storage.from('note-images').remove([path]);
+          continue;
+        }
+        await deleteLocalAttachment(item.id);
+      }catch(err){
+        console.warn('Anexo local pendente:',err);
+      }
+    }
+  }
+
   function deviceSyncKey(userId){return `aghuNotes.syncConfirmed:${userId}`;}
   async function confirmFirstDeviceSync(user){
     if(localStorage.getItem(deviceSyncKey(user.id))==='1')return true;
@@ -1566,6 +1933,81 @@ window.APP_CONFIG = {
       const finish=ok=>{els.confirmFirstSync.onclick=null;els.cancelFirstSync.onclick=null;try{els.firstSyncDialog.close();}catch{}if(ok)localStorage.setItem(deviceSyncKey(user.id),'1');resolve(ok);};
       els.confirmFirstSync.onclick=()=>finish(true);els.cancelFirstSync.onclick=()=>finish(false);els.firstSyncDialog.showModal();
     });
+  }
+
+  function compactAge(value=''){
+    const s=String(value).trim().toLowerCase();
+    if(!s) return '';
+    const y=s.match(/(\d{1,3})\s*(?:anos?|ano|a)\b/i);
+    const m=s.match(/(\d{1,2})\s*(?:meses?|m[eê]s|m)\b/i);
+    if(y&&m) return `${Number(y[1])}a ${Number(m[1])}m`;
+    if(y) return String(Number(y[1]));
+    if(m) return `${Number(m[1])}m`;
+    const n=s.match(/\b(\d{1,3})\b/);
+    return n?String(Number(n[1])):'';
+  }
+
+  function cleanPatientName(value=''){
+    let s=String(value).replace(/\s+/g,' ').trim();
+    s=s.replace(/\s*[|;]\s*(?:idade|prontu[aá]rio|pol)\b.*$/i,'').trim();
+    s=s.replace(/,\s*\d{1,3}\s*(?:anos?|ano|a)\b.*$/i,'').trim();
+    s=s.replace(/,\s*\d{1,2}\s*(?:meses?|m[eê]s)\b.*$/i,'').trim();
+    s=s.replace(/\s+(?:idade|prontu[aá]rio|pol)\s*[:\-–].*$/i,'').trim();
+    return s.replace(/[,:;\-–]+$/,'').trim();
+  }
+
+  function extractPatientMetadata(note){
+    const clinicalHtml=String(note?.content_html||'').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<\/(?:div|p|h[1-6]|li|tr)>/gi,'\n');
+    const text=stripHtml(clinicalHtml).replace(/\u00a0/g,' ').replace(/\r/g,'\n');
+    const lines=text.split(/\n+/).map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);
+    const whole=lines.join('\n');
+    let name='', age='', record='';
+
+    // Nome / Identificação / ID: prioriza campos explicitamente rotulados.
+    for(const line of lines){
+      let m=line.match(/^(?:nome(?:\s+(?:do|da)\s+paciente)?|identifica(?:ç|c)[aã]o)\s*[:\-–]\s*(.+)$/i);
+      if(m){ name=cleanPatientName(m[1]); if(name) break; }
+    }
+    if(!name){
+      for(const line of lines){
+        const m=line.match(/^id\s*[:\-–]\s*(.+)$/i);
+        if(m){
+          const candidate=cleanPatientName(m[1]);
+          const compact=candidate.replace(/[\s./-]/g,'');
+          if(candidate && !/^\d+$/.test(compact)){name=candidate;break;}
+        }
+      }
+    }
+
+    // Idade explicitamente rotulada.
+    let m=whole.match(/(?:^|\n)\s*idade\s*[:\-–]\s*([^\n;|]+)/i);
+    if(m) age=compactAge(m[1]);
+    // Se ID contém nome + idade, captura a idade na mesma linha.
+    if(!age){
+      for(const line of lines){
+        if(!/^(?:id|identifica(?:ç|c)[aã]o)\s*[:\-–]/i.test(line)) continue;
+        const a=line.match(/\b(\d{1,3})\s*(?:anos?|ano|a)\b(?:\s*(?:e|,)?\s*(\d{1,2})\s*(?:meses?|m[eê]s|m)\b)?/i);
+        if(a){age=a[2]?`${Number(a[1])}a ${Number(a[2])}m`:String(Number(a[1]));break;}
+        const mm=line.match(/\b(\d{1,2})\s*(?:meses?|m[eê]s)\b/i);
+        if(mm){age=`${Number(mm[1])}m`;break;}
+      }
+    }
+    // Fallback: primeira idade inequívoca no texto.
+    if(!age){
+      const a=whole.match(/\b(\d{1,3})\s*(?:anos?|ano)\b(?:\s*(?:e|,)?\s*(\d{1,2})\s*(?:meses?|m[eê]s)\b)?/i);
+      if(a) age=a[2]?`${Number(a[1])}a ${Number(a[2])}m`:String(Number(a[1]));
+    }
+
+    // Prontuário ou POL.
+    m=whole.match(/(?:^|\n|\s)(?:prontu[aá]rio|pol)\s*(?:n[ºo°.]*)?\s*[:#\-–]?\s*([A-Za-z0-9./-]{3,})/i);
+    if(m) record=m[1].replace(/[.,;:]+$/,'');
+
+    return {
+      name:name||note?.title||'Sem título',
+      age:age||String(note?.synthetic_age??'-'),
+      record:record||String(note?.synthetic_record??'-'),
+      recognized:{name:!!name,age:!!age,record:!!record}
+    };
   }
 
   function randomMeta(){
@@ -1600,6 +2042,7 @@ window.APP_CONFIG = {
   }
 
   function showPanelGeneral(){
+    if(state.current&&state.isDirty)persistDraftNow();
     document.body.classList.remove('keep-focus-mode');
     els.keepFocusBar?.classList.add('hidden');
     els.keepPage.classList.add('hidden');
@@ -1611,7 +2054,10 @@ window.APP_CONFIG = {
 
   function openKeepModule(){
     els.panelPage?.classList.add('hidden');
-    els.keepTab?.classList.remove('hidden');
+    if(els.keepTab){
+      els.keepTab.style.removeProperty('display');
+      els.keepTab.classList.remove('hidden');
+    }
     els.editorPage.classList.add('hidden');
     els.keepPage.classList.remove('hidden');
     state.current=null;
@@ -1625,7 +2071,10 @@ window.APP_CONFIG = {
     if(state.isDirty) await flushSave();
     document.body.classList.remove('keep-focus-mode');
     els.keepFocusBar?.classList.add('hidden');
-    els.keepTab?.classList.add('hidden');
+    if(els.keepTab){
+      els.keepTab.classList.add('hidden');
+      els.keepTab.style.setProperty('display','none','important');
+    }
     showPanelGeneral();
   }
 
@@ -1639,7 +2088,7 @@ window.APP_CONFIG = {
     state.current=null;
     setTopTabState('panel');
     // A preferência "Abrir em primeiro plano" continua marcada.
-    // Ao abrir Keep novamente, ele volta elevado.
+    // Ao abrir Notas novamente, ele volta elevado.
     syncKeepModeControls();
   }
 
@@ -1671,18 +2120,45 @@ window.APP_CONFIG = {
       const ok=await confirmFirstDeviceSync(user);
       if(!ok){await supabase.auth.signOut();showAuth();return;}
       els.auth.classList.add('hidden');els.app.classList.remove('hidden');setSyncStatus('syncing');
-      await Promise.all([loadNotes(),loadLabels()]);renderNotes();applyKeepFocusMode(state.keepFocusMode);setSyncStatus('ok');startSyncLoop();startReminderLoop();
+      await initLocalPersistence(user.id);
+      await Promise.all([loadNotes(),loadLabels()]);
+      renderNotes();applyKeepFocusMode(state.keepFocusMode);
+      if(navigator.onLine&&pendingDrafts().length)await syncPendingDrafts();
+      if(navigator.onLine)await syncPendingLocalAttachments();
+      setSyncStatus(navigator.onLine?'ok':'offline');
+      startSyncLoop();startReminderLoop();
     }finally{state.entering=false;}
   }
+
+  const rememberedEmail=localStorage.getItem('aghuNotes.lastEmail')||'';
+  if(rememberedEmail) els.loginEmail.value=rememberedEmail;
 
   els.login.addEventListener('submit', async e=>{
     e.preventDefault(); els.loginError.textContent='';
     if(!supabase){ els.loginError.textContent='Supabase ainda não configurado.'; return; }
-    const {data,error}=await supabase.auth.signInWithPassword({email:els.loginEmail.value.trim(),password:els.loginPassword.value});
+    const email=els.loginEmail.value.trim();
+    const {data,error}=await supabase.auth.signInWithPassword({email,password:els.loginPassword.value});
     if(error){ els.loginError.textContent='Falha no login. Verifique e-mail e senha.'; return; }
+    localStorage.setItem('aghuNotes.lastEmail',email);
+    els.loginPassword.value='';
     await enterApp(data.user);
   });
   els.logout.addEventListener('click', async()=>{ await supabase.auth.signOut(); showAuth(); });
+
+  let deferredInstallPrompt=null;
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();
+    deferredInstallPrompt=e;
+    els.installApp?.classList.remove('hidden');
+  });
+  els.installApp?.addEventListener('click',async()=>{
+    if(!deferredInstallPrompt){showToast('Use a opção “Adicionar à tela inicial” do navegador neste aparelho.',4200);return;}
+    deferredInstallPrompt.prompt();
+    try{await deferredInstallPrompt.userChoice;}catch{}
+    deferredInstallPrompt=null;
+    els.installApp.classList.add('hidden');
+  });
+  window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;els.installApp?.classList.add('hidden');showToast('AGHU Notes instalado neste dispositivo.');});
 
   function setSyncStatus(mode){
     if(!els.syncStatus) return;
@@ -1699,14 +2175,22 @@ window.APP_CONFIG = {
   }
 
   async function syncFromCloud(){
-    if(!state.user || !navigator.onLine){
+    if(!state.user||!navigator.onLine){
       setSyncStatus('offline');
       return;
     }
-    if(state.isDirty) return;
+    if(pendingDrafts().length){
+      await syncPendingDrafts();
+      return;
+    }
+    if(state.isDirty){
+      await flushSave();
+      return;
+    }
     setSyncStatus('syncing');
+    await syncPendingLocalAttachments();
     await Promise.all([loadNotes(),loadLabels()]);
-    if(!els.keepPage.classList.contains('hidden')) renderNotes();
+    if(!els.keepPage.classList.contains('hidden'))renderNotes();
     setSyncStatus('ok');
   }
 
@@ -1720,13 +2204,75 @@ window.APP_CONFIG = {
   }
 
   async function loadNotes(){
-    const {data,error}=await supabase.from('notes').select('*, note_labels(label_id, labels(id,name)), attachments(*)').order('updated_at',{ascending:false});
-    if(error){ console.error(error); return; }
+    if(!navigator.onLine){
+      state.notes=state.localNotesCache.length?state.localNotesCache.map(n=>({...n})):(state.notes||[]);
+      for(const d of pendingDrafts()){
+        const idx=state.notes.findIndex(n=>n.id===d.id);
+        if(idx>=0){
+          Object.assign(state.notes[idx],{
+            title:d.title,content_html:d.content_html,color:d.color,
+            reminder_at:d.reminder_at,updated_at:d.updated_at
+          });
+        }else if(d.pending_create){
+          state.notes.unshift({
+            id:d.id,user_id:d.user_id,title:d.title,content_html:d.content_html,
+            color:d.color||'#ffffff',reminder_at:d.reminder_at||null,
+            created_at:d.created_at,updated_at:d.updated_at,
+            synthetic_local:d.synthetic_local,synthetic_age:d.synthetic_age,
+            synthetic_record:d.synthetic_record,pinned:false,archived:false,deleted:false,
+            local_only:true,note_labels:[],attachments:[]
+          });
+        }
+      }
+      return;
+    }
+
+    const {data,error}=await supabase.from('notes')
+      .select('*, note_labels(label_id, labels(id,name)), attachments(*)')
+      .order('updated_at',{ascending:false});
+
+    if(error){
+      console.error(error);
+      state.notes=state.localNotesCache.length?state.localNotesCache.map(n=>({...n})):(state.notes||[]);
+      return;
+    }
+
     state.notes=data||[];
+
+    for(const d of pendingDrafts()){
+      const idx=state.notes.findIndex(n=>n.id===d.id);
+      if(idx>=0 && new Date(d.updated_at||0)>new Date(state.notes[idx].updated_at||0)){
+        Object.assign(state.notes[idx],{
+          title:d.title,content_html:d.content_html,color:d.color,
+          reminder_at:d.reminder_at,updated_at:d.updated_at
+        });
+      }else if(idx<0&&d.pending_create){
+        state.notes.unshift({
+          id:d.id,user_id:d.user_id,title:d.title,content_html:d.content_html,
+          color:d.color||'#ffffff',reminder_at:d.reminder_at||null,
+          created_at:d.created_at,updated_at:d.updated_at,
+          synthetic_local:d.synthetic_local,synthetic_age:d.synthetic_age,
+          synthetic_record:d.synthetic_record,pinned:false,archived:false,deleted:false,
+          local_only:true,note_labels:[],attachments:[]
+        });
+      }
+    }
+    cacheNotes();
   }
+
   async function loadLabels(){
-    const {data}=await supabase.from('labels').select('*').order('name'); state.labels=data||[];
-    els.labelFilter.innerHTML='<option value="">Todas as etiquetas</option>'+state.labels.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
+    if(!navigator.onLine){
+      state.labels=state.localLabelsCache.length?state.localLabelsCache.map(l=>({...l})):(state.labels||[]);
+    }else{
+      const {data,error}=await supabase.from('labels').select('*').order('name');
+      if(error)state.labels=state.localLabelsCache.length?state.localLabelsCache.map(l=>({...l})):(state.labels||[]);
+      else{
+        state.labels=data||[];
+        cacheLabels();
+      }
+    }
+    els.labelFilter.innerHTML='<option value="">Todas as etiquetas</option>'+
+      state.labels.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
   }
 
   function filteredNotes(){
@@ -1734,12 +2280,12 @@ window.APP_CONFIG = {
     const rows=state.notes.filter(n=>{
       const base=state.filter==='trash'?n.deleted:state.filter==='archived'?n.archived&&!n.deleted:state.filter==='pinned'?n.pinned&&!n.archived&&!n.deleted:state.filter==='reminders'?!!n.reminder_at&&!n.deleted&&!n.archived:!n.deleted&&!n.archived;
       if(!base)return false;
-      if(q){const labelText=(n.note_labels||[]).map(x=>x.labels?.name||'').join(' ');const hay=[n.title,stripHtml(n.content_html),labelText,n.synthetic_local,n.synthetic_record].join(' ').toLowerCase();if(!hay.includes(q))return false;}
+      if(q){const labelText=(n.note_labels||[]).map(x=>x.labels?.name||'').join(' ');const meta=extractPatientMetadata(n);const hay=[n.title,meta.name,stripHtml(n.content_html),labelText,n.synthetic_local,meta.record,meta.age].join(' ').toLowerCase();if(!hay.includes(q))return false;}
       if(state.label){const ids=(n.note_labels||[]).map(x=>x.label_id);if(!ids.includes(state.label))return false;}
       return true;
     });
     const dir=state.sortDir==='asc'?1:-1;
-    return rows.sort((a,b)=>{let av=a[state.sortKey],bv=b[state.sortKey];if(state.sortKey==='updated_at'){av=new Date(av||0).getTime();bv=new Date(bv||0).getTime();}if(typeof av==='string')av=av.toLocaleLowerCase('pt-BR');if(typeof bv==='string')bv=bv.toLocaleLowerCase('pt-BR');if(av===bv)return 0;return av>bv?dir:-dir;});
+    return rows.sort((a,b)=>{const am=extractPatientMetadata(a),bm=extractPatientMetadata(b);let av=state.sortKey==='title'?am.name:state.sortKey==='synthetic_age'?am.age:state.sortKey==='synthetic_record'?am.record:a[state.sortKey];let bv=state.sortKey==='title'?bm.name:state.sortKey==='synthetic_age'?bm.age:state.sortKey==='synthetic_record'?bm.record:b[state.sortKey];if(state.sortKey==='updated_at'){av=new Date(av||0).getTime();bv=new Date(bv||0).getTime();}if(state.sortKey==='synthetic_age'){av=parseFloat(String(av).replace(/[^0-9.]/g,''))||0;bv=parseFloat(String(bv).replace(/[^0-9.]/g,''))||0;}if(typeof av==='string')av=av.toLocaleLowerCase('pt-BR');if(typeof bv==='string')bv=bv.toLocaleLowerCase('pt-BR');if(av===bv)return 0;return av>bv?dir:-dir;});
   }
 
   function updateSideActions(){
@@ -1771,14 +2317,17 @@ window.APP_CONFIG = {
     els.emptyTrash.classList.toggle('hidden',state.filter!=='trash');
     if(state.selectedId && !rows.some(n=>n.id===state.selectedId)) state.selectedId=null;
 
-    els.tbody.innerHTML=rows.map(n=>`<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}">
+    els.tbody.innerHTML=rows.map(n=>{
+      const meta=extractPatientMetadata(n);
+      return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}">
       <td data-label="Local">${esc(n.synthetic_local||'-')}</td>
-      <td data-label="Nome"><strong>${esc(n.title||'Sem título')}</strong>${n.pinned?' ★':''}<div class="keep-card-preview">${esc(stripHtml(n.content_html||'').slice(0,180))}</div></td>
-      <td data-label="Idade">${n.synthetic_age??'-'}</td>
-      <td data-label="Prontuário">${n.synthetic_record??'-'}</td>
+      <td data-label="Nome"><strong>${esc(meta.name)}</strong>${n.pinned?' ★':''}${meta.recognized.name?'<span class="patient-source-badge">ID</span>':''}<div class="keep-card-preview">${esc(stripHtml(n.content_html||'').slice(0,180))}</div></td>
+      <td data-label="Idade">${esc(meta.age)}</td>
+      <td data-label="Prontuário">${esc(meta.record)}</td>
       <td data-label="Dt. Atend.">${fmtDate(n.updated_at)}</td>
       ${actionCells(n)}
-    </tr>`).join('');
+    </tr>`;
+    }).join('');
 
     els.tbody.querySelectorAll('tr').forEach(tr=>{
       tr.addEventListener('click',e=>{
@@ -1897,6 +2446,8 @@ window.APP_CONFIG = {
   async function deleteNoteForever(note,ask=true){
     if(!note) return;
     if(ask && !confirm('Excluir definitivamente esta nota? Esta ação não poderá ser desfeita.')) return;
+    clearDraft(note.id);
+    try{await deleteLocalAttachmentsForNote(note.id);}catch{}
     setSyncStatus('syncing');
     await removeStorageFiles(note);
     const {error}=await supabase.from('notes').delete().eq('id',note.id);
@@ -1921,7 +2472,11 @@ window.APP_CONFIG = {
     if(!trashed.length) return;
     if(!confirm(`Esvaziar a lixeira e excluir definitivamente ${trashed.length} nota(s)? Esta ação não poderá ser desfeita.`)) return;
     setSyncStatus('syncing');
-    for(const note of trashed) await removeStorageFiles(note);
+    for(const note of trashed){
+      clearDraft(note.id);
+      try{await deleteLocalAttachmentsForNote(note.id);}catch{}
+      await removeStorageFiles(note);
+    }
     const {error}=await supabase.from('notes').delete().eq('deleted',true);
     if(error){
       alert('Não foi possível esvaziar a lixeira.');
@@ -1937,19 +2492,74 @@ window.APP_CONFIG = {
 
   els.newNote.addEventListener('click', async()=>{
     const meta=randomMeta();
-    const {data,error}=await supabase.from('notes').insert({user_id:state.user.id,title:'Nova nota',content_html:'',...meta}).select().single();
-    if(error){ alert('Não foi possível criar a nota.'); return; }
-    state.notes.unshift({...data,note_labels:[],attachments:[]}); openNote(data.id);
+    const id=crypto.randomUUID();
+    const makeLocal=()=>{
+      const data={
+        id,user_id:state.user.id,title:'Nova nota',content_html:'',
+        color:'#ffffff',reminder_at:null,created_at:new Date().toISOString(),
+        updated_at:new Date().toISOString(),pinned:false,archived:false,deleted:false,
+        local_only:true,...meta,note_labels:[],attachments:[]
+      };
+      state.notes.unshift(data);cacheNotes();
+      const localDraft={
+        id,user_id:state.user.id,title:'Nova nota',content_html:'',
+        color:'#ffffff',reminder_at:null,labels_text:'',
+        created_at:data.created_at,updated_at:data.updated_at,
+        synthetic_local:data.synthetic_local,synthetic_age:data.synthetic_age,
+        synthetic_record:data.synthetic_record,pending_create:true
+      };
+      state.localDrafts.set(id,localDraft);
+      if(state.localPersistenceReady){
+        idbPut('drafts',{
+          key:draftId(id),userId:state.user.id,noteId:id,data:localDraft,updatedAt:Date.now()
+        }).catch(persistenceError);
+      }
+      openNote(id);
+      setAutosave('Salvo neste aparelho • aguardando internet','local-saved');
+      setSyncStatus('offline');
+    };
+
+    if(!navigator.onLine){makeLocal();return;}
+
+    const {data,error}=await supabase.from('notes').insert({
+      id,user_id:state.user.id,title:'Nova nota',content_html:'',...meta
+    }).select().single();
+
+    if(error){makeLocal();return;}
+    state.notes.unshift({...data,note_labels:[],attachments:[]});
+    cacheNotes();
+    openNote(data.id);
   });
 
   function openNote(id){
     const n=state.notes.find(x=>x.id===id); if(!n) return;
-    state.current=JSON.parse(JSON.stringify(n));
-    els.keepPage.classList.add('hidden'); els.editorPage.classList.remove('hidden');
+    const d=getDraft(id);
+    const useDraft=!!d&&(d.pending_create||new Date(d.updated_at||0)>new Date(n.updated_at||0));
+    const source=useDraft?{...n,...d}:n;
+
+    state.current=JSON.parse(JSON.stringify(source));
+    if(n.local_only)state.current.local_only=true;
+
+    els.keepPage.classList.add('hidden');els.editorPage.classList.remove('hidden');
     applyKeepFocusMode(state.keepFocusMode);
-    els.title.value=n.title||''; els.body.innerHTML=n.content_html||''; els.color.value=n.color||'#ffffff'; els.reminder.value=toLocalInput(n.reminder_at);
-    els.labelsInput.value=(n.note_labels||[]).map(x=>x.labels?.name).filter(Boolean).join(', '); els.editorPage.style.background=n.color||'#fff';
-    updateActionLabels(); renderImages(); els.autosave.textContent='Salvo';
+
+    els.title.value=source.title||'';
+    els.body.innerHTML=source.content_html||'';
+    els.color.value=source.color||'#ffffff';
+    els.reminder.value=toLocalInput(source.reminder_at);
+    els.labelsInput.value=useDraft?(d.labels_text||''):(n.note_labels||[]).map(x=>x.labels?.name).filter(Boolean).join(', ');
+    els.editorPage.style.background=source.color||'#fff';
+
+    updateActionLabels();renderImages();
+
+    if(useDraft){
+      state.isDirty=true;
+      setAutosave(navigator.onLine?'Rascunho recuperado • sincronizando...':'Salvo neste aparelho • aguardando internet',navigator.onLine?'':'local-saved');
+      if(navigator.onLine){clearTimeout(state.saveTimer);state.saveTimer=setTimeout(flushSave,100);}
+    }else{
+      state.isDirty=false;
+      setAutosave('Salvo','cloud-saved');
+    }
   }
   els.back.addEventListener('click',async()=>{ await flushSave(); els.editorPage.classList.add('hidden');els.keepPage.classList.remove('hidden');state.current=null;await loadNotes();renderNotes();applyKeepFocusMode(state.keepFocusMode); });
 
@@ -1960,8 +2570,25 @@ window.APP_CONFIG = {
     els.trash.textContent=state.current.deleted?'↩ Restaurar':'🗑 Excluir';
     els.permanentDelete.classList.toggle('hidden',!state.current.deleted);
   }
-  function markDirty(){ if(!state.current)return; state.isDirty=true; els.autosave.textContent='Salvando...'; clearTimeout(state.saveTimer); state.saveTimer=setTimeout(flushSave,700); }
-  [els.title,els.body,els.color,els.reminder,els.labelsInput].forEach(el=>el.addEventListener(el===els.body?'input':'input',markDirty));
+  function markDirty(){
+    if(!state.current)return;
+    state.isDirty=true;
+
+    // PRIMEIRO: grava imediatamente no aparelho, no mesmo evento de digitação.
+    persistDraftNow();
+
+    if(!navigator.onLine){
+      setAutosave('Salvo neste aparelho • aguardando internet','local-saved');
+      setSyncStatus('offline');
+      return;
+    }
+
+    // SEGUNDO: envia ao Supabase quase imediatamente.
+    setAutosave('Salvo local • sincronizando...','local-saved');
+    clearTimeout(state.saveTimer);
+    state.saveTimer=setTimeout(flushSave,200);
+  }
+  [els.title,els.body,els.color,els.reminder,els.labelsInput].forEach(el=>el.addEventListener('input',markDirty));
   els.color.addEventListener('change',()=>{els.editorPage.style.background=els.color.value;markDirty();});
   els.reminder.addEventListener('change',async()=>{if(els.reminder.value&&'Notification'in window&&Notification.permission==='default'){try{await Notification.requestPermission();}catch{}}markDirty();});
 
@@ -1986,28 +2613,134 @@ window.APP_CONFIG = {
     const {data:versions}=await supabase.from('note_versions').select('id,created_at').eq('note_id',n.id).order('created_at',{ascending:false});
     if((versions||[]).length>30){const excess=versions.slice(30).map(v=>v.id);if(excess.length)await supabase.from('note_versions').delete().in('id',excess);}
   }
+
+  async function syncDraftRecord(d){
+    if(!navigator.onLine||!state.user)return false;
+
+    if(d.pending_create){
+      const {error}=await supabase.from('notes').insert({
+        id:d.id,user_id:state.user.id,title:d.title||'Sem título',
+        content_html:d.content_html||'',color:d.color||'#ffffff',
+        reminder_at:d.reminder_at||null,created_at:d.created_at||new Date().toISOString(),
+        updated_at:d.updated_at||new Date().toISOString(),
+        synthetic_local:d.synthetic_local,
+        synthetic_age:Number(d.synthetic_age)||0,
+        synthetic_record:Number(d.synthetic_record)||Math.floor(1000000+Math.random()*8999999)
+      });
+      if(error && !String(error.message||'').toLowerCase().includes('duplicate'))return false;
+    }else{
+      const {error}=await supabase.from('notes').update({
+        title:d.title||'Sem título',content_html:d.content_html||'',
+        color:d.color||'#ffffff',reminder_at:d.reminder_at||null,
+        updated_at:d.updated_at||new Date().toISOString()
+      }).eq('id',d.id);
+      if(error)return false;
+    }
+
+    const names=(d.labels_text||'').split(',').map(x=>x.trim()).filter(Boolean);
+    const ids=await ensureLabels(names);
+    await supabase.from('note_labels').delete().eq('note_id',d.id);
+    if(ids.length){
+      await supabase.from('note_labels').insert(ids.map(label_id=>({
+        note_id:d.id,label_id,user_id:state.user.id
+      })));
+    }
+
+    clearDraft(d.id);
+    return true;
+  }
+
+  async function syncPendingDrafts(){
+    if(state.pendingSyncRunning||!navigator.onLine||!state.user)return;
+    const list=pendingDrafts();
+    if(!list.length)return;
+
+    state.pendingSyncRunning=true;
+    setSyncStatus('syncing');
+    try{
+      for(const d of list){
+        const ok=await syncDraftRecord(d);
+        if(!ok)break;
+      }
+      await Promise.all([loadNotes(),loadLabels()]);
+      await syncPendingLocalAttachments();
+      if(!els.keepPage.classList.contains('hidden'))renderNotes();
+      setSyncStatus('ok');
+    }finally{
+      state.pendingSyncRunning=false;
+    }
+  }
+
   async function flushSave(){
     if(!state.current||!state.isDirty)return;
-    state.isDirty=false;
-    setSyncStatus('syncing');
-    await createVersionIfNeeded();
-    const patch={title:els.title.value.trim()||'Sem título',content_html:els.body.innerHTML,color:els.color.value,reminder_at:els.reminder.value?new Date(els.reminder.value).toISOString():null,updated_at:new Date().toISOString()};
-    const {data:remote}=await supabase.from('notes').select('title,content_html,updated_at').eq('id',state.current.id).maybeSingle();
-    if(remote && state.current.updated_at && new Date(remote.updated_at).getTime()>new Date(state.current.updated_at).getTime()+500){
-      const changed=remote.title!==state.current.title||remote.content_html!==state.current.content_html;
-      if(changed){await supabase.from('note_versions').insert({note_id:state.current.id,user_id:state.user.id,title:remote.title||'',content_html:remote.content_html||''});showToast('Alteração de outro aparelho preservada no histórico.',4200);}
-    }
-    const {error}=await supabase.from('notes').update(patch).eq('id',state.current.id);
-    if(error){
-      els.autosave.textContent='Erro ao salvar';
+
+    // O rascunho local só é apagado DEPOIS da confirmação do Supabase.
+    persistDraftNow();
+
+    if(!navigator.onLine){
       state.isDirty=true;
-      setSyncStatus(navigator.onLine?'ok':'offline');
+      setAutosave('Salvo neste aparelho • aguardando internet','local-saved');
+      setSyncStatus('offline');
       return;
     }
+
+    const d=buildDraft();
+    setSyncStatus('syncing');
+    setAutosave('Sincronizando...','local-saved');
+
+    if(state.current.local_only||d.pending_create){
+      const ok=await syncDraftRecord({...d,pending_create:true});
+      if(!ok){
+        state.isDirty=true;
+        setAutosave('Salvo neste aparelho • sincronização pendente','local-saved');
+        return;
+      }
+      state.current.local_only=false;
+      state.isDirty=false;
+      await Promise.all([loadNotes(),loadLabels()]);
+      const fresh=state.notes.find(n=>n.id===d.id);
+      if(fresh)state.current=JSON.parse(JSON.stringify(fresh));
+      setAutosave(`Sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'cloud-saved');
+      setSyncStatus('ok');
+      return;
+    }
+
+    await createVersionIfNeeded();
+
+    const patch={
+      title:d.title,content_html:d.content_html,color:d.color,
+      reminder_at:d.reminder_at,updated_at:d.updated_at
+    };
+
+    const {data:remote}=await supabase.from('notes').select('title,content_html,updated_at').eq('id',state.current.id).maybeSingle();
+    if(remote&&state.current.updated_at&&new Date(remote.updated_at).getTime()>new Date(state.current.updated_at).getTime()+500){
+      const changed=remote.title!==state.current.title||remote.content_html!==state.current.content_html;
+      if(changed){
+        await supabase.from('note_versions').insert({
+          note_id:state.current.id,user_id:state.user.id,
+          title:remote.title||'',content_html:remote.content_html||''
+        });
+      }
+    }
+
+    const {error}=await supabase.from('notes').update(patch).eq('id',state.current.id);
+    if(error){
+      state.isDirty=true;
+      persistDraftNow();
+      setAutosave('Salvo neste aparelho • sincronização pendente','local-saved');
+      setSyncStatus(navigator.onLine?'syncing':'offline');
+      return;
+    }
+
     await syncLabels(state.current.id);
     Object.assign(state.current,patch);
-    const cached=state.notes.find(n=>n.id===state.current.id);if(cached)Object.assign(cached,patch);
-    els.autosave.textContent=`Salvo ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+    const cached=state.notes.find(n=>n.id===state.current.id);
+    if(cached)Object.assign(cached,patch);
+    cacheNotes();
+
+    clearDraft(state.current.id);
+    state.isDirty=false;
+    setAutosave(`Sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'cloud-saved');
     await loadLabels();
     setSyncStatus('ok');
   }
@@ -2060,7 +2793,33 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     const start=e=>{drawing=true;last=point(e);e.preventDefault();};const move=e=>{if(!drawing)return;const p=point(e);ctx.strokeStyle=els.drawColor.value;ctx.lineWidth=Number(els.drawSize.value);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p;e.preventDefault();};const end=e=>{drawing=false;last=null;e.preventDefault();};
     canvas.addEventListener('pointerdown',start);canvas.addEventListener('pointermove',move);canvas.addEventListener('pointerup',end);canvas.addEventListener('pointercancel',end);canvas.addEventListener('pointerleave',e=>{if(drawing)end(e)});
     els.clearDraw.addEventListener('click',()=>ctx.clearRect(0,0,canvas.width,canvas.height));els.draw.addEventListener('click',()=>{ctx.clearRect(0,0,canvas.width,canvas.height);els.drawDialog.showModal();});const close=()=>{try{els.drawDialog.close()}catch{}};els.closeDraw.addEventListener('click',close);els.cancelDraw.addEventListener('click',close);
-    els.saveDraw.addEventListener('click',async()=>{if(!state.current)return;const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)return;els.autosave.textContent='Salvando desenho...';try{await uploadAttachment(blob,`desenho-${Date.now()}.png`);await renderImages();els.autosave.textContent='Desenho salvo';close();}catch(err){console.error(err);showToast('Não foi possível salvar o desenho.');}});
+    els.saveDraw.addEventListener('click',async()=>{
+      if(!state.current)return;
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+      if(!blob)return;
+      const fileName=`desenho-${Date.now()}.png`;
+
+      try{
+        if(!navigator.onLine){
+          await queueLocalAttachment(blob,fileName,state.current.id);
+          await renderImages();
+          setAutosave('Desenho salvo neste aparelho • aguardando internet','local-saved');
+        }else{
+          try{
+            await uploadAttachment(blob,fileName);
+            await renderImages();
+            setAutosave('Desenho sincronizado','cloud-saved');
+          }catch(uploadErr){
+            await queueLocalAttachment(blob,fileName,state.current.id);
+            await renderImages();
+            setAutosave('Desenho salvo neste aparelho • sincronização pendente','local-saved');
+          }
+        }
+        close();
+      }catch(err){
+        persistenceError(err);
+      }
+    });
   }
   initDrawing();
 
@@ -2081,13 +2840,96 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     const{data,error}=await supabase.from('attachments').insert({user_id:state.user.id,note_id:state.current.id,storage_path:path,public_url:'',file_name:fileName||safe}).select().single();
     if(error){await supabase.storage.from('note-images').remove([path]);throw error;}state.current.attachments=state.current.attachments||[];state.current.attachments.push(data);return data;
   }
-  els.imageInput.addEventListener('change',async()=>{const file=els.imageInput.files?.[0];if(!file||!state.current)return;els.autosave.textContent='Enviando imagem...';try{await uploadAttachment(file,file.name);await renderImages();els.autosave.textContent='Imagem salva';}catch(err){console.error(err);els.autosave.textContent='Erro na imagem';showToast('Não foi possível enviar a imagem.');}els.imageInput.value='';});
+  els.imageInput.addEventListener('change',async()=>{
+    const file=els.imageInput.files?.[0];
+    if(!file||!state.current)return;
+
+    if(!navigator.onLine){
+      try{
+        await queueLocalAttachment(file,file.name,state.current.id);
+        await renderImages();
+        setAutosave('Imagem salva neste aparelho • aguardando internet','local-saved');
+        showToast('Imagem guardada no aparelho e será enviada quando a conexão voltar.',3800);
+      }catch(err){persistenceError(err);}
+      els.imageInput.value='';
+      return;
+    }
+
+    setAutosave('Enviando imagem...','local-saved');
+    try{
+      await uploadAttachment(file,file.name);
+      await renderImages();
+      setAutosave('Imagem sincronizada','cloud-saved');
+    }catch(err){
+      console.error(err);
+      try{
+        await queueLocalAttachment(file,file.name,state.current.id);
+        await renderImages();
+        setAutosave('Imagem salva neste aparelho • sincronização pendente','local-saved');
+        showToast('Falha de rede: a imagem ficou preservada no aparelho.',3800);
+      }catch(localErr){persistenceError(localErr);}
+    }
+    els.imageInput.value='';
+  });
   async function signedImageUrl(path){const{data,error}=await supabase.storage.from('note-images').createSignedUrl(path,3600);if(error)return'';return data?.signedUrl||'';}
   async function renderImages(){
-    const a=state.current?.attachments||[];if(!a.length){els.imageGallery.innerHTML='';return;}
-    els.imageGallery.innerHTML=a.map(x=>`<div class="image-card" data-image-card="${x.id}"><div class="image-loading">Carregando...</div><button data-delimg="${x.id}" data-path="${esc(x.storage_path)}">Remover</button></div>`).join('');
-    for(const x of a){const card=els.imageGallery.querySelector(`[data-image-card="${x.id}"]`);if(!card)continue;const url=await signedImageUrl(x.storage_path);const loading=card.querySelector('.image-loading');if(url)loading.outerHTML=`<img src="${esc(url)}" alt="${esc(x.file_name||'Imagem')}">`;else loading.textContent='Imagem indisponível';}
-    els.imageGallery.querySelectorAll('[data-delimg]').forEach(b=>b.addEventListener('click',async()=>{await supabase.storage.from('note-images').remove([b.dataset.path]);await supabase.from('attachments').delete().eq('id',b.dataset.delimg);state.current.attachments=state.current.attachments.filter(x=>x.id!==b.dataset.delimg);await renderImages();showToast('Imagem removida.');}));
+    const remote=state.current?.attachments||[];
+    let pending=[];
+    try{
+      pending=state.current?await localAttachmentsForNote(state.current.id):[];
+    }catch(err){
+      console.warn('Anexos locais:',err);
+    }
+
+    if(!remote.length&&!pending.length){
+      els.imageGallery.innerHTML='';
+      return;
+    }
+
+    els.imageGallery.innerHTML=
+      remote.map(x=>`
+        <div class="image-card" data-image-card="${x.id}">
+          <div class="image-loading">Carregando...</div>
+          <button data-delimg="${x.id}" data-path="${esc(x.storage_path)}">Remover</button>
+        </div>`).join('')+
+      pending.map(x=>`
+        <div class="image-card local-pending-image" data-local-image="${x.id}">
+          <img alt="${esc(x.fileName||'Imagem local')}">
+          <small>Pendente de sincronização</small>
+          <button data-del-local-image="${x.id}">Remover</button>
+        </div>`).join('');
+
+    for(const x of remote){
+      const card=els.imageGallery.querySelector(`[data-image-card="${x.id}"]`);
+      if(!card)continue;
+      const url=await signedImageUrl(x.storage_path);
+      const loading=card.querySelector('.image-loading');
+      if(url)loading.outerHTML=`<img src="${esc(url)}" alt="${esc(x.file_name||'Imagem')}">`;
+      else loading.textContent='Imagem indisponível';
+    }
+
+    for(const x of pending){
+      const img=els.imageGallery.querySelector(`[data-local-image="${x.id}"] img`);
+      if(img){
+        const objectUrl=URL.createObjectURL(x.blob);
+        img.src=objectUrl;
+        img.onload=()=>URL.revokeObjectURL(objectUrl);
+      }
+    }
+
+    els.imageGallery.querySelectorAll('[data-delimg]').forEach(b=>b.addEventListener('click',async()=>{
+      await supabase.storage.from('note-images').remove([b.dataset.path]);
+      await supabase.from('attachments').delete().eq('id',b.dataset.delimg);
+      state.current.attachments=state.current.attachments.filter(x=>x.id!==b.dataset.delimg);
+      await renderImages();
+      showToast('Imagem removida.');
+    }));
+
+    els.imageGallery.querySelectorAll('[data-del-local-image]').forEach(b=>b.addEventListener('click',async()=>{
+      await deleteLocalAttachment(b.dataset.delLocalImage);
+      await renderImages();
+      showToast('Imagem local removida.');
+    }));
   }
 
   document.querySelectorAll('.group-toggle').forEach(b=>b.addEventListener('click',()=>b.nextElementSibling.classList.toggle('open')));
@@ -2096,12 +2938,30 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   $('collapseSidebar').addEventListener('click',()=>document.querySelector('.sidebar').classList.toggle('collapsed'));
   $('menuSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.side-menu button').forEach(b=>b.style.display=!q||b.textContent.toLowerCase().includes(q)?'':'none');});
 
-  window.addEventListener('online',()=>syncFromCloud());
-  window.addEventListener('offline',()=>setSyncStatus('offline'));
+  window.addEventListener('online',async()=>{
+    setSyncStatus('syncing');
+    await syncPendingDrafts();
+    await syncPendingLocalAttachments();
+    await syncFromCloud();
+    if(state.current&&!getDraft(state.current.id))setAutosave('Sincronizado','cloud-saved');
+  });
+  window.addEventListener('offline',()=>{
+    if(state.current&&state.isDirty)persistDraftNow();
+    setSyncStatus('offline');
+    if(state.current)setAutosave('Salvo neste aparelho • aguardando internet','local-saved');
+  });
   window.addEventListener('focus',()=>syncFromCloud());
   document.addEventListener('visibilitychange',()=>{if(!document.hidden) syncFromCloud();});
-  window.addEventListener('pagehide',()=>{if(state.isDirty)flushSave();});
-  window.addEventListener('beforeunload',()=>{ if(state.isDirty) flushSave(); });
+  window.addEventListener('pagehide',()=>{
+    if(state.current&&state.isDirty)persistDraftNow();
+    if(state.isDirty&&navigator.onLine)flushSave();
+  });
+  window.addEventListener('beforeunload',()=>{
+    if(state.current&&state.isDirty)persistDraftNow();
+  });
+  if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+    window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('Service Worker:',err)));
+  }
   bootstrap();
 })();
 
