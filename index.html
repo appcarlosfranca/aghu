@@ -1,0 +1,2111 @@
+<!doctype html>
+<!--
+ARQUIVO ÚNICO DO APP
+HTML, CSS, configuração e JavaScript estão reunidos neste arquivo.
+A biblioteca Supabase é carregada por CDN.
+Preencha SUPABASE_URL e SUPABASE_ANON_KEY em APP_CONFIG.
+O schema SQL está incorporado no final como referência e precisa ser aplicado no Supabase uma única vez.
+-->
+
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>AGHU Notes</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+:root{
+  --sidebar:220px; --red:#b9252f; --mint:#1fb7a5; --blue:#4f7fbe; --line:#d7d7d7;
+  --soft:#f4f4f4; --text:#2f2f2f; --muted:#777; --bg:#ededed;
+}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:#fff;font-size:13px}
+.hidden{display:none!important} button,input,select{font:inherit}.btn{border:1px solid #c7c7c7;background:#fff;padding:7px 12px;border-radius:3px;cursor:pointer}.btn-primary{background:#4c7dbc;color:#fff;border-color:#3f6fae}.btn-light{background:#fafafa}.btn-danger{background:#fff3f3;border-color:#e0a6a6;color:#a12424}
+
+.auth-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+  padding:24px;
+}
+.auth-card{
+  width:248px;
+  min-height:auto;
+  background:#fff;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  padding:0 20px 28px;
+  text-align:center;
+  position:relative;
+}
+.auth-heading{
+  font-size:16px;
+  font-weight:400;
+  color:#222;
+  padding:10px 0 9px;
+  border-bottom:1px solid #eeeeee;
+  margin:0 0 18px;
+}
+.auth-brand{
+  height:54px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:14px;
+}
+.aghu-notes-logo{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  line-height:1;
+  user-select:none;
+}
+.aghu-cross{
+  width:31px;
+  height:31px;
+  position:relative;
+  background:#b51f2c;
+  clip-path:polygon(36% 0,64% 0,64% 36%,100% 36%,100% 64%,64% 64%,64% 100%,36% 100%,36% 64%,0 64%,0 36%,36% 36%);
+}
+.aghu-word{
+  text-align:left;
+  color:#b51f2c;
+  font-family:Arial,Helvetica,sans-serif;
+}
+.aghu-word strong{
+  display:block;
+  font-size:24px;
+  letter-spacing:-1.2px;
+  line-height:.85;
+}
+.aghu-word small{
+  display:block;
+  font-size:5.5px;
+  color:#8c8c8c;
+  line-height:1.05;
+  margin-top:2px;
+  letter-spacing:.05px;
+}
+.aghu-word em{
+  font-style:normal;
+  color:#2f7d70;
+  font-size:7px;
+  font-weight:700;
+  margin-left:2px;
+}
+.auth-card form{
+  margin:0;
+}
+.auth-card label{
+  display:none;
+}
+.auth-card input{
+  width:100%;
+  height:30px;
+  border:1px solid #d8d8d8;
+  border-radius:2px;
+  padding:0 9px;
+  margin:0 0 8px;
+  font-size:12px;
+  background:#fff;
+  outline:none;
+}
+.auth-card input:focus{
+  border-color:#aaa;
+}
+.auth-card .btn{
+  width:100%;
+  height:28px;
+  margin:3px 0 0;
+  padding:0;
+  border:1px solid #3ea044;
+  border-radius:2px;
+  background:#4caf50;
+  color:#fff;
+  font-size:11px;
+  line-height:26px;
+  box-shadow:none;
+}
+.auth-card .btn:hover{
+  background:#45a049;
+}
+.auth-privacy{
+  margin:12px 10px 0;
+  font-size:6px;
+  line-height:1.35;
+  color:#c8c8c8;
+  text-align:center;
+  font-weight:400;
+}
+.auth-disclaimer{
+  position:fixed;
+  right:6px;
+  bottom:4px;
+  z-index:3;
+  font-size:7px;
+  color:#bcbcbc;
+  background:rgba(255,255,255,.92);
+  padding:2px 4px;
+  border:1px solid #f3f3f3;
+  border-radius:2px;
+}
+.form-error{
+  color:#b00020;
+  min-height:12px;
+  margin-top:4px;
+  font-size:8px;
+  line-height:1.2;
+}
+@media(max-width:480px){
+  .auth-screen{padding:16px}
+  .auth-card{width:min(248px, calc(100vw - 44px));padding-left:18px;padding-right:18px}
+  .auth-disclaimer{font-size:6.5px}
+}
+
+.app-shell{min-height:100vh;display:flex}.sidebar{width:var(--sidebar);border-right:1px solid #cfcfcf;display:flex;flex-direction:column;background:white;flex-shrink:0;transition:.2s}.sidebar.collapsed{width:0;overflow:hidden;border:0}.sidebar-brand{height:74px;display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:4px solid #38434e;border-bottom:1px solid #ddd}.mini-logo{width:38px;height:38px;border-radius:3px}.brand-title{font-size:22px;font-weight:700;color:var(--red)}.brand-sub{font-size:10px;color:#8b8b8b}.side-menu{overflow:auto;flex:1}.menu-item,.submenu button{width:100%;border:0;background:white;text-align:left;cursor:pointer}.menu-item{height:43px;padding:0 10px;display:flex;align-items:center;gap:9px;border-bottom:1px solid #e4e4e4}.menu-item span{width:14px;color:#243646}.menu-item b{margin-left:auto;font-weight:400}.menu-item.active{border-left:3px solid var(--mint);background:#f7fffd}.submenu{display:none;background:#f8f8f8}.submenu.open{display:block}.submenu button{min-height:29px;padding:5px 14px 5px 32px;border-bottom:1px solid #e5e5e5;font-size:11px}.submenu button:hover,.menu-item:hover{background:#f4f6f7}.independent-note{padding:7px 10px;border-top:1px solid #eee;color:#999;font-size:9px;line-height:1.3}
+.workspace{flex:1;min-width:0;background:#eee}.topbar{height:74px;background:white;border-top:4px solid #37424d;border-bottom:1px solid #ddd;display:flex;align-items:center;gap:8px;padding:0 14px}.icon-btn{border:0;background:transparent;font-size:18px;cursor:pointer;color:#777}.menu-search-wrap{height:40px;width:min(570px,55vw);border:1px solid #c9c9c9;display:flex;align-items:center;padding:0 10px;background:#fff}.menu-search-wrap span,.search-notes span{font-size:20px;color:#999}.menu-search-wrap input,.search-notes input{border:0;outline:none;width:100%;padding:0 8px;background:transparent}.topbar-right{margin-left:auto;display:flex;align-items:center;gap:18px}.user-badge{white-space:nowrap}.logout-btn{border:0;background:transparent;color:#a91d24;cursor:pointer;font-weight:600}
+.content{padding:14px}.tabs{height:38px;display:flex;align-items:end}.tab{border:1px solid #d6d6d6;border-bottom:0;background:#fff;height:38px;padding:0 14px}.tab.active{border-top:2px solid var(--mint)}.page{background:white;min-height:calc(100vh - 126px);padding:16px}.toolbar-row{display:flex;justify-content:space-between;gap:12px;align-items:center}.search-notes{border:1px solid #cfcfcf;height:37px;display:flex;align-items:center;width:min(520px,65vw);padding:0 9px}.filters-row{display:flex;gap:8px;align-items:center;margin:12px 0;flex-wrap:wrap}.filter{border:1px solid #d3d3d3;background:#fafafa;padding:6px 11px;cursor:pointer}.filter.active{background:#eaf7f4;border-color:#76cbbb}.filters-row select{height:30px;border:1px solid #ccc}.panel-title{display:inline-block;background:var(--blue);color:white;font-weight:700;padding:8px 13px;border-radius:3px 3px 0 0;margin-top:8px}.table-wrap{border:1px solid #c7c7c7;overflow:auto;position:relative}.notes-table{width:100%;border-collapse:collapse;min-width:820px}.notes-table th{background:#e8f0fa;text-align:center;border-right:1px solid #c1c7ce;border-bottom:1px solid #b8b8b8;height:45px}.notes-table td{border-right:1px solid #ddd;border-bottom:1px solid #ddd;padding:8px 9px;height:43px}.notes-table tbody tr{cursor:pointer}.notes-table tbody tr:hover{background:#f4fbff}.notes-table tbody tr.selected{background:#34d8d8}.notes-table th:nth-child(1){width:115px}.notes-table th:nth-child(3){width:70px}.notes-table th:nth-child(4){width:120px}.notes-table th:nth-child(5){width:150px}.notes-table th:nth-child(6){width:150px}.row-actions{display:flex;gap:6px}.row-actions button{border:1px solid #bbb;background:white;cursor:pointer;padding:4px 7px}.empty-state{padding:35px;text-align:center;color:#888}
+.editor-header{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}.editor-actions{display:flex;gap:6px;flex-wrap:wrap}.autosave-state{color:#7a7a7a;margin-left:10px;font-size:11px}.editor-shell{border:1px solid #c7c7c7;background:white;min-height:calc(100vh - 195px);display:flex;flex-direction:column}.note-title{font-size:22px;font-weight:600;border:0;border-bottom:1px solid #ddd;padding:15px 17px;outline:none}.formatbar{display:flex;align-items:center;gap:2px;padding:7px;border-bottom:1px solid #ddd;background:#f8f8f8;flex-wrap:wrap}.formatbar button{border:1px solid #ddd;background:white;min-width:34px;height:30px;cursor:pointer}.note-body{flex:1;min-height:440px;padding:18px;outline:none;font-size:15px;line-height:1.55;overflow:auto}.note-body:empty:before{content:attr(data-placeholder);color:#aaa}.meta-tools{border-top:1px solid #ddd;background:#fafafa;display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:10px;padding:10px}.meta-tools label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#666}.meta-tools input,.meta-tools select{height:32px;border:1px solid #ccc;background:white;padding:0 7px}.image-gallery{display:flex;gap:8px;padding:10px;flex-wrap:wrap}.image-card{width:130px;border:1px solid #ddd;padding:4px;background:white}.image-card img{width:100%;height:90px;object-fit:cover}.image-card button{width:100%;border:0;background:#fff1f1;color:#a11;margin-top:4px;cursor:pointer}.history-dialog{width:min(720px,94vw);border:1px solid #aaa;padding:0}.dialog-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #ddd}.history-list{max-height:65vh;overflow:auto;padding:10px}.history-item{border:1px solid #ddd;padding:10px;margin-bottom:8px}.history-item small{color:#777}.history-item button{margin-top:8px}
+.check-item{display:flex;gap:8px;align-items:flex-start}.check-item input{margin-top:5px}
+@media(max-width:900px){:root{--sidebar:190px}.meta-tools{grid-template-columns:1fr 1fr}.topbar-right .user-badge{display:none}.notes-table{min-width:700px}}
+@media(max-width:700px){.sidebar{position:fixed;z-index:20;height:100vh;box-shadow:8px 0 20px #0002}.sidebar.collapsed{transform:translateX(-100%);width:var(--sidebar)}.workspace{width:100%}.content{padding:8px}.page{padding:9px}.menu-search-wrap{width:52vw}.toolbar-row{align-items:stretch}.search-notes{width:100%}.meta-tools{grid-template-columns:1fr}.editor-shell{min-height:calc(100vh - 205px)}.note-body{min-height:360px}.editor-actions{width:100%}.editor-actions .btn{flex:1}.topbar{padding:0 8px}}
+
+  </style>
+
+  <style id="aghu-precision-overrides">
+    :root{
+      --sidebar:220px;
+      --aghu-red:#b51f2c;
+      --aghu-mint:#13aa9b;
+      --aghu-blue:#4e7fbe;
+      --aghu-header:#e6eef7;
+      --aghu-grid:#d4d7da;
+    }
+
+    body{
+      font-family:Arial, Helvetica, sans-serif;
+      font-size:12px;
+      color:#1f1f1f;
+    }
+
+    .sidebar{
+      width:220px;
+      border-right:1px solid #c9c9c9;
+    }
+    .sidebar-brand{
+      height:74px;
+      padding:0;
+      justify-content:center;
+      border-top:4px solid #37424d;
+      border-bottom:1px solid #d9d9d9;
+    }
+    .sidebar-aghu-logo{
+      transform:scale(1.05);
+      transform-origin:center;
+    }
+    .sidebar-aghu-logo .aghu-cross{width:27px;height:27px}
+    .sidebar-aghu-logo .aghu-word strong{font-size:27px}
+    .sidebar-aghu-logo .aghu-word em{font-size:7px}
+    .sidebar-aghu-logo .aghu-word small{
+      font-size:5px;
+      color:#aaa;
+      margin-top:2px;
+    }
+
+    .menu-item{
+      height:43px;
+      padding:0 9px;
+      gap:9px;
+      font-size:12px;
+      border-bottom:1px solid #dedede;
+    }
+    .menu-item.active{
+      border-left:3px solid #14ac9c;
+      background:#f4fffd;
+    }
+    .submenu button{
+      min-height:29px;
+      font-size:10.5px;
+      padding-left:32px;
+    }
+
+    .workspace{background:#efefef}
+    .topbar{
+      height:74px;
+      padding:0 15px 0 8px;
+      border-top:4px solid #37424d;
+      border-bottom:1px solid #ddd;
+      gap:8px;
+    }
+    #collapseSidebar{
+      width:27px;
+      padding:0;
+      font-size:15px;
+      color:#aaa;
+    }
+    .menu-search-wrap{
+      width:560px;
+      max-width:calc(100vw - 510px);
+      height:40px;
+      border:1px solid #c6c9cc;
+      padding:0 10px;
+    }
+    .menu-search-wrap span{font-size:18px}
+    .menu-search-wrap input{
+      font-size:12px;
+      color:#555;
+    }
+    .topbar-right{
+      margin-left:auto;
+      gap:12px;
+      height:100%;
+      align-items:center;
+    }
+    .sync-status{
+      min-width:136px;
+      height:24px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 10px;
+      background:#e3f6fb;
+      border:1px solid #c4e4eb;
+      color:#16718c;
+      font-size:11px;
+      white-space:nowrap;
+    }
+    .sync-status.syncing{color:#7a6a00;background:#fff8d9;border-color:#ede1a8}
+    .sync-status.offline{color:#9c2828;background:#fff0f0;border-color:#efc5c5}
+    .logout-btn{
+      width:56px;
+      height:48px;
+      color:#ae1f28;
+      font-size:12px;
+      font-weight:400;
+    }
+
+    .content{padding:14px 15px 0}
+    .tabs{
+      height:38px;
+      align-items:flex-end;
+    }
+    .tab{
+      height:38px;
+      padding:0 14px;
+      font-size:12px;
+      background:#fff;
+      border:1px solid #d6d6d6;
+      border-bottom:0;
+    }
+    .tab.active{border-top:2px solid #28b5a6}
+
+    .page{
+      min-height:calc(100vh - 126px);
+      padding:33px 15px 18px;
+      background:#fff;
+    }
+    .toolbar-row{
+      justify-content:flex-start;
+      gap:12px;
+      align-items:center;
+    }
+    .search-notes{
+      width:520px;
+      height:37px;
+      border:1px solid #c9c9c9;
+    }
+    #newNoteBtn{
+      margin-left:auto;
+      height:33px;
+      border-radius:2px;
+      font-size:12px;
+      padding:0 15px;
+    }
+    .filters-row{
+      margin:13px 0 10px;
+      gap:8px;
+    }
+    .filter,
+    .filters-row select,
+    .empty-trash-btn{
+      height:30px;
+      border-radius:0;
+      font-size:12px;
+    }
+    .filter{
+      padding:0 11px;
+      background:#fff;
+      border:1px solid #c9cdd0;
+    }
+    .filter.active{
+      background:#effbf9;
+      border-color:#67cbbb;
+    }
+    .filters-row select{
+      padding:0 6px;
+      border:1px solid #c9cdd0;
+      background:#fff;
+    }
+    .empty-trash-btn{
+      margin-left:auto;
+      padding:0 10px;
+      border:1px solid #c88;
+      background:#fff7f7;
+      color:#a02a2a;
+      cursor:pointer;
+    }
+
+    .notes-list-layout{
+      display:flex;
+      align-items:flex-start;
+      gap:62px;
+      width:100%;
+    }
+    .notes-grid-area{
+      width:838px;
+      max-width:calc(100% - 194px);
+    }
+    .panel-title{
+      margin:8px 0 0 13px;
+      padding:8px 13px;
+      height:33px;
+      line-height:17px;
+      border-radius:3px 3px 0 0;
+      background:#4e7fbe;
+      font-size:12px;
+    }
+    .table-wrap{
+      width:838px;
+      max-width:100%;
+      border:1px solid #bfc3c7;
+      overflow:auto;
+      min-height:218px;
+    }
+    .notes-table{
+      table-layout:fixed;
+      width:834px;
+      min-width:834px;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+    .notes-table th{
+      height:45px;
+      padding:0 5px;
+      background:#e6eef7;
+      color:#111;
+      font-weight:700;
+      border-right:1px solid #c2c6cb;
+      border-bottom:1px solid #b6bac0;
+      text-align:center;
+      vertical-align:middle;
+      white-space:nowrap;
+      overflow:hidden;
+    }
+    .notes-table td{
+      height:43px;
+      padding:5px 8px;
+      border-right:1px solid #d6d6d6;
+      border-bottom:1px solid #d6d6d6;
+      vertical-align:middle;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      background:#fff;
+    }
+    .notes-table th:nth-child(1), .notes-table td:nth-child(1){width:76px}
+    .notes-table th:nth-child(2), .notes-table td:nth-child(2){width:322px}
+    .notes-table th:nth-child(3), .notes-table td:nth-child(3){width:53px;text-align:center}
+    .notes-table th:nth-child(4), .notes-table td:nth-child(4){width:98px;text-align:center}
+    .notes-table th:nth-child(5), .notes-table td:nth-child(5){width:108px}
+    .notes-table th:nth-child(n+6), .notes-table td:nth-child(n+6){width:28px;padding:0;text-align:center}
+    .notes-table th.blue-cap{
+      background:#4e7fbe;
+      border-right-color:#4e7fbe;
+    }
+    .notes-table tbody tr:hover td{background:#f5fbff}
+    .notes-table tbody tr.selected td{background:#00e7e7}
+    .sort-glyph{
+      color:#f39422;
+      font-weight:700;
+      font-size:12px;
+      margin-left:2px;
+    }
+    .grid-icon-btn{
+      width:100%;
+      height:42px;
+      border:0;
+      background:transparent;
+      color:#8b6b45;
+      cursor:pointer;
+      font-size:14px;
+      padding:0;
+    }
+    .grid-icon-btn:hover{background:#fff7db}
+    .grid-icon-btn.danger{color:#a42525}
+    .grid-icon-btn.restore{color:#2b7e54}
+    .empty-state{
+      width:834px;
+      max-width:100%;
+      padding:35px 10px;
+      text-align:center;
+      color:#888;
+      font-size:12px;
+    }
+
+    .list-side-actions{
+      width:132px;
+      border:1px solid #4d8c40;
+      border-radius:7px;
+      padding:10px;
+      margin-top:40px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      background:#fff;
+    }
+    .list-side-actions button{
+      min-height:28px;
+      border:1px solid #b8cfae;
+      border-radius:2px;
+      background:#fff;
+      color:#78a06e;
+      font-size:11px;
+      padding:4px 6px;
+      cursor:pointer;
+    }
+    .list-side-actions button:disabled{
+      color:#c4d2bf;
+      border-color:#d7e0d3;
+      cursor:default;
+    }
+    .list-side-actions .danger-side{
+      color:#9e3131;
+      border-color:#d8adad;
+    }
+
+    .editor-shell{min-height:calc(100vh - 190px)}
+    .note-title{font-size:20px}
+    .note-body{
+      min-height:470px;
+      font-size:14px;
+      line-height:1.55;
+    }
+
+    @media(max-width:1100px){
+      .notes-list-layout{gap:14px}
+      .notes-grid-area{max-width:calc(100% - 148px)}
+      .menu-search-wrap{max-width:48vw}
+    }
+    @media(max-width:900px){
+      :root{--sidebar:190px}
+      .sidebar{width:190px}
+      .notes-grid-area{width:100%;max-width:100%}
+      .notes-list-layout{display:block}
+      .list-side-actions{
+        width:100%;
+        margin:10px 0 0;
+        flex-direction:row;
+        border-radius:2px;
+      }
+      .list-side-actions button{flex:1}
+      .table-wrap{width:100%}
+      .menu-search-wrap{max-width:52vw}
+    }
+    @media(max-width:700px){
+      .page{padding:14px 9px}
+      .toolbar-row{flex-wrap:wrap}
+      #newNoteBtn{margin-left:0}
+      .search-notes{width:100%}
+      .sync-status{min-width:92px;font-size:9px}
+      .notes-table{min-width:834px}
+    }
+  </style>
+
+
+  <style id="aghu-v3-responsive">
+    html{font-size:16px} body{min-width:0;overflow-x:hidden}
+    .workspace,.content,.page,.notes-grid-area,.table-wrap{min-width:0}
+    .notes-list-layout{width:100%;display:grid;grid-template-columns:minmax(0,1fr) 132px;gap:clamp(12px,3vw,62px)}
+    .notes-grid-area{width:100%;max-width:none}.table-wrap{width:100%;max-width:100%}
+    .notes-table{width:100%;min-width:760px;table-layout:fixed}
+    .notes-table th:nth-child(1),.notes-table td:nth-child(1){width:9%}
+    .notes-table th:nth-child(2),.notes-table td:nth-child(2){width:38%}
+    .notes-table th:nth-child(3),.notes-table td:nth-child(3){width:6%}
+    .notes-table th:nth-child(4),.notes-table td:nth-child(4){width:12%}
+    .notes-table th:nth-child(5),.notes-table td:nth-child(5){width:15%}
+    .notes-table th:nth-child(n+6),.notes-table td:nth-child(n+6){width:4%}
+    .notes-table th[data-sort]{cursor:pointer;user-select:none}.notes-table th[data-sort]:hover{background:#dfe9f4}
+    .formatbar{display:flex;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}.formatbar button{flex:0 0 auto}
+    .editor-actions{display:flex;flex-wrap:wrap;gap:5px}.meta-tools{grid-template-columns:repeat(4,minmax(150px,1fr))}.note-body{width:100%;overflow-wrap:anywhere}.image-gallery img{max-width:100%;height:auto}
+    .utility-dialog,.history-dialog{width:min(620px,calc(100vw - 30px));max-height:min(82vh,760px);border:1px solid #c8c8c8;border-radius:4px;padding:0;background:#fff}
+    .utility-dialog::backdrop,.history-dialog::backdrop{background:#0006}.utility-body{padding:18px;font-size:13px;line-height:1.45}.dialog-actions{display:flex;justify-content:flex-end;gap:8px;padding:12px}
+    .labels-manager-list{padding:10px 14px 16px;max-height:55vh;overflow:auto}.label-manager-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:6px 0;border-bottom:1px solid #eee}.label-manager-row input{height:32px;border:1px solid #ccc;padding:0 8px}.label-manager-row button{height:32px}
+    .draw-dialog{width:min(900px,calc(100vw - 24px))}.draw-tools{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #eee}#drawCanvas{display:block;width:100%;height:auto;max-height:62vh;background:white;touch-action:none;cursor:crosshair}
+    .app-toast{position:fixed;right:16px;bottom:16px;z-index:1000;max-width:min(360px,calc(100vw - 32px));padding:10px 14px;background:#263238;color:#fff;border-radius:4px;font-size:12px;box-shadow:0 4px 18px #0003}
+    @media (max-width:1024px){.notes-list-layout{grid-template-columns:1fr}.list-side-actions{width:100%;margin-top:0;display:flex;flex-direction:row;flex-wrap:wrap}.list-side-actions button{flex:1 1 150px}.meta-tools{grid-template-columns:repeat(2,minmax(150px,1fr))}.menu-search-wrap{width:min(500px,50vw);max-width:none}}
+    @media (max-width:700px){
+      .topbar{height:62px}.content{padding:6px}.page{padding:8px;min-height:calc(100vh - 100px)}.tabs{height:34px}.tab{height:34px}.menu-search-wrap{width:min(52vw,360px);height:36px}.sync-status{display:none}.logout-btn{width:auto;height:40px}
+      .toolbar-row{display:grid;grid-template-columns:1fr auto;gap:8px}.search-notes{width:100%}#newNoteBtn{margin:0}.filters-row{overflow-x:auto;flex-wrap:nowrap;padding-bottom:5px}.filters-row>*{flex:0 0 auto}.meta-tools{grid-template-columns:1fr}.editor-actions{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}.editor-actions .btn{flex:0 0 auto}.note-title{font-size:18px}.note-body{min-height:52vh;font-size:15px}
+      .table-wrap{border:0;overflow:visible}.notes-table{min-width:0;width:100%;display:block}.notes-table thead{display:none}.notes-table tbody{display:block}.notes-table tr{display:grid;grid-template-columns:1fr 1fr;margin:0 0 8px;border:1px solid #cfd4d8;background:#fff}.notes-table td{display:block!important;width:auto!important;height:auto!important;min-height:34px;white-space:normal;padding:7px 9px!important;border-right:1px solid #e2e2e2;border-bottom:1px solid #e2e2e2}.notes-table td::before{content:attr(data-label);display:block;font-size:9px;color:#7b7b7b;text-transform:uppercase;margin-bottom:2px}.notes-table td[data-label="Nome"]{grid-column:1/-1;font-size:13px;background:#f6f9fc}.notes-table td.row-action{display:inline-flex!important;align-items:center;justify-content:center;min-height:38px}.notes-table td.row-action::before{display:none}.notes-table tbody tr.selected td{background:#00e7e7}.notes-table tbody tr.selected td[data-label="Nome"]{background:#00dede}.empty-state{width:100%}
+    }
+    @media (max-width:420px){.auth-card{width:min(280px,calc(100vw - 32px))}.menu-search-wrap{width:45vw}.toolbar-row{grid-template-columns:1fr}#newNoteBtn{width:100%}.editor-shell{padding:10px}.formatbar{margin-left:-10px;margin-right:-10px;padding-left:10px;padding-right:10px}}
+  </style>
+
+
+  <style id="keep-focus-mode-styles">
+    .keep-mode-switch{display:flex;align-items:center;gap:7px;height:28px;padding:0 10px 0 31px;border-bottom:1px solid #e4e4e4;background:#fafafa;color:#777;font-size:10px;cursor:pointer;user-select:none}
+    .keep-mode-switch input{accent-color:#14aa9b;width:13px;height:13px;margin:0}
+    .sidebar.collapsed .keep-mode-switch{display:none}
+    .keep-focus-bar{display:none}
+    .keep-card-preview{display:none}
+    body.keep-focus-mode{overflow:hidden}
+    body.keep-focus-mode::before{content:"";position:fixed;inset:0;background:rgba(10,14,19,.72);z-index:1800;backdrop-filter:blur(1.5px)}
+    body.keep-focus-mode .keep-focus-bar{position:fixed;display:flex!important;left:50%;top:max(14px,env(safe-area-inset-top));transform:translateX(-50%);z-index:2020;width:min(1180px,94vw);height:50px;align-items:center;justify-content:space-between;padding:0 17px;background:#202124;border:1px solid #42454a;border-radius:10px 10px 0 0;color:#e8eaed;box-shadow:0 12px 32px #0006}
+    .keep-focus-brand{display:flex;align-items:center;gap:8px;font-size:20px;color:#e8eaed}.keep-bulb{font-size:23px;filter:saturate(.9)}
+    .keep-focus-toggle{display:flex;align-items:center;gap:7px;font-size:11px;color:#bdc1c6;cursor:pointer}.keep-focus-toggle input{accent-color:#fbbc04;width:15px;height:15px}
+    body.keep-focus-mode #keepPage,body.keep-focus-mode #editorPage{position:fixed;left:50%;top:calc(max(14px,env(safe-area-inset-top)) + 50px);transform:translateX(-50%);z-index:2010;width:min(1180px,94vw);height:min(86vh,900px);max-height:calc(100vh - 82px);min-height:0;overflow:auto;margin:0;padding:24px;background:#202124!important;color:#e8eaed;border:1px solid #42454a;border-top:0;border-radius:0 0 10px 10px;box-shadow:0 18px 48px #0008}
+    body.keep-focus-mode #keepPage.hidden,body.keep-focus-mode #editorPage.hidden{display:none!important}
+    body.keep-focus-mode .tabs{visibility:hidden}
+    body.keep-focus-mode #keepPage .toolbar-row{max-width:980px;margin:0 auto 12px}
+    body.keep-focus-mode #keepPage .search-notes{width:min(720px,100%);height:46px;background:#303134;border:1px solid #3c4043;border-radius:8px;color:#e8eaed;box-shadow:0 1px 2px #0005}
+    body.keep-focus-mode #keepPage .search-notes input{color:#e8eaed;font-size:13px}body.keep-focus-mode #keepPage .search-notes input::placeholder{color:#9aa0a6}
+    body.keep-focus-mode #newNoteBtn{height:40px;background:#303134;border:1px solid #5f6368;color:#e8eaed;border-radius:6px}
+    body.keep-focus-mode #keepPage .filters-row{max-width:980px;margin:10px auto 18px;display:flex;gap:7px;flex-wrap:wrap}
+    body.keep-focus-mode #keepPage .filter,body.keep-focus-mode #keepPage .filters-row select,body.keep-focus-mode #keepPage .empty-trash-btn{background:#292a2d;color:#bdc1c6;border:1px solid #4b4f54;border-radius:18px;height:30px}
+    body.keep-focus-mode #keepPage .filter.active{background:#41331c;border-color:#725d2d;color:#f6d37a}
+    body.keep-focus-mode #keepPage .notes-list-layout{display:block;max-width:1040px;margin:0 auto}body.keep-focus-mode #keepPage .notes-grid-area{width:100%;max-width:none}body.keep-focus-mode #keepPage .panel-title{display:none}
+    body.keep-focus-mode #keepPage .table-wrap{border:0;background:transparent;overflow:visible;min-height:0;width:100%}body.keep-focus-mode #keepPage .notes-table{display:block;min-width:0;width:100%;background:transparent}body.keep-focus-mode #keepPage .notes-table thead{display:none}
+    body.keep-focus-mode #keepPage .notes-table tbody{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%}
+    body.keep-focus-mode #keepPage .notes-table tr{display:flex;flex-direction:row;flex-wrap:wrap;min-height:150px;border:1px solid #5f6368;border-radius:9px;background:#202124;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+    body.keep-focus-mode #keepPage .notes-table tr:hover{border-color:#9aa0a6;box-shadow:0 2px 8px #0006}body.keep-focus-mode #keepPage .notes-table tr.selected{border-color:#fbbc04;box-shadow:0 0 0 1px #fbbc04}
+    body.keep-focus-mode #keepPage .notes-table td{display:none!important;width:auto!important;height:auto!important;border:0;background:transparent!important;color:#e8eaed;white-space:normal;text-align:left;padding:0!important}
+    body.keep-focus-mode #keepPage .notes-table td[data-label="Nome"]{display:block!important;order:1;flex:0 0 100%;padding:15px 15px 10px!important;font-size:14px;line-height:1.35}body.keep-focus-mode #keepPage .notes-table td[data-label="Nome"] strong{display:block;font-size:14px;margin-bottom:8px;color:#f1f3f4}
+    body.keep-focus-mode #keepPage .keep-card-preview{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden;color:#bdc1c6;font-size:12px;line-height:1.45;font-weight:400}
+    body.keep-focus-mode #keepPage .notes-table td.row-action{display:inline-flex!important;order:2;width:25%!important;height:35px!important;align-items:center;justify-content:center;border-top:1px solid #36383b;background:#202124!important}
+    body.keep-focus-mode #keepPage .grid-icon-btn{height:34px;color:#bdc1c6}body.keep-focus-mode #keepPage .grid-icon-btn:hover{background:#303134;color:#fff}body.keep-focus-mode #keepPage .list-side-actions{display:none}body.keep-focus-mode #keepPage .empty-state{color:#9aa0a6;width:100%;padding:80px 10px}
+    body.keep-focus-mode #editorPage{padding:18px 24px 78px;overflow:auto}body.keep-focus-mode #editorPage .editor-header{position:sticky;top:-18px;z-index:10;margin:-18px -24px 14px;padding:10px 14px;background:#202124;border-bottom:1px solid #3c4043;color:#e8eaed}
+    body.keep-focus-mode #editorPage .btn{background:transparent;color:#bdc1c6;border:1px solid transparent}body.keep-focus-mode #editorPage .btn:hover{background:#303134;color:#fff}body.keep-focus-mode #editorPage .btn-danger{color:#e8a0a0}body.keep-focus-mode #editorPage .autosave-state{color:#9aa0a6}
+    body.keep-focus-mode #editorPage .editor-shell{max-width:920px;min-height:calc(100% - 20px);margin:0 auto;background:#292a2d;border:1px solid #5f6368;border-radius:10px;padding:18px 20px 22px;box-shadow:0 4px 18px #0006;color:#e8eaed}
+    body.keep-focus-mode #editorPage .note-title{width:100%;background:transparent;border:0;border-bottom:1px solid transparent;color:#f1f3f4;font-size:19px;font-weight:600;padding:7px 4px 10px;outline:none}body.keep-focus-mode #editorPage .note-title::placeholder{color:#9aa0a6}
+    body.keep-focus-mode #editorPage .formatbar{border:0;border-bottom:1px solid #3c4043;background:#292a2d;margin:2px 0 8px;padding:6px 0}body.keep-focus-mode #editorPage .formatbar button{background:transparent;color:#bdc1c6;border:0;border-radius:50%;min-width:34px;height:34px}body.keep-focus-mode #editorPage .formatbar button:hover{background:#3c4043;color:#fff}
+    body.keep-focus-mode #editorPage .note-body{min-height:45vh;background:transparent!important;color:#e8eaed;border:0;padding:10px 4px 20px;font-size:15px;line-height:1.55;outline:none}body.keep-focus-mode #editorPage .note-body:empty::before{color:#9aa0a6}
+    body.keep-focus-mode #editorPage .meta-tools{border-top:1px solid #3c4043;padding-top:12px;color:#bdc1c6;grid-template-columns:repeat(2,minmax(180px,1fr))}body.keep-focus-mode #editorPage .meta-tools input,body.keep-focus-mode #editorPage .meta-tools select{background:#303134;color:#e8eaed;border:1px solid #5f6368}body.keep-focus-mode #editorPage .image-gallery{border-top:1px solid #3c4043;margin-top:12px;padding-top:12px}
+    @media(max-width:900px){body.keep-focus-mode .keep-focus-bar{width:96vw}body.keep-focus-mode #keepPage,body.keep-focus-mode #editorPage{width:96vw;height:88vh;max-height:calc(100vh - 70px);padding-left:16px;padding-right:16px}body.keep-focus-mode #keepPage .notes-table tbody{grid-template-columns:repeat(2,minmax(0,1fr))}body.keep-focus-mode #editorPage .meta-tools{grid-template-columns:1fr 1fr}}
+    @media(max-width:600px){body.keep-focus-mode .keep-focus-bar{top:env(safe-area-inset-top);width:100vw;height:48px;border-radius:0;border-left:0;border-right:0;padding:0 12px}body.keep-focus-mode #keepPage,body.keep-focus-mode #editorPage{top:calc(env(safe-area-inset-top) + 48px);width:100vw;height:calc(100vh - 48px - env(safe-area-inset-top));max-height:none;border-radius:0;border-left:0;border-right:0;border-bottom:0;box-shadow:none}body.keep-focus-mode #keepPage{padding:14px 10px}body.keep-focus-mode #keepPage .toolbar-row{display:grid;grid-template-columns:1fr auto;gap:8px}body.keep-focus-mode #keepPage .notes-table tbody{grid-template-columns:1fr;gap:9px}body.keep-focus-mode #keepPage .notes-table tr{min-height:120px}body.keep-focus-mode #editorPage{padding:8px 10px 70px}body.keep-focus-mode #editorPage .editor-header{top:-8px;margin:-8px -10px 8px;padding:6px 8px}body.keep-focus-mode #editorPage .editor-actions{overflow-x:auto;flex-wrap:nowrap;width:100%;padding-bottom:3px}body.keep-focus-mode #editorPage .editor-actions .btn{flex:0 0 auto}body.keep-focus-mode #editorPage .editor-shell{border-radius:7px;padding:12px 12px 18px}body.keep-focus-mode #editorPage .note-title{font-size:18px}body.keep-focus-mode #editorPage .note-body{min-height:55vh;font-size:16px}body.keep-focus-mode #editorPage .meta-tools{grid-template-columns:1fr}.keep-focus-brand{font-size:17px}.keep-bulb{font-size:20px}.keep-focus-toggle{font-size:10px}}
+  </style>
+
+
+  <style id="aghu-first-plane-style">
+    body.keep-focus-mode::before{
+      background:rgba(43,52,60,.38)!important;
+      backdrop-filter:blur(1px)!important;
+    }
+
+    body.keep-focus-mode .keep-focus-bar{
+      top:max(14px,env(safe-area-inset-top))!important;
+      width:min(1180px,94vw)!important;
+      height:58px!important;
+      padding:0 17px!important;
+      background:#fff!important;
+      color:#222!important;
+      border:1px solid #c7cbd0!important;
+      border-top:4px solid #37424d!important;
+      border-radius:4px 4px 0 0!important;
+      box-shadow:0 9px 28px rgba(0,0,0,.22)!important;
+    }
+
+    .focus-aghu-brand{
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+    }
+    .focus-aghu-logo{
+      transform:scale(.88);
+      transform-origin:left center;
+    }
+    .focus-aghu-logo .aghu-cross{width:28px;height:28px}
+    .focus-aghu-logo .aghu-word strong{font-size:27px;color:#b51f2c}
+    .focus-aghu-logo .aghu-word em{color:#2f7d70;font-size:7px}
+    .focus-aghu-logo .aghu-word small{color:#a0a0a0;font-size:5px}
+    .keep-focus-toggle{color:#666!important;font-size:11px!important;gap:7px!important}
+    .keep-focus-toggle input{accent-color:#14aa9b!important}
+
+    body.keep-focus-mode #keepPage,
+    body.keep-focus-mode #editorPage{
+      top:calc(max(14px,env(safe-area-inset-top)) + 58px)!important;
+      width:min(1180px,94vw)!important;
+      height:min(86vh,900px)!important;
+      max-height:calc(100vh - 90px)!important;
+      padding:22px 24px 28px!important;
+      background:#fff!important;
+      color:#1f1f1f!important;
+      border:1px solid #c7cbd0!important;
+      border-top:0!important;
+      border-radius:0 0 4px 4px!important;
+      box-shadow:0 14px 36px rgba(0,0,0,.25)!important;
+    }
+
+    body.keep-focus-mode #keepPage .toolbar-row{
+      max-width:none!important;
+      margin:0 0 12px!important;
+    }
+    body.keep-focus-mode #keepPage .search-notes{
+      width:min(620px,100%)!important;
+      height:37px!important;
+      background:#fff!important;
+      border:1px solid #c9c9c9!important;
+      border-radius:0!important;
+      color:#333!important;
+      box-shadow:none!important;
+    }
+    body.keep-focus-mode #keepPage .search-notes input{
+      color:#333!important;
+      font-size:12px!important;
+    }
+    body.keep-focus-mode #keepPage .search-notes input::placeholder{color:#8a8a8a!important}
+    body.keep-focus-mode #newNoteBtn{
+      height:33px!important;
+      background:#4e7fbe!important;
+      border:1px solid #4474ac!important;
+      color:#fff!important;
+      border-radius:2px!important;
+    }
+
+    body.keep-focus-mode #keepPage .filters-row{
+      max-width:none!important;
+      margin:12px 0 11px!important;
+      gap:7px!important;
+      flex-wrap:wrap!important;
+    }
+    body.keep-focus-mode #keepPage .filter,
+    body.keep-focus-mode #keepPage .filters-row select,
+    body.keep-focus-mode #keepPage .empty-trash-btn{
+      height:30px!important;
+      background:#fff!important;
+      color:#333!important;
+      border:1px solid #c8ccd0!important;
+      border-radius:0!important;
+    }
+    body.keep-focus-mode #keepPage .filter.active{
+      background:#eefaf8!important;
+      border-color:#60c4b7!important;
+      color:#111!important;
+    }
+
+    body.keep-focus-mode #keepPage .notes-list-layout{
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) 132px!important;
+      gap:clamp(14px,3vw,42px)!important;
+      max-width:none!important;
+      margin:0!important;
+    }
+    body.keep-focus-mode #keepPage .notes-grid-area{
+      width:100%!important;
+      max-width:none!important;
+    }
+    body.keep-focus-mode #keepPage .panel-title{
+      display:block!important;
+      margin:8px 0 0 13px!important;
+      background:#4e7fbe!important;
+      color:#fff!important;
+      border-radius:3px 3px 0 0!important;
+    }
+    body.keep-focus-mode #keepPage .table-wrap{
+      width:100%!important;
+      min-height:218px!important;
+      border:1px solid #bfc3c7!important;
+      background:#fff!important;
+      overflow:auto!important;
+    }
+    body.keep-focus-mode #keepPage .notes-table{
+      display:table!important;
+      width:100%!important;
+      min-width:760px!important;
+      table-layout:fixed!important;
+      border-collapse:collapse!important;
+      background:#fff!important;
+    }
+    body.keep-focus-mode #keepPage .notes-table thead{display:table-header-group!important}
+    body.keep-focus-mode #keepPage .notes-table tbody{display:table-row-group!important}
+    body.keep-focus-mode #keepPage .notes-table tr{
+      display:table-row!important;
+      min-height:0!important;
+      border:0!important;
+      border-radius:0!important;
+      background:#fff!important;
+      box-shadow:none!important;
+    }
+    body.keep-focus-mode #keepPage .notes-table th{
+      display:table-cell!important;
+      height:45px!important;
+      background:#e6eef7!important;
+      color:#111!important;
+      border-right:1px solid #c2c6cb!important;
+      border-bottom:1px solid #b6bac0!important;
+      padding:0 5px!important;
+      text-align:center!important;
+    }
+    body.keep-focus-mode #keepPage .notes-table td{
+      display:table-cell!important;
+      height:43px!important;
+      background:#fff!important;
+      color:#1f1f1f!important;
+      border-right:1px solid #d6d6d6!important;
+      border-bottom:1px solid #d6d6d6!important;
+      padding:5px 8px!important;
+      white-space:nowrap!important;
+      overflow:hidden!important;
+      text-overflow:ellipsis!important;
+    }
+    body.keep-focus-mode #keepPage .notes-table tbody tr:hover td{background:#f5fbff!important}
+    body.keep-focus-mode #keepPage .notes-table tbody tr.selected td{background:#00e7e7!important}
+    body.keep-focus-mode #keepPage .notes-table td.row-action{
+      display:table-cell!important;
+      height:43px!important;
+      width:auto!important;
+      border-top:0!important;
+      background:inherit!important;
+      padding:0!important;
+    }
+    body.keep-focus-mode #keepPage .grid-icon-btn{height:42px!important;color:#8b6b45!important}
+    body.keep-focus-mode #keepPage .grid-icon-btn:hover{background:#fff7db!important;color:#5d452b!important}
+    body.keep-focus-mode #keepPage .list-side-actions{
+      display:flex!important;
+      width:132px!important;
+      margin-top:40px!important;
+      background:#fff!important;
+      border:1px solid #4d8c40!important;
+      border-radius:7px!important;
+    }
+    body.keep-focus-mode #keepPage .empty-state{color:#888!important;width:100%!important;padding:35px 10px!important}
+    body.keep-focus-mode .keep-card-preview{display:none!important}
+
+    body.keep-focus-mode #editorPage{
+      padding:0 20px 24px!important;
+      overflow:auto!important;
+    }
+    body.keep-focus-mode #editorPage .editor-header{
+      position:sticky!important;
+      top:0!important;
+      z-index:10!important;
+      margin:0 -20px 14px!important;
+      padding:8px 14px!important;
+      background:#f3f3f3!important;
+      border-bottom:1px solid #d3d3d3!important;
+      color:#222!important;
+    }
+    body.keep-focus-mode #editorPage .btn{
+      background:#fff!important;
+      color:#333!important;
+      border:1px solid #c8ccd0!important;
+      border-radius:2px!important;
+    }
+    body.keep-focus-mode #editorPage .btn:hover{background:#eef4fa!important;color:#111!important}
+    body.keep-focus-mode #editorPage .btn-primary{
+      background:#4e7fbe!important;
+      color:#fff!important;
+      border-color:#4474ac!important;
+    }
+    body.keep-focus-mode #editorPage .btn-danger{
+      background:#fff!important;
+      color:#a52b31!important;
+      border-color:#d4aeb0!important;
+    }
+    body.keep-focus-mode #editorPage .autosave-state{color:#777!important}
+    body.keep-focus-mode #editorPage .editor-shell{
+      max-width:980px!important;
+      min-height:calc(100% - 20px)!important;
+      margin:0 auto!important;
+      background:#fff!important;
+      border:1px solid #c9cdd1!important;
+      border-radius:3px!important;
+      padding:18px 20px 22px!important;
+      box-shadow:none!important;
+      color:#222!important;
+    }
+    body.keep-focus-mode #editorPage .note-title{
+      background:#fff!important;
+      color:#222!important;
+      border:0!important;
+      border-bottom:1px solid #d7dadd!important;
+      font-size:19px!important;
+      font-weight:600!important;
+    }
+    body.keep-focus-mode #editorPage .note-title::placeholder{color:#929292!important}
+    body.keep-focus-mode #editorPage .formatbar{
+      background:#f7f8f9!important;
+      border:1px solid #d9dcdf!important;
+      margin:8px 0!important;
+      padding:5px!important;
+    }
+    body.keep-focus-mode #editorPage .formatbar button{
+      background:#fff!important;
+      color:#333!important;
+      border:1px solid #d5d8db!important;
+      border-radius:2px!important;
+      min-width:34px!important;
+      height:32px!important;
+    }
+    body.keep-focus-mode #editorPage .formatbar button:hover{background:#e8f0f8!important;color:#111!important}
+    body.keep-focus-mode #editorPage .note-body{
+      min-height:46vh!important;
+      background:#fff!important;
+      color:#222!important;
+      border:1px solid #d8dbde!important;
+      padding:12px!important;
+      font-size:15px!important;
+      line-height:1.55!important;
+    }
+    body.keep-focus-mode #editorPage .note-body:empty::before{color:#929292!important}
+    body.keep-focus-mode #editorPage .meta-tools{
+      border-top:1px solid #d8dbde!important;
+      color:#555!important;
+      grid-template-columns:repeat(2,minmax(180px,1fr))!important;
+    }
+    body.keep-focus-mode #editorPage .meta-tools input,
+    body.keep-focus-mode #editorPage .meta-tools select{
+      background:#fff!important;
+      color:#222!important;
+      border:1px solid #c8ccd0!important;
+    }
+    body.keep-focus-mode #editorPage .image-gallery{border-top:1px solid #d8dbde!important}
+
+    @media(max-width:900px){
+      body.keep-focus-mode .keep-focus-bar{width:96vw!important}
+      body.keep-focus-mode #keepPage,
+      body.keep-focus-mode #editorPage{
+        width:96vw!important;
+        height:88vh!important;
+        max-height:calc(100vh - 80px)!important;
+        padding-left:14px!important;
+        padding-right:14px!important;
+      }
+      body.keep-focus-mode #keepPage .notes-list-layout{grid-template-columns:1fr!important}
+      body.keep-focus-mode #keepPage .list-side-actions{
+        width:100%!important;
+        margin:10px 0 0!important;
+        flex-direction:row!important;
+      }
+      body.keep-focus-mode #editorPage .meta-tools{grid-template-columns:1fr 1fr!important}
+    }
+
+    @media(max-width:700px){
+      body.keep-focus-mode .keep-focus-bar{
+        top:max(6px,env(safe-area-inset-top))!important;
+        width:96vw!important;
+        height:52px!important;
+        border-radius:3px 3px 0 0!important;
+        padding:0 10px!important;
+      }
+      .focus-aghu-logo{transform:scale(.72);transform-origin:left center}
+      .keep-focus-toggle{font-size:9px!important}
+      body.keep-focus-mode #keepPage,
+      body.keep-focus-mode #editorPage{
+        top:calc(max(6px,env(safe-area-inset-top)) + 52px)!important;
+        width:96vw!important;
+        height:calc(94vh - 52px)!important;
+        max-height:calc(100vh - 64px)!important;
+        border-radius:0 0 3px 3px!important;
+        padding:10px!important;
+      }
+
+      body.keep-focus-mode #keepPage .table-wrap{border:0!important;overflow:visible!important}
+      body.keep-focus-mode #keepPage .notes-table{display:block!important;min-width:0!important;width:100%!important}
+      body.keep-focus-mode #keepPage .notes-table thead{display:none!important}
+      body.keep-focus-mode #keepPage .notes-table tbody{display:block!important}
+      body.keep-focus-mode #keepPage .notes-table tr{
+        display:grid!important;
+        grid-template-columns:1fr 1fr!important;
+        margin:0 0 8px!important;
+        border:1px solid #cfd4d8!important;
+        background:#fff!important;
+      }
+      body.keep-focus-mode #keepPage .notes-table td{
+        display:block!important;
+        width:auto!important;
+        height:auto!important;
+        min-height:34px!important;
+        white-space:normal!important;
+        padding:7px 9px!important;
+        border-right:1px solid #e2e2e2!important;
+        border-bottom:1px solid #e2e2e2!important;
+      }
+      body.keep-focus-mode #keepPage .notes-table td[data-label="Nome"]{
+        grid-column:1/-1!important;
+        font-size:13px!important;
+        background:#f6f9fc!important;
+      }
+      body.keep-focus-mode #keepPage .notes-table td.row-action{
+        display:inline-flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        min-height:38px!important;
+      }
+      body.keep-focus-mode #editorPage{padding:0 8px 14px!important}
+      body.keep-focus-mode #editorPage .editor-header{
+        margin:0 -8px 8px!important;
+        padding:6px 8px!important;
+      }
+      body.keep-focus-mode #editorPage .editor-shell{padding:10px!important}
+      body.keep-focus-mode #editorPage .note-body{min-height:55vh!important;font-size:16px!important}
+      body.keep-focus-mode #editorPage .meta-tools{grid-template-columns:1fr!important}
+    }
+  </style>
+
+
+  <style id="aghu-close-window-controls">
+    .tab-with-close{
+      display:flex!important;
+      align-items:stretch!important;
+      padding:0!important;
+      overflow:hidden;
+    }
+    .tab-with-close .tab-main-btn,
+    .tab-close-btn{
+      border:0;
+      background:transparent;
+      color:inherit;
+      cursor:pointer;
+    }
+    .tab-with-close .tab-main-btn{
+      padding:0 8px 0 12px;
+      min-width:72px;
+    }
+    .tab-close-btn{
+      width:24px;
+      padding:0;
+      color:#929292;
+      font-size:15px;
+      line-height:1;
+    }
+    .tab-close-btn:hover{
+      color:#a91d24;
+      background:#f7eded;
+    }
+
+    .keep-focus-tools{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+      gap:11px;
+      height:100%;
+    }
+    .focus-close-btn{
+      width:28px;
+      height:28px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid transparent;
+      background:transparent;
+      color:#777;
+      border-radius:2px;
+      cursor:pointer;
+      font-size:21px;
+      line-height:1;
+      padding:0 0 2px;
+    }
+    .focus-close-btn:hover{
+      color:#a91d24;
+      border-color:#d8b3b5;
+      background:#fff3f3;
+    }
+
+    .panel-general-page{
+      background:#fff;
+    }
+    .panel-general-card{
+      min-height:430px;
+      border:1px solid #e1e1e1;
+      background:#fff;
+    }
+    .panel-general-title{
+      height:34px;
+      display:flex;
+      align-items:center;
+      padding:0 12px;
+      border-bottom:1px solid #dedede;
+      font-size:12px;
+      font-weight:600;
+    }
+    .panel-general-body{
+      min-height:390px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      color:#777;
+    }
+    .panel-general-mark{
+      width:54px;
+      height:48px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:33px;
+      font-weight:700;
+      color:#bf8a00;
+      border:2px solid #d0ab45;
+      background:#fff4bd;
+      clip-path:polygon(50% 0,100% 100%,0 100%);
+      padding-top:12px;
+    }
+    .panel-general-text{
+      font-size:12px;
+    }
+
+    body.keep-focus-mode .keep-focus-tools{
+      margin-left:auto;
+    }
+
+    @media(max-width:700px){
+      .focus-close-btn{
+        width:30px;
+        height:30px;
+        font-size:23px;
+      }
+      .keep-focus-tools{
+        gap:5px;
+      }
+      .keep-focus-toggle span{
+        display:none;
+      }
+      .tab-close-btn{
+        width:30px;
+      }
+    }
+  </style>
+
+</head>
+<body>
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-card">
+      <div class="auth-heading">Acesse o sistema</div>
+
+      <div class="auth-brand" aria-label="AGHU Notes">
+        <div class="aghu-notes-logo">
+          <div class="aghu-cross" aria-hidden="true"></div>
+          <div class="aghu-word">
+            <strong>AGHU<em>Notes</em></strong>
+            <small>Aplicativo particular de anotações</small>
+          </div>
+        </div>
+      </div>
+
+      <form id="loginForm" autocomplete="on">
+        <label for="loginEmail">E-mail</label>
+        <input id="loginEmail" type="email" autocomplete="username" placeholder="Usuário" required />
+        <label for="loginPassword">Senha</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Senha" required />
+        <button type="submit" class="btn btn-primary">Entrar</button>
+        <div id="loginError" class="form-error"></div>
+      </form>
+
+      <div class="auth-privacy">
+        Aplicativo particular para anotações pessoais. Não integra, consulta ou altera dados do sistema AGHU/EBSERH.
+      </div>
+    </div>
+
+    <div class="auth-disclaimer">
+      Bloco de notas particular • não oficial • sem vínculo com AGHU/EBSERH
+    </div>
+  </div>
+
+  <div id="appShell" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="aghu-notes-logo sidebar-aghu-logo" aria-label="AGHU Notes">
+          <div class="aghu-cross" aria-hidden="true"></div>
+          <div class="aghu-word">
+            <strong>AGHU<em>Notes</em></strong>
+            <small>Aplicativo particular de anotações</small>
+          </div>
+        </div>
+      </div>
+
+      <nav id="sideMenu" class="side-menu">
+        <button id="panelMenuBtn" class="menu-item" data-static="true"><span>▣</span>Painel Geral</button>
+        <button class="menu-item" data-static="true"><span>▰</span>Prontuário Online</button>
+        <button id="keepMenuBtn" class="menu-item active" data-page="keep"><span>🗒</span>Keep</button>
+        <label class="keep-mode-switch" title="Quando marcado, o módulo de notas abre em uma janela central em primeiro plano">
+          <input id="keepModeToggle" type="checkbox" />
+          <span>Abrir em primeiro plano</span>
+        </label>
+
+        <div class="menu-group">
+          <button class="menu-item group-toggle"><span>♟</span>Pacientes <b>⌄</b></button>
+          <div class="submenu">
+            <button data-static="true">Pesquisar Pacientes</button>
+            <button data-static="true">+ Prontuário</button>
+            <button data-static="true">+ Cadastros</button>
+            <button data-static="true">+ Relatórios</button>
+            <button data-static="true">+ Etiquetas</button>
+            <button data-static="true">+ SAME</button>
+          </div>
+        </div>
+
+        <div class="menu-group">
+          <button class="menu-item group-toggle"><span>⚑</span>Internação <b>⌄</b></button>
+          <div class="submenu">
+            <button data-static="true">Solicitação Internação/Autorização Hospitalar</button>
+            <button data-static="true">Internar Paciente</button>
+            <button data-static="true">Registrar Nascimento</button>
+            <button data-static="true">Censo Diário dos Pacientes</button>
+            <button data-static="true">+ Administração</button>
+            <button data-static="true">Escala de Profissionais</button>
+            <button data-static="true">+ Pesquisas</button>
+            <button data-static="true">+ Relatórios</button>
+            <button data-static="true">+ Cadastros</button>
+            <button data-static="true">Estornar Internação</button>
+            <button data-static="true">Estornar Alta do Paciente</button>
+            <button data-static="true">Imprimir Pulseiras de Internação</button>
+            <button data-static="true">Imprimir Placa de Identificação</button>
+            <button data-static="true">+ Impressão</button>
+          </div>
+        </div>
+
+        <div class="menu-group">
+          <button class="menu-item group-toggle"><span>⚕</span>Prescrição <b>⌄</b></button>
+          <div class="submenu open">
+            <button data-static="true">+ Médica</button>
+            <button data-static="true">+ Enfermagem</button>
+            <button data-static="true">+ Multiprofissional</button>
+          </div>
+        </div>
+
+        <button class="menu-item" data-static="true"><span>♙</span>Ambulatório</button>
+        <button class="menu-item" data-static="true"><span>⚗</span>Exames</button>
+        <button class="menu-item" data-static="true"><span>▤</span>Financeiro</button>
+        <button class="menu-item" data-static="true"><span>✚</span>Farmácia</button>
+        <button class="menu-item" data-static="true"><span>▣</span>Suprimentos</button>
+        <button class="menu-item" data-static="true"><span>▦</span>Inventário</button>
+        <button class="menu-item" data-static="true"><span>♙</span>Enfermagem</button>
+        <button class="menu-item" data-static="true"><span>?</span>Manuais de Ajuda</button>
+      </nav>
+
+      <div class="independent-note">Ferramenta particular de notas • não oficial</div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <button id="collapseSidebar" class="icon-btn" title="Recolher menu">«</button>
+        <div class="menu-search-wrap">
+          <span>⌕</span>
+          <input id="menuSearch" type="search" placeholder="Pesquisar menu" />
+        </div>
+        <div class="topbar-right">
+          <span id="syncStatus" class="sync-status">● Sincronizado</span>
+          <button id="logoutBtn" class="logout-btn">↪ Sair</button>
+        </div>
+      </header>
+      <div id="keepFocusBar" class="keep-focus-bar hidden">
+        <div class="focus-aghu-brand" aria-label="AGHU Notes">
+          <div class="aghu-notes-logo focus-aghu-logo">
+            <div class="aghu-cross" aria-hidden="true"></div>
+            <div class="aghu-word">
+              <strong>AGHU<em>Notes</em></strong>
+              <small>Aplicativo particular de anotações</small>
+            </div>
+          </div>
+        </div>
+        <div class="keep-focus-tools">
+          <label class="keep-focus-toggle">
+            <input id="keepModeOverlayToggle" type="checkbox" />
+            <span>Primeiro plano</span>
+          </label>
+          <button id="closeFocusWindowBtn" class="focus-close-btn" type="button" title="Fechar janela em primeiro plano" aria-label="Fechar janela">×</button>
+        </div>
+      </div>
+
+
+      <main class="content">
+        <div class="tabs">
+          <button id="panelTab" class="tab" type="button">▣ Painel Geral</button>
+          <div id="keepTab" class="tab active tab-with-close" role="tab" aria-selected="true">
+            <button id="keepTabOpenBtn" class="tab-main-btn" type="button">🗒 Keep</button>
+            <button id="closeKeepTabBtn" class="tab-close-btn" type="button" title="Fechar Keep" aria-label="Fechar Keep">×</button>
+          </div>
+        </div>
+
+        <section id="panelGeneralPage" class="page panel-general-page hidden">
+          <div class="panel-general-card">
+            <div class="panel-general-title">Painel Geral</div>
+            <div class="panel-general-body">
+              <div class="panel-general-mark">!</div>
+              <div class="panel-general-text">Selecione uma opção no menu lateral.</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="keepPage" class="page">
+          <div class="toolbar-row">
+            <div class="search-notes">
+              <span>⌕</span>
+              <input id="noteSearch" type="search" placeholder="Pesquisar notas" />
+            </div>
+            <button id="newNoteBtn" class="btn btn-primary">＋ Nova nota</button>
+          </div>
+
+          <div class="filters-row">
+            <button class="filter active" data-filter="all">Todas</button>
+            <button class="filter" data-filter="pinned">Fixadas</button>
+            <button class="filter" data-filter="reminders">Lembretes</button>
+            <button class="filter" data-filter="archived">Arquivo</button>
+            <button class="filter" data-filter="trash">Lixeira</button>
+            <select id="labelFilter"><option value="">Todas as etiquetas</option></select>
+            <button id="manageLabelsBtn" class="filter">Editar etiquetas</button>
+            <button id="emptyTrashBtn" class="empty-trash-btn hidden">Esvaziar lixeira</button>
+          </div>
+
+          <div class="notes-list-layout">
+            <div class="notes-grid-area">
+              <div class="panel-title">Lista de Notas</div>
+              <div class="table-wrap">
+                <table class="notes-table">
+                  <thead>
+                    <tr>
+                      <th data-sort="synthetic_local">Local <span class="sort-glyph">↕</span></th>
+                      <th data-sort="title">Nome <span class="sort-glyph">↕</span></th>
+                      <th data-sort="synthetic_age">Idade <span class="sort-glyph">↕</span></th>
+                      <th data-sort="synthetic_record">Prontuário <span class="sort-glyph">↕</span></th>
+                      <th data-sort="updated_at">Dt. Atend. <span class="sort-glyph">↕</span></th>
+                      <th class="icon-col"><span class="sort-glyph">↕</span></th>
+                      <th class="icon-col"><span class="sort-glyph">↕</span></th>
+                      <th class="icon-col"><span class="sort-glyph">↕</span></th>
+                      <th class="icon-col"><span class="sort-glyph">↕</span></th>
+                      <th class="icon-col"><span class="sort-glyph">↕</span></th>
+                      <th class="icon-col blue-cap"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="notesTbody"></tbody>
+                </table>
+                <div id="emptyState" class="empty-state hidden">Nenhuma nota encontrada.</div>
+              </div>
+            </div>
+
+            <aside class="list-side-actions">
+              <button id="openSelectedBtn" disabled>Abrir nota</button>
+              <button id="restoreSelectedBtn" class="hidden">Restaurar</button>
+              <button id="deleteSelectedBtn" class="hidden danger-side">Excluir definitivamente</button>
+            </aside>
+          </div>
+        </section>
+
+        <section id="editorPage" class="page hidden">
+          <div class="editor-header">
+            <div>
+              <button id="backBtn" class="btn btn-light">← Lista</button>
+              <span id="autosaveState" class="autosave-state">Salvo</span>
+            </div>
+            <div class="editor-actions">
+              <button id="pinBtn" class="btn btn-light">☆ Fixar</button>
+              <button id="archiveBtn" class="btn btn-light">▣ Arquivar</button>
+              <button id="duplicateBtn" class="btn btn-light">⧉ Duplicar</button>
+              <button id="shareBtn" class="btn btn-light">↗ Compartilhar</button>
+              <button id="drawBtn" class="btn btn-light">✎ Desenho</button>
+              <button id="copyDocsBtn" class="btn btn-light">▤ Google Docs</button>
+              <button id="historyBtn" class="btn btn-light">↶ Histórico</button>
+              <button id="trashBtn" class="btn btn-danger">🗑 Excluir</button>
+              <button id="permanentDeleteBtn" class="btn btn-danger hidden">Excluir definitivamente</button>
+            </div>
+          </div>
+
+          <div class="editor-shell">
+            <input id="noteTitle" class="note-title" type="text" placeholder="Título da nota" />
+
+            <div class="formatbar">
+              <button data-cmd="formatBlock" data-value="H1">H1</button>
+              <button data-cmd="formatBlock" data-value="H2">H2</button>
+              <button data-cmd="formatBlock" data-value="P">Aa</button>
+              <button data-cmd="bold"><b>B</b></button>
+              <button data-cmd="italic"><i>I</i></button>
+              <button data-cmd="underline"><u>U</u></button>
+              <button data-cmd="strikeThrough"><s>S</s></button>
+              <button data-cmd="removeFormat">Tx</button>
+              <button data-cmd="insertUnorderedList">• Lista</button>
+              <button data-cmd="insertOrderedList">1. Lista</button>
+              <button id="checklistBtn">☑ Checklist</button>
+              <button data-cmd="undo">↶</button>
+              <button data-cmd="redo">↷</button>
+            </div>
+
+            <div id="noteBody" class="note-body" contenteditable="true" data-placeholder="Digite sua nota..."></div>
+
+            <div class="meta-tools">
+              <label>Cor
+                <select id="colorSelect">
+                  <option value="#ffffff">Branco</option>
+                  <option value="#faafa8">Coral</option>
+                  <option value="#f39f76">Pêssego</option>
+                  <option value="#fff8b8">Amarelo</option>
+                  <option value="#e2f6d3">Verde</option>
+                  <option value="#b4ddd3">Verde-água</option>
+                  <option value="#d4e4ed">Azul claro</option>
+                  <option value="#aeccdc">Azul</option>
+                  <option value="#d3bfdb">Lilás</option>
+                  <option value="#f6e2dd">Rosa claro</option>
+                  <option value="#e9e3d4">Cinza-bege</option>
+                  <option value="linear-gradient(135deg,#f8fbff 0 50%,#e9f2ff 50% 100%)">Fundo geométrico</option>
+                  <option value="linear-gradient(180deg,#fffef7,#eef8f0)">Fundo suave</option>
+                  <option value="repeating-linear-gradient(0deg,#fff 0,#fff 23px,#e8edf3 24px)">Papel pautado</option>
+                </select>
+              </label>
+              <label>Lembrete
+                <input id="reminderAt" type="datetime-local" />
+              </label>
+              <label>Etiquetas
+                <input id="labelsInput" type="text" placeholder="separe por vírgulas" />
+              </label>
+              <label class="file-label">Imagem
+                <input id="imageInput" type="file" accept="image/*" />
+              </label>
+            </div>
+
+            <div id="imageGallery" class="image-gallery"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+
+  <dialog id="firstSyncDialog" class="utility-dialog">
+    <div class="dialog-head"><h3>Primeiro acesso neste dispositivo</h3></div>
+    <div class="utility-body">
+      <p>Este navegador foi autenticado pela primeira vez. Confirme para carregar e manter suas notas sincronizadas neste aparelho.</p>
+      <div class="dialog-actions">
+        <button id="confirmFirstSyncBtn" class="btn btn-primary">Confirmar sincronização</button>
+        <button id="cancelFirstSyncBtn" class="btn btn-light">Sair</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="labelsDialog" class="utility-dialog">
+    <form method="dialog" class="dialog-head"><h3>Editar etiquetas</h3><button class="icon-btn">×</button></form>
+    <div id="labelsManagerList" class="labels-manager-list"></div>
+  </dialog>
+
+  <dialog id="drawDialog" class="utility-dialog draw-dialog">
+    <div class="dialog-head"><h3>Adicionar desenho</h3><button id="closeDrawBtn" class="icon-btn">×</button></div>
+    <div class="draw-tools">
+      <label>Espessura <input id="drawSize" type="range" min="1" max="18" value="3"></label>
+      <label>Cor <input id="drawColor" type="color" value="#202124"></label>
+      <button id="clearDrawBtn" class="btn btn-light">Limpar</button>
+    </div>
+    <canvas id="drawCanvas" width="1200" height="700"></canvas>
+    <div class="dialog-actions">
+      <button id="saveDrawBtn" class="btn btn-primary">Inserir desenho</button>
+      <button id="cancelDrawBtn" class="btn btn-light">Cancelar</button>
+    </div>
+  </dialog>
+
+  <div id="toast" class="app-toast hidden" role="status" aria-live="polite"></div>
+
+  <dialog id="historyDialog" class="history-dialog">
+    <form method="dialog" class="dialog-head">
+      <h3>Histórico de versões</h3>
+      <button class="icon-btn">×</button>
+    </form>
+    <div id="historyList" class="history-list"></div>
+  </dialog>
+
+  <script type="text/plain" id="supabase-schema" hidden>
+-- Execute no SQL Editor do Supabase.
+create extension if not exists pgcrypto;
+
+create table if not exists public.notes (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  title text not null default 'Nova nota',
+  content_html text not null default '',
+  pinned boolean not null default false,
+  archived boolean not null default false,
+  deleted boolean not null default false,
+  color text not null default '#ffffff',
+  reminder_at timestamptz,
+  synthetic_local text not null,
+  synthetic_age integer not null check (synthetic_age between 0 and 120),
+  synthetic_record integer not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.labels (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  name text not null,
+  created_at timestamptz not null default now(),
+  unique(user_id,name)
+);
+
+create table if not exists public.note_labels (
+  note_id uuid not null references public.notes(id) on delete cascade,
+  label_id uuid not null references public.labels(id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  primary key(note_id,label_id)
+);
+
+create table if not exists public.note_versions (
+  id uuid primary key default gen_random_uuid(),
+  note_id uuid not null references public.notes(id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  title text not null default '',
+  content_html text not null default '',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.attachments (
+  id uuid primary key default gen_random_uuid(),
+  note_id uuid not null references public.notes(id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  storage_path text not null,
+  public_url text not null,
+  file_name text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.notes enable row level security;
+alter table public.labels enable row level security;
+alter table public.note_labels enable row level security;
+alter table public.note_versions enable row level security;
+alter table public.attachments enable row level security;
+
+create policy "notes_own" on public.notes for all using (auth.uid()=user_id) with check (auth.uid()=user_id);
+create policy "labels_own" on public.labels for all using (auth.uid()=user_id) with check (auth.uid()=user_id);
+create policy "note_labels_own" on public.note_labels for all using (auth.uid()=user_id) with check (auth.uid()=user_id);
+create policy "versions_own" on public.note_versions for all using (auth.uid()=user_id) with check (auth.uid()=user_id);
+create policy "attachments_own" on public.attachments for all using (auth.uid()=user_id) with check (auth.uid()=user_id);
+
+insert into storage.buckets (id,name,public) values ('note-images','note-images',false)
+on conflict (id) do update set public=false;
+
+create policy "note_images_insert" on storage.objects for insert to authenticated with check (bucket_id='note-images' and (storage.foldername(name))[1]=auth.uid()::text);
+create policy "note_images_update" on storage.objects for update to authenticated using (bucket_id='note-images' and (storage.foldername(name))[1]=auth.uid()::text);
+create policy "note_images_delete" on storage.objects for delete to authenticated using (bucket_id='note-images' and (storage.foldername(name))[1]=auth.uid()::text);
+create policy "note_images_select" on storage.objects for select to authenticated using (bucket_id='note-images' and (storage.foldername(name))[1]=auth.uid()::text);
+
+  </script>
+
+  <script>
+// Preencha com os dados públicos do seu projeto Supabase.
+// A anon key é própria para uso no navegador; a senha do usuário nunca deve ser escrita aqui.
+window.APP_CONFIG = {
+  SUPABASE_URL: "https://aufujiafalafuncsbjzu.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_u0p7ZsvaBivvZwOgqVowcw_opxxFTOO"
+};
+
+  </script>
+
+  <script>
+(() => {
+  const cfg = window.APP_CONFIG || {};
+  const configured = cfg.SUPABASE_URL && !cfg.SUPABASE_URL.includes("SEU-PROJETO") && cfg.SUPABASE_ANON_KEY && !cfg.SUPABASE_ANON_KEY.includes("SUA-ANON-KEY");
+  const supabase = configured ? window.supabase.createClient(
+    cfg.SUPABASE_URL,
+    cfg.SUPABASE_ANON_KEY,
+    {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
+  ) : null;
+
+  const $ = (id) => document.getElementById(id);
+  const state = {
+    user: null,
+    notes: [],
+    labels: [],
+    current: null,
+    filter: 'all',
+    search: '',
+    label: '',
+    saveTimer: null,
+    isDirty: false,
+    versionTimer: null,
+    selectedId: null,
+    syncTimer: null,
+    reminderTimer: null,
+    sortKey: 'updated_at',
+    sortDir: 'desc',
+    entering: false,
+    keepFocusMode: localStorage.getItem('aghuNotes.keepFocusMode')==='1'
+  };
+
+  const els = {
+    auth: $('authScreen'), app: $('appShell'), login: $('loginForm'), loginEmail: $('loginEmail'), loginPassword: $('loginPassword'), loginError: $('loginError'),
+    logout: $('logoutBtn'), syncStatus: $('syncStatus'), tbody: $('notesTbody'), empty: $('emptyState'), newNote: $('newNoteBtn'), noteSearch: $('noteSearch'), labelFilter: $('labelFilter'),
+    emptyTrash: $('emptyTrashBtn'), openSelected: $('openSelectedBtn'), restoreSelected: $('restoreSelectedBtn'), deleteSelected: $('deleteSelectedBtn'),
+    manageLabels: $('manageLabelsBtn'), labelsDialog: $('labelsDialog'), labelsManagerList: $('labelsManagerList'),
+    firstSyncDialog: $('firstSyncDialog'), confirmFirstSync: $('confirmFirstSyncBtn'), cancelFirstSync: $('cancelFirstSyncBtn'),
+    keepPage: $('keepPage'), editorPage: $('editorPage'), back: $('backBtn'), title: $('noteTitle'), body: $('noteBody'), autosave: $('autosaveState'), color: $('colorSelect'), reminder: $('reminderAt'), labelsInput: $('labelsInput'),
+    pin: $('pinBtn'), archive: $('archiveBtn'), trash: $('trashBtn'), permanentDelete: $('permanentDeleteBtn'), duplicate: $('duplicateBtn'), share: $('shareBtn'), draw: $('drawBtn'), copyDocs: $('copyDocsBtn'),
+    history: $('historyBtn'), historyDialog: $('historyDialog'), historyList: $('historyList'), imageInput: $('imageInput'), imageGallery: $('imageGallery'),
+    drawDialog: $('drawDialog'), drawCanvas: $('drawCanvas'), drawSize: $('drawSize'), drawColor: $('drawColor'), clearDraw: $('clearDrawBtn'), saveDraw: $('saveDrawBtn'), closeDraw: $('closeDrawBtn'), cancelDraw: $('cancelDrawBtn'), toast: $('toast'), keepModeToggle: $('keepModeToggle'), keepModeOverlayToggle: $('keepModeOverlayToggle'), keepFocusBar: $('keepFocusBar'),
+    closeFocusWindow: $('closeFocusWindowBtn'), closeKeepTab: $('closeKeepTabBtn'), keepTab: $('keepTab'), keepTabOpen: $('keepTabOpenBtn'), panelTab: $('panelTab'), panelPage: $('panelGeneralPage'), panelMenu: $('panelMenuBtn'), keepMenu: $('keepMenuBtn')
+  };
+
+  function fmtDate(v){
+    if(!v) return '-';
+    const d = new Date(v);
+    return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }
+  function toLocalInput(v){ if(!v) return ''; const d=new Date(v); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
+  function esc(s=''){ return String(s).replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#039;",'"':'&quot;'}[c])); }
+  function stripHtml(value=''){
+    const div=document.createElement('div');div.innerHTML=value;return (div.textContent||div.innerText||'').trim();
+  }
+  function showToast(message,ms=2600){if(!els.toast)return;els.toast.textContent=message;els.toast.classList.remove('hidden');clearTimeout(showToast._t);showToast._t=setTimeout(()=>els.toast.classList.add('hidden'),ms);}
+  function deviceSyncKey(userId){return `aghuNotes.syncConfirmed:${userId}`;}
+  async function confirmFirstDeviceSync(user){
+    if(localStorage.getItem(deviceSyncKey(user.id))==='1')return true;
+    if(!els.firstSyncDialog?.showModal){localStorage.setItem(deviceSyncKey(user.id),'1');return true;}
+    return await new Promise(resolve=>{
+      const finish=ok=>{els.confirmFirstSync.onclick=null;els.cancelFirstSync.onclick=null;try{els.firstSyncDialog.close();}catch{}if(ok)localStorage.setItem(deviceSyncKey(user.id),'1');resolve(ok);};
+      els.confirmFirstSync.onclick=()=>finish(true);els.cancelFirstSync.onclick=()=>finish(false);els.firstSyncDialog.showModal();
+    });
+  }
+
+  function randomMeta(){
+    const ward = Math.floor(Math.random()*9)+1;
+    const room = String(Math.floor(Math.random()*390)+101);
+    const bed = String(Math.floor(Math.random()*4)+1).padStart(4,'0');
+    return { synthetic_local:`L:UN${ward}.${room}-${bed}`, synthetic_age:Math.floor(Math.random()*86), synthetic_record:Math.floor(Math.random()*8999999)+1000000 };
+  }
+
+
+  function syncKeepModeControls(){
+    if(els.keepModeToggle) els.keepModeToggle.checked=state.keepFocusMode;
+    if(els.keepModeOverlayToggle) els.keepModeOverlayToggle.checked=state.keepFocusMode;
+  }
+  function applyKeepFocusMode(active=state.keepFocusMode){
+    document.body.classList.toggle('keep-focus-mode',!!active);
+    if(els.keepFocusBar) els.keepFocusBar.classList.toggle('hidden',!active);
+    syncKeepModeControls();
+  }
+  function setKeepFocusMode(enabled){
+    state.keepFocusMode=!!enabled;
+    localStorage.setItem('aghuNotes.keepFocusMode',state.keepFocusMode?'1':'0');
+    applyKeepFocusMode(state.keepFocusMode);
+  }
+  function setTopTabState(which){
+    const keepActive=which==='keep';
+    els.keepTab?.classList.toggle('active',keepActive);
+    els.panelTab?.classList.toggle('active',!keepActive);
+    els.keepMenu?.classList.toggle('active',keepActive);
+    els.panelMenu?.classList.toggle('active',!keepActive);
+    if(els.keepTab) els.keepTab.setAttribute('aria-selected',keepActive?'true':'false');
+  }
+
+  function showPanelGeneral(){
+    document.body.classList.remove('keep-focus-mode');
+    els.keepFocusBar?.classList.add('hidden');
+    els.keepPage.classList.add('hidden');
+    els.editorPage.classList.add('hidden');
+    els.panelPage?.classList.remove('hidden');
+    state.current=null;
+    setTopTabState('panel');
+  }
+
+  function openKeepModule(){
+    els.panelPage?.classList.add('hidden');
+    els.keepTab?.classList.remove('hidden');
+    els.editorPage.classList.add('hidden');
+    els.keepPage.classList.remove('hidden');
+    state.current=null;
+    setTopTabState('keep');
+    applyKeepFocusMode(state.keepFocusMode);
+    if(!state.keepFocusMode&&window.matchMedia('(max-width:700px)').matches)document.querySelector('.sidebar')?.classList.add('collapsed');
+    renderNotes();
+  }
+
+  async function closeKeepModule(){
+    if(state.isDirty) await flushSave();
+    document.body.classList.remove('keep-focus-mode');
+    els.keepFocusBar?.classList.add('hidden');
+    els.keepTab?.classList.add('hidden');
+    showPanelGeneral();
+  }
+
+  async function closeElevatedWindow(){
+    if(state.isDirty) await flushSave();
+    document.body.classList.remove('keep-focus-mode');
+    els.keepFocusBar?.classList.add('hidden');
+    els.keepPage.classList.add('hidden');
+    els.editorPage.classList.add('hidden');
+    els.panelPage?.classList.remove('hidden');
+    state.current=null;
+    setTopTabState('panel');
+    // A preferência "Abrir em primeiro plano" continua marcada.
+    // Ao abrir Keep novamente, ele volta elevado.
+    syncKeepModeControls();
+  }
+
+  els.keepModeToggle?.addEventListener('change',e=>setKeepFocusMode(e.target.checked));
+  els.keepModeOverlayToggle?.addEventListener('change',e=>setKeepFocusMode(e.target.checked));
+  els.closeFocusWindow?.addEventListener('click',closeElevatedWindow);
+  els.closeKeepTab?.addEventListener('click',async e=>{e.stopPropagation();await closeKeepModule();});
+  els.keepTabOpen?.addEventListener('click',openKeepModule);
+  els.panelTab?.addEventListener('click',showPanelGeneral);
+  els.panelMenu?.addEventListener('click',showPanelGeneral);
+  syncKeepModeControls();
+
+  async function bootstrap(){
+    if(!configured){els.auth.classList.remove('hidden');els.loginError.textContent='Configure o Supabase na seção APP_CONFIG deste index antes do primeiro uso.';return;}
+    const {data}=await supabase.auth.getSession();
+    if(data.session)await enterApp(data.session.user);else showAuth();
+    supabase.auth.onAuthStateChange(async(_event,session)=>{
+      if(!session){if(state.user)showAuth();return;}
+      if(!state.user||state.user.id!==session.user.id)await enterApp(session.user);
+    });
+    if(window.matchMedia('(max-width:700px)').matches)document.querySelector('.sidebar')?.classList.add('collapsed');
+  }
+  function showAuth(){stopSyncLoop();stopReminderLoop();state.user=null;document.body.classList.remove('keep-focus-mode');els.keepFocusBar?.classList.add('hidden');els.app.classList.add('hidden');els.auth.classList.remove('hidden');}
+  async function enterApp(user){
+    if(state.entering)return;
+    state.entering=true;
+    try{
+      state.user=user;
+      const ok=await confirmFirstDeviceSync(user);
+      if(!ok){await supabase.auth.signOut();showAuth();return;}
+      els.auth.classList.add('hidden');els.app.classList.remove('hidden');setSyncStatus('syncing');
+      await Promise.all([loadNotes(),loadLabels()]);renderNotes();applyKeepFocusMode(state.keepFocusMode);setSyncStatus('ok');startSyncLoop();startReminderLoop();
+    }finally{state.entering=false;}
+  }
+
+  els.login.addEventListener('submit', async e=>{
+    e.preventDefault(); els.loginError.textContent='';
+    if(!supabase){ els.loginError.textContent='Supabase ainda não configurado.'; return; }
+    const {data,error}=await supabase.auth.signInWithPassword({email:els.loginEmail.value.trim(),password:els.loginPassword.value});
+    if(error){ els.loginError.textContent='Falha no login. Verifique e-mail e senha.'; return; }
+    await enterApp(data.user);
+  });
+  els.logout.addEventListener('click', async()=>{ await supabase.auth.signOut(); showAuth(); });
+
+  function setSyncStatus(mode){
+    if(!els.syncStatus) return;
+    els.syncStatus.classList.remove('syncing','offline');
+    if(mode==='syncing'){
+      els.syncStatus.classList.add('syncing');
+      els.syncStatus.textContent='● Sincronizando...';
+    } else if(mode==='offline'){
+      els.syncStatus.classList.add('offline');
+      els.syncStatus.textContent='● Sem conexão';
+    } else {
+      els.syncStatus.textContent='● Sincronizado';
+    }
+  }
+
+  async function syncFromCloud(){
+    if(!state.user || !navigator.onLine){
+      setSyncStatus('offline');
+      return;
+    }
+    if(state.isDirty) return;
+    setSyncStatus('syncing');
+    await Promise.all([loadNotes(),loadLabels()]);
+    if(!els.keepPage.classList.contains('hidden')) renderNotes();
+    setSyncStatus('ok');
+  }
+
+  function startSyncLoop(){stopSyncLoop();state.syncTimer=setInterval(syncFromCloud,10000);}
+  function stopSyncLoop(){if(state.syncTimer){clearInterval(state.syncTimer);state.syncTimer=null;}}
+  function startReminderLoop(){stopReminderLoop();checkDueReminders();state.reminderTimer=setInterval(checkDueReminders,30000);}
+  function stopReminderLoop(){if(state.reminderTimer){clearInterval(state.reminderTimer);state.reminderTimer=null;}}
+  async function checkDueReminders(){
+    if(!state.user)return;const now=Date.now();const due=state.notes.filter(n=>!n.deleted&&n.reminder_at&&new Date(n.reminder_at).getTime()<=now);
+    for(const n of due){const key=`aghuNotes.reminderShown:${n.id}:${n.reminder_at}`;if(localStorage.getItem(key)==='1')continue;localStorage.setItem(key,'1');showToast(`Lembrete: ${n.title||'Nota'}`,5000);if('Notification'in window&&Notification.permission==='granted'){try{new Notification('AGHU Notes',{body:n.title||'Nota com lembrete'});}catch{}}}
+  }
+
+  async function loadNotes(){
+    const {data,error}=await supabase.from('notes').select('*, note_labels(label_id, labels(id,name)), attachments(*)').order('updated_at',{ascending:false});
+    if(error){ console.error(error); return; }
+    state.notes=data||[];
+  }
+  async function loadLabels(){
+    const {data}=await supabase.from('labels').select('*').order('name'); state.labels=data||[];
+    els.labelFilter.innerHTML='<option value="">Todas as etiquetas</option>'+state.labels.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
+  }
+
+  function filteredNotes(){
+    const q=state.search;
+    const rows=state.notes.filter(n=>{
+      const base=state.filter==='trash'?n.deleted:state.filter==='archived'?n.archived&&!n.deleted:state.filter==='pinned'?n.pinned&&!n.archived&&!n.deleted:state.filter==='reminders'?!!n.reminder_at&&!n.deleted&&!n.archived:!n.deleted&&!n.archived;
+      if(!base)return false;
+      if(q){const labelText=(n.note_labels||[]).map(x=>x.labels?.name||'').join(' ');const hay=[n.title,stripHtml(n.content_html),labelText,n.synthetic_local,n.synthetic_record].join(' ').toLowerCase();if(!hay.includes(q))return false;}
+      if(state.label){const ids=(n.note_labels||[]).map(x=>x.label_id);if(!ids.includes(state.label))return false;}
+      return true;
+    });
+    const dir=state.sortDir==='asc'?1:-1;
+    return rows.sort((a,b)=>{let av=a[state.sortKey],bv=b[state.sortKey];if(state.sortKey==='updated_at'){av=new Date(av||0).getTime();bv=new Date(bv||0).getTime();}if(typeof av==='string')av=av.toLocaleLowerCase('pt-BR');if(typeof bv==='string')bv=bv.toLocaleLowerCase('pt-BR');if(av===bv)return 0;return av>bv?dir:-dir;});
+  }
+
+  function updateSideActions(){
+    const n=state.notes.find(x=>x.id===state.selectedId);
+    const has=!!n;
+    els.openSelected.disabled=!has;
+    els.restoreSelected.classList.toggle('hidden',!(has&&state.filter==='trash'));
+    els.deleteSelected.classList.toggle('hidden',!(has&&state.filter==='trash'));
+  }
+
+  function actionCells(n){
+    if(n.deleted){
+      return `
+        <td class="row-action"><button class="grid-icon-btn restore" title="Restaurar" data-restore-row="${n.id}">↩</button></td>
+        <td class="row-action"><button class="grid-icon-btn danger" title="Excluir definitivamente" data-delete-forever="${n.id}">×</button></td>
+        <td class="row-action"></td><td class="row-action"></td><td class="row-action"></td><td class="row-action"></td>`;
+    }
+    return `
+      <td class="row-action"><button class="grid-icon-btn" title="Abrir" data-open="${n.id}">▧</button></td>
+      <td class="row-action"><button class="grid-icon-btn" title="Fixar" data-star="${n.id}">${n.pinned?'★':'☆'}</button></td>
+      <td class="row-action"><button class="grid-icon-btn" title="${n.archived?'Restaurar do arquivo':'Arquivar'}" data-archive-row="${n.id}">▣</button></td>
+      <td class="row-action"><button class="grid-icon-btn danger" title="Mover para a lixeira" data-trash-row="${n.id}">×</button></td>
+      <td class="row-action"></td><td class="row-action"></td>`;
+  }
+
+  function renderNotes(){
+    const rows=filteredNotes();
+    els.empty.classList.toggle('hidden',rows.length>0);
+    els.emptyTrash.classList.toggle('hidden',state.filter!=='trash');
+    if(state.selectedId && !rows.some(n=>n.id===state.selectedId)) state.selectedId=null;
+
+    els.tbody.innerHTML=rows.map(n=>`<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}">
+      <td data-label="Local">${esc(n.synthetic_local||'-')}</td>
+      <td data-label="Nome"><strong>${esc(n.title||'Sem título')}</strong>${n.pinned?' ★':''}<div class="keep-card-preview">${esc(stripHtml(n.content_html||'').slice(0,180))}</div></td>
+      <td data-label="Idade">${n.synthetic_age??'-'}</td>
+      <td data-label="Prontuário">${n.synthetic_record??'-'}</td>
+      <td data-label="Dt. Atend.">${fmtDate(n.updated_at)}</td>
+      ${actionCells(n)}
+    </tr>`).join('');
+
+    els.tbody.querySelectorAll('tr').forEach(tr=>{
+      tr.addEventListener('click',e=>{
+        if(e.target.closest('button')) return;
+        state.selectedId=tr.dataset.id;
+        renderNotes();
+      });
+      tr.addEventListener('dblclick',()=>openNote(tr.dataset.id));
+    });
+
+    els.tbody.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',e=>{
+      e.stopPropagation(); openNote(b.dataset.open);
+    }));
+    els.tbody.querySelectorAll('[data-star]').forEach(b=>b.addEventListener('click',async e=>{
+      e.stopPropagation();
+      const n=state.notes.find(x=>x.id===b.dataset.star);
+      if(n) await quickUpdate(n.id,{pinned:!n.pinned});
+    }));
+    els.tbody.querySelectorAll('[data-archive-row]').forEach(b=>b.addEventListener('click',async e=>{
+      e.stopPropagation();
+      const n=state.notes.find(x=>x.id===b.dataset.archiveRow);
+      if(n) await quickUpdate(n.id,{archived:!n.archived});
+    }));
+    els.tbody.querySelectorAll('[data-trash-row]').forEach(b=>b.addEventListener('click',async e=>{
+      e.stopPropagation();
+      const n=state.notes.find(x=>x.id===b.dataset.trashRow);
+      if(n) await moveToTrash(n.id);
+    }));
+    els.tbody.querySelectorAll('[data-restore-row]').forEach(b=>b.addEventListener('click',async e=>{
+      e.stopPropagation(); await restoreNote(b.dataset.restoreRow);
+    }));
+    els.tbody.querySelectorAll('[data-delete-forever]').forEach(b=>b.addEventListener('click',async e=>{
+      e.stopPropagation();
+      const n=state.notes.find(x=>x.id===b.dataset.deleteForever);
+      if(n) await deleteNoteForever(n,true);
+    }));
+
+    updateSideActions();
+  }
+
+  async function quickUpdate(id,patch){
+    setSyncStatus('syncing');
+    await supabase.from('notes').update({...patch,updated_at:new Date().toISOString()}).eq('id',id);
+    await loadNotes();
+    renderNotes();
+    setSyncStatus('ok');
+  }
+
+  document.querySelectorAll('.notes-table th[data-sort]').forEach(th=>th.addEventListener('click',()=>{const key=th.dataset.sort;if(state.sortKey===key)state.sortDir=state.sortDir==='asc'?'desc':'asc';else{state.sortKey=key;state.sortDir=key==='title'||key==='synthetic_local'?'asc':'desc';}renderNotes();}));
+
+  document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    state.filter=b.dataset.filter;
+    state.selectedId=null;
+    renderNotes();
+  }));
+  els.noteSearch.addEventListener('input',()=>{state.search=els.noteSearch.value.trim().toLowerCase();renderNotes();});
+  els.labelFilter.addEventListener('change',()=>{state.label=els.labelFilter.value;renderNotes();});
+
+  els.manageLabels.addEventListener('click',()=>renderLabelsManager());
+  function renderLabelsManager(){
+    els.labelsManagerList.innerHTML=state.labels.map(l=>`<div class="label-manager-row" data-label-row="${l.id}"><input value="${esc(l.name)}" aria-label="Nome da etiqueta"><div><button class="btn btn-light" data-save-label="${l.id}">Salvar</button><button class="btn btn-danger" data-delete-label="${l.id}">Excluir</button></div></div>`).join('')||'<p>Nenhuma etiqueta criada.</p>';
+    els.labelsManagerList.querySelectorAll('[data-save-label]').forEach(btn=>btn.addEventListener('click',async()=>{const row=btn.closest('[data-label-row]');const name=row.querySelector('input').value.trim();if(!name)return;const{error}=await supabase.from('labels').update({name}).eq('id',btn.dataset.saveLabel);if(error){showToast('Não foi possível renomear a etiqueta.');return;}await Promise.all([loadLabels(),loadNotes()]);renderLabelsManager();renderNotes();}));
+    els.labelsManagerList.querySelectorAll('[data-delete-label]').forEach(btn=>btn.addEventListener('click',async()=>{const l=state.labels.find(x=>x.id===btn.dataset.deleteLabel);if(!l||!confirm(`Excluir a etiqueta "${l.name}"? As notas não serão apagadas.`))return;const{error}=await supabase.from('labels').delete().eq('id',l.id);if(error){showToast('Não foi possível excluir a etiqueta.');return;}await Promise.all([loadLabels(),loadNotes()]);renderLabelsManager();renderNotes();}));
+    els.labelsDialog.showModal();
+  }
+
+
+  els.openSelected.addEventListener('click',()=>{
+    if(state.selectedId) openNote(state.selectedId);
+  });
+  els.restoreSelected.addEventListener('click',async()=>{
+    if(state.selectedId) await restoreNote(state.selectedId);
+  });
+  els.deleteSelected.addEventListener('click',async()=>{
+    const n=state.notes.find(x=>x.id===state.selectedId);
+    if(n) await deleteNoteForever(n,true);
+  });
+
+  async function moveToTrash(id){
+    // Mantém a nota recuperável, mas remove o histórico antigo para economizar espaço imediatamente.
+    setSyncStatus('syncing');
+    await supabase.from('note_versions').delete().eq('note_id',id);
+    const {error}=await supabase.from('notes').update({
+      deleted:true,
+      archived:false,
+      updated_at:new Date().toISOString()
+    }).eq('id',id);
+    if(error){setSyncStatus('ok');return;}
+    if(state.current?.id===id) state.current.deleted=true;
+    await loadNotes();
+    renderNotes();
+    setSyncStatus('ok');
+  }
+
+  async function restoreNote(id){
+    setSyncStatus('syncing');
+    await supabase.from('notes').update({
+      deleted:false,
+      updated_at:new Date().toISOString()
+    }).eq('id',id);
+    state.selectedId=null;
+    await loadNotes();
+    renderNotes();
+    setSyncStatus('ok');
+  }
+
+  async function removeStorageFiles(note){
+    const paths=(note.attachments||[]).map(a=>a.storage_path).filter(Boolean);
+    if(paths.length){
+      await supabase.storage.from('note-images').remove(paths);
+    }
+  }
+
+  async function deleteNoteForever(note,ask=true){
+    if(!note) return;
+    if(ask && !confirm('Excluir definitivamente esta nota? Esta ação não poderá ser desfeita.')) return;
+    setSyncStatus('syncing');
+    await removeStorageFiles(note);
+    const {error}=await supabase.from('notes').delete().eq('id',note.id);
+    if(error){
+      alert('Não foi possível excluir definitivamente a nota.');
+      setSyncStatus('ok');
+      return;
+    }
+    state.selectedId=null;
+    if(state.current?.id===note.id){
+      state.current=null;
+      els.editorPage.classList.add('hidden');
+      els.keepPage.classList.remove('hidden');
+    }
+    await Promise.all([loadNotes(),loadLabels()]);
+    renderNotes();
+    setSyncStatus('ok');
+  }
+
+  els.emptyTrash.addEventListener('click',async()=>{
+    const trashed=state.notes.filter(n=>n.deleted);
+    if(!trashed.length) return;
+    if(!confirm(`Esvaziar a lixeira e excluir definitivamente ${trashed.length} nota(s)? Esta ação não poderá ser desfeita.`)) return;
+    setSyncStatus('syncing');
+    for(const note of trashed) await removeStorageFiles(note);
+    const {error}=await supabase.from('notes').delete().eq('deleted',true);
+    if(error){
+      alert('Não foi possível esvaziar a lixeira.');
+      setSyncStatus('ok');
+      return;
+    }
+    state.selectedId=null;
+    await Promise.all([loadNotes(),loadLabels()]);
+    renderNotes();
+    setSyncStatus('ok');
+  });
+
+
+  els.newNote.addEventListener('click', async()=>{
+    const meta=randomMeta();
+    const {data,error}=await supabase.from('notes').insert({user_id:state.user.id,title:'Nova nota',content_html:'',...meta}).select().single();
+    if(error){ alert('Não foi possível criar a nota.'); return; }
+    state.notes.unshift({...data,note_labels:[],attachments:[]}); openNote(data.id);
+  });
+
+  function openNote(id){
+    const n=state.notes.find(x=>x.id===id); if(!n) return;
+    state.current=JSON.parse(JSON.stringify(n));
+    els.keepPage.classList.add('hidden'); els.editorPage.classList.remove('hidden');
+    applyKeepFocusMode(state.keepFocusMode);
+    els.title.value=n.title||''; els.body.innerHTML=n.content_html||''; els.color.value=n.color||'#ffffff'; els.reminder.value=toLocalInput(n.reminder_at);
+    els.labelsInput.value=(n.note_labels||[]).map(x=>x.labels?.name).filter(Boolean).join(', '); els.editorPage.style.background=n.color||'#fff';
+    updateActionLabels(); renderImages(); els.autosave.textContent='Salvo';
+  }
+  els.back.addEventListener('click',async()=>{ await flushSave(); els.editorPage.classList.add('hidden');els.keepPage.classList.remove('hidden');state.current=null;await loadNotes();renderNotes();applyKeepFocusMode(state.keepFocusMode); });
+
+  function updateActionLabels(){
+    if(!state.current)return;
+    els.pin.textContent=state.current.pinned?'★ Fixada':'☆ Fixar';
+    els.archive.textContent=state.current.archived?'▣ Restaurar':'▣ Arquivar';
+    els.trash.textContent=state.current.deleted?'↩ Restaurar':'🗑 Excluir';
+    els.permanentDelete.classList.toggle('hidden',!state.current.deleted);
+  }
+  function markDirty(){ if(!state.current)return; state.isDirty=true; els.autosave.textContent='Salvando...'; clearTimeout(state.saveTimer); state.saveTimer=setTimeout(flushSave,700); }
+  [els.title,els.body,els.color,els.reminder,els.labelsInput].forEach(el=>el.addEventListener(el===els.body?'input':'input',markDirty));
+  els.color.addEventListener('change',()=>{els.editorPage.style.background=els.color.value;markDirty();});
+  els.reminder.addEventListener('change',async()=>{if(els.reminder.value&&'Notification'in window&&Notification.permission==='default'){try{await Notification.requestPermission();}catch{}}markDirty();});
+
+  async function ensureLabels(names){
+    const clean=[...new Set(names.map(s=>s.trim()).filter(Boolean))]; const ids=[];
+    for(const name of clean){ let l=state.labels.find(x=>x.name.toLowerCase()===name.toLowerCase());
+      if(!l){ const {data,error}=await supabase.from('labels').insert({user_id:state.user.id,name}).select().single(); if(error) continue; l=data; state.labels.push(l); }
+      ids.push(l.id);
+    }
+    return ids;
+  }
+  async function syncLabels(noteId){
+    const ids=await ensureLabels(els.labelsInput.value.split(',')); await supabase.from('note_labels').delete().eq('note_id',noteId); if(ids.length) await supabase.from('note_labels').insert(ids.map(label_id=>({note_id:noteId,label_id,user_id:state.user.id})));
+  }
+  async function createVersionIfNeeded(){
+    const n=state.current; if(!n)return;
+    const title=els.title.value.trim(), html=els.body.innerHTML;
+    if(title===n.title && html===n.content_html) return;
+    const last=state.versionTimer||0; if(Date.now()-last<30000) return;
+    state.versionTimer=Date.now();
+    await supabase.from('note_versions').insert({note_id:n.id,user_id:state.user.id,title:n.title||'',content_html:n.content_html||''});
+    const {data:versions}=await supabase.from('note_versions').select('id,created_at').eq('note_id',n.id).order('created_at',{ascending:false});
+    if((versions||[]).length>30){const excess=versions.slice(30).map(v=>v.id);if(excess.length)await supabase.from('note_versions').delete().in('id',excess);}
+  }
+  async function flushSave(){
+    if(!state.current||!state.isDirty)return;
+    state.isDirty=false;
+    setSyncStatus('syncing');
+    await createVersionIfNeeded();
+    const patch={title:els.title.value.trim()||'Sem título',content_html:els.body.innerHTML,color:els.color.value,reminder_at:els.reminder.value?new Date(els.reminder.value).toISOString():null,updated_at:new Date().toISOString()};
+    const {data:remote}=await supabase.from('notes').select('title,content_html,updated_at').eq('id',state.current.id).maybeSingle();
+    if(remote && state.current.updated_at && new Date(remote.updated_at).getTime()>new Date(state.current.updated_at).getTime()+500){
+      const changed=remote.title!==state.current.title||remote.content_html!==state.current.content_html;
+      if(changed){await supabase.from('note_versions').insert({note_id:state.current.id,user_id:state.user.id,title:remote.title||'',content_html:remote.content_html||''});showToast('Alteração de outro aparelho preservada no histórico.',4200);}
+    }
+    const {error}=await supabase.from('notes').update(patch).eq('id',state.current.id);
+    if(error){
+      els.autosave.textContent='Erro ao salvar';
+      state.isDirty=true;
+      setSyncStatus(navigator.onLine?'ok':'offline');
+      return;
+    }
+    await syncLabels(state.current.id);
+    Object.assign(state.current,patch);
+    const cached=state.notes.find(n=>n.id===state.current.id);if(cached)Object.assign(cached,patch);
+    els.autosave.textContent=`Salvo ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+    await loadLabels();
+    setSyncStatus('ok');
+  }
+
+  els.pin.addEventListener('click',async()=>{state.current.pinned=!state.current.pinned;await quickCurrent({pinned:state.current.pinned});});
+  els.archive.addEventListener('click',async()=>{state.current.archived=!state.current.archived;await quickCurrent({archived:state.current.archived});});
+  els.trash.addEventListener('click',async()=>{
+    if(!state.current) return;
+    if(state.current.deleted){
+      await restoreNote(state.current.id);
+      state.current.deleted=false;
+      updateActionLabels();
+    } else {
+      const id=state.current.id;
+      await flushSave();
+      await moveToTrash(id);
+      els.editorPage.classList.add('hidden');
+      els.keepPage.classList.remove('hidden');
+      state.current=null;
+      state.filter='trash';
+      document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.filter==='trash'));
+      renderNotes();
+    }
+  });
+  els.permanentDelete.addEventListener('click',async()=>{
+    if(!state.current) return;
+    const n=state.notes.find(x=>x.id===state.current.id) || state.current;
+    await deleteNoteForever(n,true);
+  });
+  async function quickCurrent(p){if(!state.current)return;setSyncStatus('syncing');const{error}=await supabase.from('notes').update({...p,updated_at:new Date().toISOString()}).eq('id',state.current.id);if(error){showToast('Não foi possível atualizar a nota.');setSyncStatus('ok');return;}Object.assign(state.current,p);const local=state.notes.find(n=>n.id===state.current.id);if(local)Object.assign(local,p);updateActionLabels();setSyncStatus('ok');}
+
+  els.duplicate.addEventListener('click',async()=>{
+    await flushSave();const source=state.current;const m=randomMeta();
+    const{data,error}=await supabase.from('notes').insert({user_id:state.user.id,title:`${els.title.value||'Sem título'} (cópia)`,content_html:els.body.innerHTML,color:els.color.value,reminder_at:source.reminder_at||null,...m}).select().single();
+    if(error){showToast('Não foi possível duplicar a nota.');return;}
+    const labelIds=await ensureLabels(els.labelsInput.value.split(','));if(labelIds.length)await supabase.from('note_labels').insert(labelIds.map(label_id=>({note_id:data.id,label_id,user_id:state.user.id})));
+    for(const att of(source.attachments||[])){try{const{data:blob,error:downErr}=await supabase.storage.from('note-images').download(att.storage_path);if(downErr||!blob)continue;const safe=(att.file_name||'imagem').replace(/[^a-zA-Z0-9._-]/g,'_');const newPath=`${state.user.id}/${data.id}/${Date.now()}-${Math.random().toString(36).slice(2,7)}-${safe}`;const up=await supabase.storage.from('note-images').upload(newPath,blob,{upsert:false});if(up.error)continue;await supabase.from('attachments').insert({user_id:state.user.id,note_id:data.id,storage_path:newPath,public_url:'',file_name:att.file_name||safe});}catch{}}
+    await Promise.all([loadNotes(),loadLabels()]);openNote(data.id);showToast('Cópia criada.');
+  });
+
+  function notePlainText(){return `${els.title.value.trim()||'Sem título'}
+
+${stripHtml(els.body.innerHTML)}`.trim();}
+  els.share.addEventListener('click',async()=>{const payload={title:els.title.value.trim()||'Nota',text:notePlainText()};try{if(navigator.share)await navigator.share(payload);else{await navigator.clipboard.writeText(payload.text);showToast('Nota copiada para a área de transferência.');}}catch(err){if(err?.name!=='AbortError')showToast('Não foi possível compartilhar.');}});
+  els.copyDocs.addEventListener('click',async()=>{const htmlContent=`<h1>${esc(els.title.value.trim()||'Sem título')}</h1>${els.body.innerHTML}`;try{if(window.ClipboardItem&&navigator.clipboard?.write){const item=new ClipboardItem({'text/html':new Blob([htmlContent],{type:'text/html'}),'text/plain':new Blob([notePlainText()],{type:'text/plain'})});await navigator.clipboard.write([item]);}else await navigator.clipboard.writeText(notePlainText());window.open('https://docs.new/','_blank','noopener');showToast('Conteúdo copiado. Cole no Google Docs.');}catch{showToast('Não foi possível copiar para o Google Docs.');}});
+
+  function initDrawing(){
+    const canvas=els.drawCanvas,ctx=canvas.getContext('2d');ctx.lineCap='round';ctx.lineJoin='round';let drawing=false,last=null;
+    const point=e=>{const r=canvas.getBoundingClientRect(),p=e;return{x:(p.clientX-r.left)*(canvas.width/r.width),y:(p.clientY-r.top)*(canvas.height/r.height)}};
+    const start=e=>{drawing=true;last=point(e);e.preventDefault();};const move=e=>{if(!drawing)return;const p=point(e);ctx.strokeStyle=els.drawColor.value;ctx.lineWidth=Number(els.drawSize.value);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p;e.preventDefault();};const end=e=>{drawing=false;last=null;e.preventDefault();};
+    canvas.addEventListener('pointerdown',start);canvas.addEventListener('pointermove',move);canvas.addEventListener('pointerup',end);canvas.addEventListener('pointercancel',end);canvas.addEventListener('pointerleave',e=>{if(drawing)end(e)});
+    els.clearDraw.addEventListener('click',()=>ctx.clearRect(0,0,canvas.width,canvas.height));els.draw.addEventListener('click',()=>{ctx.clearRect(0,0,canvas.width,canvas.height);els.drawDialog.showModal();});const close=()=>{try{els.drawDialog.close()}catch{}};els.closeDraw.addEventListener('click',close);els.cancelDraw.addEventListener('click',close);
+    els.saveDraw.addEventListener('click',async()=>{if(!state.current)return;const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)return;els.autosave.textContent='Salvando desenho...';try{await uploadAttachment(blob,`desenho-${Date.now()}.png`);await renderImages();els.autosave.textContent='Desenho salvo';close();}catch(err){console.error(err);showToast('Não foi possível salvar o desenho.');}});
+  }
+  initDrawing();
+
+  els.history.addEventListener('click',async()=>{
+    if(!state.current)return; const {data}=await supabase.from('note_versions').select('*').eq('note_id',state.current.id).order('created_at',{ascending:false}).limit(50);
+    els.historyList.innerHTML=(data||[]).map(v=>`<div class="history-item"><strong>${esc(v.title||'Sem título')}</strong><br><small>${fmtDate(v.created_at)}</small><button class="btn btn-light" data-restore="${v.id}">Restaurar esta versão</button></div>`).join('')||'<p>Sem versões anteriores.</p>';
+    els.historyList.querySelectorAll('[data-restore]').forEach(b=>b.addEventListener('click',()=>restoreVersion((data||[]).find(v=>v.id===b.dataset.restore)))); els.historyDialog.showModal();
+  });
+  async function restoreVersion(v){ if(!v)return; els.title.value=v.title;els.body.innerHTML=v.content_html;markDirty();els.historyDialog.close(); }
+
+  document.querySelectorAll('.formatbar [data-cmd]').forEach(b=>b.addEventListener('click',()=>{els.body.focus();document.execCommand(b.dataset.cmd,false,b.dataset.value||null);markDirty();}));
+  $('checklistBtn').addEventListener('click',()=>{els.body.focus();document.execCommand('insertHTML',false,'<div class="check-item"><input type="checkbox" contenteditable="false"><span>Item</span></div>');markDirty();});
+  els.body.addEventListener('change',e=>{if(e.target.matches('input[type="checkbox"]'))markDirty();});
+
+  async function uploadAttachment(fileOrBlob,fileName){
+    if(!fileOrBlob||!state.current)return null;const safe=(fileName||'arquivo').replace(/[^a-zA-Z0-9._-]/g,'_');const path=`${state.user.id}/${state.current.id}/${Date.now()}-${safe}`;
+    const up=await supabase.storage.from('note-images').upload(path,fileOrBlob,{upsert:false});if(up.error)throw up.error;
+    const{data,error}=await supabase.from('attachments').insert({user_id:state.user.id,note_id:state.current.id,storage_path:path,public_url:'',file_name:fileName||safe}).select().single();
+    if(error){await supabase.storage.from('note-images').remove([path]);throw error;}state.current.attachments=state.current.attachments||[];state.current.attachments.push(data);return data;
+  }
+  els.imageInput.addEventListener('change',async()=>{const file=els.imageInput.files?.[0];if(!file||!state.current)return;els.autosave.textContent='Enviando imagem...';try{await uploadAttachment(file,file.name);await renderImages();els.autosave.textContent='Imagem salva';}catch(err){console.error(err);els.autosave.textContent='Erro na imagem';showToast('Não foi possível enviar a imagem.');}els.imageInput.value='';});
+  async function signedImageUrl(path){const{data,error}=await supabase.storage.from('note-images').createSignedUrl(path,3600);if(error)return'';return data?.signedUrl||'';}
+  async function renderImages(){
+    const a=state.current?.attachments||[];if(!a.length){els.imageGallery.innerHTML='';return;}
+    els.imageGallery.innerHTML=a.map(x=>`<div class="image-card" data-image-card="${x.id}"><div class="image-loading">Carregando...</div><button data-delimg="${x.id}" data-path="${esc(x.storage_path)}">Remover</button></div>`).join('');
+    for(const x of a){const card=els.imageGallery.querySelector(`[data-image-card="${x.id}"]`);if(!card)continue;const url=await signedImageUrl(x.storage_path);const loading=card.querySelector('.image-loading');if(url)loading.outerHTML=`<img src="${esc(url)}" alt="${esc(x.file_name||'Imagem')}">`;else loading.textContent='Imagem indisponível';}
+    els.imageGallery.querySelectorAll('[data-delimg]').forEach(b=>b.addEventListener('click',async()=>{await supabase.storage.from('note-images').remove([b.dataset.path]);await supabase.from('attachments').delete().eq('id',b.dataset.delimg);state.current.attachments=state.current.attachments.filter(x=>x.id!==b.dataset.delimg);await renderImages();showToast('Imagem removida.');}));
+  }
+
+  document.querySelectorAll('.group-toggle').forEach(b=>b.addEventListener('click',()=>b.nextElementSibling.classList.toggle('open')));
+  document.querySelectorAll('[data-static="true"]').forEach(b=>b.addEventListener('click',()=>{}));
+  document.querySelector('[data-page="keep"]')?.addEventListener('click',openKeepModule);
+  $('collapseSidebar').addEventListener('click',()=>document.querySelector('.sidebar').classList.toggle('collapsed'));
+  $('menuSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.side-menu button').forEach(b=>b.style.display=!q||b.textContent.toLowerCase().includes(q)?'':'none');});
+
+  window.addEventListener('online',()=>syncFromCloud());
+  window.addEventListener('offline',()=>setSyncStatus('offline'));
+  window.addEventListener('focus',()=>syncFromCloud());
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden) syncFromCloud();});
+  window.addEventListener('pagehide',()=>{if(state.isDirty)flushSave();});
+  window.addEventListener('beforeunload',()=>{ if(state.isDirty) flushSave(); });
+  bootstrap();
+})();
+
+  </script>
+
+</body>
+</html>
