@@ -13,14 +13,19 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="light" />
   <title>AGHU Notes</title>
-  <link rel="manifest" href="manifest.webmanifest?v=13" />
   <meta name="theme-color" content="#ffffff" />
+  <link rel="manifest" href="/aghu/manifest.webmanifest?v=16" />
+  <link rel="shortcut icon" href="/aghu/favicon.ico?v=16" />
+  <link rel="icon" href="/aghu/favicon.ico?v=16" sizes="any" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/aghu/favicon-96-v16.png?v=16" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/aghu/icon-192-v16.png?v=16" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/aghu/apple-touch-icon-v16.png?v=16" />
+  <meta name="application-name" content="AGHU Notes" />
+  <meta name="apple-mobile-web-app-title" content="AGHU Notes" />
+
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="AGHU Notes" />
-  <link rel="apple-touch-icon" sizes="180x180" href="aghu-touch-180-v13.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="aghu-icon-192-v13.png" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -1206,10 +1211,19 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
     }
   </style>
 
-
-  <link rel="icon" type="image/png" sizes="32x32" href="aghu-favicon-32-v13.png" />
-  <meta name="application-name" content="AGHU Notes" />
-
+  <style id="app-global-counters-style">
+    .app-counters{
+      position:fixed;left:7px;bottom:5px;z-index:1400;
+      display:flex;align-items:center;gap:5px;
+      padding:2px 5px;border:1px solid rgba(160,160,160,.18);
+      border-radius:2px;background:rgba(255,255,255,.74);
+      color:#a3a3a3;font:9px/1.2 Arial,Helvetica,sans-serif;
+      white-space:nowrap;pointer-events:none;backdrop-filter:blur(2px)
+    }
+    .app-counters strong{color:#7d7d7d;font-weight:600}
+    .counter-sep{color:#c5c5c5}
+    @media(max-width:520px){.app-counters{left:4px;bottom:3px;font-size:8px;padding:2px 4px}}
+  </style>
 </head>
 <body>
   <div id="authScreen" class="auth-screen">
@@ -1708,6 +1722,7 @@ window.APP_CONFIG = {
 
   const els = {
     auth: $('authScreen'), app: $('appShell'), login: $('loginForm'), loginEmail: $('loginEmail'), loginPassword: $('loginPassword'), loginError: $('loginError'),
+    appCounters: $('appCounters'), accessCount: $('accessCount'), notesCreatedCount: $('notesCreatedCount'),
     logout: $('logoutBtn'), syncStatus: $('syncStatus'), installApp: $('installAppBtn'), tbody: $('notesTbody'), empty: $('emptyState'), newNote: $('newNoteBtn'), noteSearch: $('noteSearch'), labelFilter: $('labelFilter'),
     emptyTrash: $('emptyTrashBtn'), openSelected: $('openSelectedBtn'), editPatientMeta: $('editPatientMetaBtn'), restoreSelected: $('restoreSelectedBtn'), deleteSelected: $('deleteSelectedBtn'),
     patientMetaDialog: $('patientMetaDialog'), patientMetaName: $('patientMetaName'), patientMetaAge: $('patientMetaAge'), patientMetaRecord: $('patientMetaRecord'),
@@ -2050,6 +2065,53 @@ window.APP_CONFIG = {
     }
   }
 
+  const COUNTERS_CACHE_KEY='aghuNotes.globalCounters';
+
+  function formatCounter(value){
+    const n=Number(value);
+    return Number.isFinite(n)?n.toLocaleString('pt-BR'):'—';
+  }
+
+  function renderAppCounters(data){
+    if(!data)return;
+    if(els.accessCount)els.accessCount.textContent=formatCounter(data.access_count);
+    if(els.notesCreatedCount)els.notesCreatedCount.textContent=formatCounter(data.notes_created_count);
+    try{localStorage.setItem(COUNTERS_CACHE_KEY,JSON.stringify(data));}catch{}
+  }
+
+  function loadCachedAppCounters(){
+    try{
+      const raw=localStorage.getItem(COUNTERS_CACHE_KEY);
+      if(raw)renderAppCounters(JSON.parse(raw));
+    }catch{}
+  }
+
+  async function registerPageAccess(){
+    if(!configured||!supabase||!navigator.onLine||window.__aghuAccessRegistered)return;
+    window.__aghuAccessRegistered=true;
+    try{
+      const {data,error}=await supabase.rpc('increment_app_access');
+      if(error)throw error;
+      const row=Array.isArray(data)?data[0]:data;
+      if(row)renderAppCounters(row);
+    }catch(err){
+      console.warn('Contador de acessos indisponível:',err);
+    }
+  }
+
+  async function refreshAppCounters(retry=false){
+    if(!configured||!supabase||!navigator.onLine)return;
+    try{
+      const {data,error}=await supabase.rpc('get_app_counters');
+      if(error)throw error;
+      const row=Array.isArray(data)?data[0]:data;
+      if(row)renderAppCounters(row);
+    }catch(err){
+      console.warn('Contadores indisponíveis:',err);
+      if(retry)setTimeout(()=>refreshAppCounters(false),800);
+    }
+  }
+
   function deviceSyncKey(userId){return `aghuNotes.syncConfirmed:${userId}`;}
   async function confirmFirstDeviceSync(user){
     if(localStorage.getItem(deviceSyncKey(user.id))==='1')return true;
@@ -2331,7 +2393,10 @@ window.APP_CONFIG = {
   syncKeepModeControls();
 
   async function bootstrap(){
+    loadCachedAppCounters();
     if(!configured){els.auth.classList.remove('hidden');els.loginError.textContent='Configure o Supabase na seção APP_CONFIG deste index antes do primeiro uso.';return;}
+    registerPageAccess();
+    setTimeout(()=>refreshAppCounters(false),600);
     const {data}=await supabase.auth.getSession();
     if(data.session)await enterApp(data.session.user);else showAuth();
     supabase.auth.onAuthStateChange(async(_event,session)=>{
@@ -2424,7 +2489,13 @@ window.APP_CONFIG = {
     setSyncStatus('ok');
   }
 
-  function startSyncLoop(){stopSyncLoop();state.syncTimer=setInterval(syncFromCloud,10000);}
+  function startSyncLoop(){
+    stopSyncLoop();
+    state.syncTimer=setInterval(syncFromCloud,10000);
+    if(!window.__aghuCountersTimer){
+      window.__aghuCountersTimer=setInterval(refreshAppCounters,60000);
+    }
+  }
   function stopSyncLoop(){if(state.syncTimer){clearInterval(state.syncTimer);state.syncTimer=null;}}
   function startReminderLoop(){stopReminderLoop();checkDueReminders();state.reminderTimer=setInterval(checkDueReminders,30000);}
   function stopReminderLoop(){if(state.reminderTimer){clearInterval(state.reminderTimer);state.reminderTimer=null;}}
@@ -2439,11 +2510,16 @@ window.APP_CONFIG = {
       for(const d of pendingDrafts()){
         const idx=state.notes.findIndex(n=>n.id===d.id);
         if(idx>=0){
-          Object.assign(state.notes[idx],{
-            title:d.title,content_html:d.content_html,color:d.color,
-            reminder_at:d.reminder_at,patient_meta:d.patient_meta||state.notes[idx].patient_meta||{},
-            updated_at:d.updated_at
-          });
+          if(d.patient_meta && Object.keys(d.patient_meta).length){
+            state.notes[idx].patient_meta=d.patient_meta;
+          }
+          if(!d.metadata_only){
+            Object.assign(state.notes[idx],{
+              title:d.title,content_html:d.content_html,color:d.color,
+              reminder_at:d.reminder_at,patient_meta:d.patient_meta||state.notes[idx].patient_meta||{},
+              updated_at:d.updated_at
+            });
+          }
         }else if(d.pending_create){
           state.notes.unshift({
             id:d.id,user_id:d.user_id,title:d.title,content_html:d.content_html,
@@ -2473,11 +2549,21 @@ window.APP_CONFIG = {
 
     for(const d of pendingDrafts()){
       const idx=state.notes.findIndex(n=>n.id===d.id);
-      if(idx>=0 && new Date(d.updated_at||0)>new Date(state.notes[idx].updated_at||0)){
-        Object.assign(state.notes[idx],{
-          title:d.title,content_html:d.content_html,color:d.color,
-          reminder_at:d.reminder_at,updated_at:d.updated_at
-        });
+      if(idx>=0){
+        // Correções manuais de identificação nunca podem sumir enquanto
+        // houver uma cópia local pendente, mesmo que o refresh do servidor
+        // aconteça a cada poucos segundos.
+        if(d.patient_meta && Object.keys(d.patient_meta).length){
+          state.notes[idx].patient_meta=d.patient_meta;
+        }
+
+        if(!d.metadata_only && new Date(d.updated_at||0)>new Date(state.notes[idx].updated_at||0)){
+          Object.assign(state.notes[idx],{
+            title:d.title,content_html:d.content_html,color:d.color,
+            reminder_at:d.reminder_at,patient_meta:d.patient_meta||state.notes[idx].patient_meta||{},
+            updated_at:d.updated_at
+          });
+        }
       }else if(idx<0&&d.pending_create){
         state.notes.unshift({
           id:d.id,user_id:d.user_id,title:d.title,content_html:d.content_html,
@@ -2654,6 +2740,7 @@ window.APP_CONFIG = {
       synthetic_age:note.synthetic_age,
       synthetic_record:note.synthetic_record,
       patient_meta:note.patient_meta||{},
+      metadata_only:true,
       pending_create:!!note.local_only
     };
 
@@ -2692,41 +2779,69 @@ window.APP_CONFIG = {
 
     note.patient_meta=manualMeta;
     note.updated_at=new Date().toISOString();
-    cacheNotes();
 
     if(state.current?.id===note.id){
       state.current.patient_meta=manualMeta;
     }
 
+    // Sempre salva primeiro no IndexedDB. Isso impede que o refresh periódico
+    // do Supabase faça a edição manual desaparecer.
+    queuePatientMetaDraft(note);
+    cacheNotes();
+    renderNotes();
+    els.patientMetaDialog.close();
+
     if(!navigator.onLine||note.local_only){
-      queuePatientMetaDraft(note);
-      renderNotes();
-      els.patientMetaDialog.close();
+      setSyncStatus('offline');
       showToast('Identificação salva neste aparelho e será sincronizada depois.',3600);
       return;
     }
 
     setSyncStatus('syncing');
-    const {error}=await supabase.from('notes').update({
-      patient_meta:manualMeta,
-      updated_at:note.updated_at
-    }).eq('id',note.id);
+
+    const {data,error}=await supabase.from('notes')
+      .update({
+        patient_meta:manualMeta,
+        updated_at:note.updated_at
+      })
+      .eq('id',note.id)
+      .select('id,patient_meta')
+      .maybeSingle();
 
     if(error){
-      queuePatientMetaDraft(note);
+      console.error('Erro ao salvar identificação:',error);
       setSyncStatus('ok');
-      renderNotes();
-      els.patientMetaDialog.close();
-      showToast('Identificação salva localmente; sincronização pendente.',3600);
+
+      const msg=String(error.message||'');
+      if(/patient_meta|column|schema|42703/i.test(msg)){
+        showToast('Correção preservada no aparelho. Falta aplicar a atualização SQL patient_meta no Supabase.',5200);
+      }else{
+        showToast('Identificação preservada localmente; sincronização pendente.',4200);
+      }
+      return;
+    }
+
+    // Só remove a cópia local quando o servidor devolver exatamente os mesmos dados.
+    const expected=JSON.stringify(manualMeta||{});
+    const confirmed=JSON.stringify(data?.patient_meta||{});
+
+    if(expected!==confirmed){
+      setSyncStatus('ok');
+      showToast('Identificação preservada localmente; o servidor ainda não confirmou a alteração.',4500);
       return;
     }
 
     clearDraft(note.id);
+
+    // Mantém a alteração manual na memória enquanto atualiza a lista.
     await loadNotes();
+    const refreshed=state.notes.find(n=>n.id===note.id);
+    if(refreshed)refreshed.patient_meta=manualMeta;
+    cacheNotes();
     renderNotes();
+
     setSyncStatus('ok');
-    els.patientMetaDialog.close();
-    showToast('Identificação atualizada.');
+    showToast('Identificação sincronizada.');
   }
 
   els.editPatientMeta.addEventListener('click',()=>{
@@ -2881,6 +2996,8 @@ window.APP_CONFIG = {
     if(error){makeLocal();return;}
     state.notes.unshift({...data,note_labels:[],attachments:[]});
     cacheNotes();
+    refreshAppCounters(true);
+    setTimeout(()=>refreshAppCounters(false),350);
     openNote(data.id);
   });
 
@@ -3025,6 +3142,34 @@ window.APP_CONFIG = {
   async function syncDraftRecord(d){
     if(!navigator.onLine||!state.user)return false;
 
+    // Uma correção manual de Nome/Idade/Prontuário é sincronizada de forma
+    // independente. Assim um rascunho antigo nunca sobrescreve o texto da nota.
+    if(d.metadata_only && !d.pending_create){
+      const {data,error}=await supabase.from('notes')
+        .update({
+          patient_meta:d.patient_meta||{},
+          updated_at:d.updated_at||new Date().toISOString()
+        })
+        .eq('id',d.id)
+        .select('id,patient_meta')
+        .maybeSingle();
+
+      if(error){
+        console.error('Falha ao sincronizar identificação:',error);
+        return false;
+      }
+
+      const expected=JSON.stringify(d.patient_meta||{});
+      const confirmed=JSON.stringify(data?.patient_meta||{});
+      if(expected!==confirmed){
+        console.warn('Identificação não confirmada pelo servidor.');
+        return false;
+      }
+
+      clearDraft(d.id);
+      return true;
+    }
+
     if(d.pending_create){
       const {error}=await supabase.from('notes').insert({
         id:d.id,user_id:state.user.id,title:compactTitleForStorage(d.title)||'Sem título',
@@ -3037,6 +3182,10 @@ window.APP_CONFIG = {
         patient_meta:d.patient_meta||{}
       });
       if(error && !String(error.message||'').toLowerCase().includes('duplicate'))return false;
+      if(!error){
+        refreshAppCounters(true);
+        setTimeout(()=>refreshAppCounters(false),350);
+      }
     }else{
       const {error}=await supabase.from('notes').update({
         title:compactTitleForStorage(d.title)||'Sem título',content_html:compactHtmlForStorage(d.content_html||''),
@@ -3092,9 +3241,10 @@ window.APP_CONFIG = {
     state.pendingSyncRunning=true;
     setSyncStatus('syncing');
     try{
+      let allOk=true;
       for(const d of list){
         const ok=await syncDraftRecord(d);
-        if(!ok)break;
+        if(!ok){allOk=false;break;}
       }
       await Promise.all([loadNotes(),loadLabels()]);
       await syncPendingLocalAttachments();
@@ -3143,7 +3293,9 @@ window.APP_CONFIG = {
 
     const patch={
       title:d.title,content_html:d.content_html,color:d.color,
-      reminder_at:d.reminder_at,updated_at:d.updated_at
+      reminder_at:d.reminder_at,
+      patient_meta:d.patient_meta||state.current.patient_meta||{},
+      updated_at:d.updated_at
     };
 
     const {data:remote}=await supabase.from('notes').select('title,content_html,updated_at').eq('id',state.current.id).maybeSingle();
@@ -3373,6 +3525,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   $('menuSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.side-menu button').forEach(b=>b.style.display=!q||b.textContent.toLowerCase().includes(q)?'':'none');});
 
   window.addEventListener('online',async()=>{
+    refreshAppCounters();
     setSyncStatus('syncing');
     await syncPendingDrafts();
     await syncPendingLocalAttachments();
@@ -3396,7 +3549,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
     window.addEventListener('load', async()=>{
       try{
-        const reg = await navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'});
+        const reg = await navigator.serviceWorker.register('/aghu/sw.js', {scope:'/aghu/', updateViaCache:'none'});
         await reg.update();
       }catch(err){
         console.warn('Service Worker:',err);
@@ -3408,5 +3561,10 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
 
   </script>
 
+  <div id="appCounters" class="app-counters" aria-live="polite">
+    <span>Acessos: <strong id="accessCount">—</strong></span>
+    <span class="counter-sep">•</span>
+    <span>Notas: <strong id="notesCreatedCount">—</strong></span>
+  </div>
 </body>
 </html>

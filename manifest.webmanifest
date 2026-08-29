@@ -1,0 +1,43 @@
+{
+  "id": "/aghu/",
+  "name": "AGHU Notes",
+  "short_name": "AGHU Notes",
+  "description": "Aplicativo particular de anotações sincronizadas.",
+  "start_url": "/aghu/",
+  "scope": "/aghu/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "any",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/aghu/icon-192-v16.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/aghu/icon-512-v16.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/aghu/maskable-192-v16.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/aghu/maskable-512-v16.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
