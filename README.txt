@@ -1,38 +1,30 @@
-AGHU Notes v16 — correção do ícone e contador de notas
+AGHU Notes v18
 
-1) CONTADOR
-Antes de publicar, execute UMA VEZ no Supabase > SQL Editor:
-supabase_v16_contadores_corrigidos.sql
+ALTERAÇÕES:
+1. Colar prontuário:
+   - cola como texto simples;
+   - remove linhas em branco duplicadas;
+   - usa espaçamento simples no editor.
 
-A v16 usa um registro permanente (note_creation_log) para cada nota criada.
-Esse registro não é apagado quando a nota é excluída. Assim, o contador
-histórico de notas não depende mais apenas da tabela notes.
+2. Barra H1/H2/Aa/B:
+   - fica fixa enquanto o texto é rolado.
 
-2) ÍCONE NO ANDROID
-Esta versão usa caminhos absolutos do seu endereço atual:
-https://appcarlosfranca.github.io/aghu/
+3. Celular/janela estreita:
+   - quando a área de Notas tem até 760 px, aparece SOMENTE o nome do paciente;
+   - Local, Idade, Prontuário, Data, EDIT e ações ficam ocultos;
+   - tocar no nome abre diretamente a nota.
 
-Arquivos padrão adicionados:
-favicon.ico
-favicon-96-v16.png
-icon-192-v16.png
-icon-512-v16.png
-maskable-192-v16.png
-maskable-512-v16.png
-apple-touch-icon-v16.png
+4. Contadores:
+   - execute supabase_v18_contadores.sql uma vez;
+   - o app passa a ler os números diretamente da tabela app_counters;
+   - mantém RPC como fallback;
+   - atualiza a cada 5 segundos e ao voltar para o app.
 
-3) PUBLICAÇÃO
-Envie TODOS os arquivos desta pasta para a raiz do repositório "aghu".
-Não envie somente index.html.
+5. Calculadora:
+   - local, sem conexão;
+   - disponível no menu lateral e também dentro do editor.
 
-Depois:
-- aguarde o GitHub Pages publicar;
-- abra https://appcarlosfranca.github.io/aghu/ no Chrome;
-- recarregue uma vez;
-- APAGUE o atalho antigo da tela inicial;
-- crie um NOVO atalho.
-
-Mesmo que o Android crie apenas um atalho do Chrome (com a pequena marca do
-Chrome), ele deverá usar o ícone AGHU Notes em vez da letra cinza genérica.
-
-Se o menu oferecer "Instalar app", prefira essa opção.
+PUBLICAÇÃO:
+- primeiro execute o SQL v18;
+- depois substitua TODOS os arquivos no GitHub;
+- recarregue o site uma vez para ativar o cache v18.

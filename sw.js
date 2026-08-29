@@ -1,4 +1,4 @@
-const CACHE = "aghu-notes-shell-v16";
+const CACHE = "aghu-notes-shell-v18";
 const ASSETS = [
   "/aghu/",
   "/aghu/index.html",

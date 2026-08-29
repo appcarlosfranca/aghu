@@ -1224,6 +1224,256 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
     .counter-sep{color:#c5c5c5}
     @media(max-width:520px){.app-counters{left:4px;bottom:3px;font-size:8px;padding:2px 4px}}
   </style>
+
+  <style id="mobile-name-only-v17">
+    @media(max-width:620px){
+      #keepPage .notes-list-layout,
+      body.keep-focus-mode #keepPage .notes-list-layout{
+        display:block!important;
+      }
+      #keepPage .list-side-actions,
+      body.keep-focus-mode #keepPage .list-side-actions{
+        display:none!important;
+      }
+      #keepPage .table-wrap,
+      body.keep-focus-mode #keepPage .table-wrap{
+        border:0!important;
+        overflow:visible!important;
+        min-height:0!important;
+      }
+      #keepPage .notes-table,
+      body.keep-focus-mode #keepPage .notes-table{
+        display:block!important;
+        width:100%!important;
+        min-width:0!important;
+      }
+      #keepPage .notes-table thead,
+      body.keep-focus-mode #keepPage .notes-table thead{
+        display:none!important;
+      }
+      #keepPage .notes-table tbody,
+      body.keep-focus-mode #keepPage .notes-table tbody{
+        display:block!important;
+      }
+      #keepPage .notes-table tr,
+      body.keep-focus-mode #keepPage .notes-table tr{
+        display:block!important;
+        width:100%!important;
+        margin:0 0 7px!important;
+        border:1px solid #ccd3d9!important;
+        border-radius:2px!important;
+        background:#fff!important;
+      }
+      #keepPage .notes-table td,
+      body.keep-focus-mode #keepPage .notes-table td{
+        display:none!important;
+      }
+      #keepPage .notes-table td[data-label="Nome"],
+      body.keep-focus-mode #keepPage .notes-table td[data-label="Nome"]{
+        display:block!important;
+        width:100%!important;
+        min-height:48px!important;
+        padding:14px 12px!important;
+        border:0!important;
+        background:#fff!important;
+        color:#111!important;
+        font-size:14px!important;
+        line-height:1.25!important;
+        white-space:normal!important;
+        overflow-wrap:anywhere!important;
+        cursor:pointer!important;
+      }
+      #keepPage .notes-table td[data-label="Nome"]::before,
+      body.keep-focus-mode #keepPage .notes-table td[data-label="Nome"]::before{
+        display:none!important;
+      }
+      #keepPage .notes-table td[data-label="Nome"] strong,
+      body.keep-focus-mode #keepPage .notes-table td[data-label="Nome"] strong{
+        font-size:14px!important;
+        font-weight:600!important;
+        color:#111!important;
+      }
+      #keepPage .notes-table tbody tr.selected td[data-label="Nome"],
+      body.keep-focus-mode #keepPage .notes-table tbody tr.selected td[data-label="Nome"]{
+        background:#e8fbfb!important;
+      }
+      #keepPage .panel-title,
+      body.keep-focus-mode #keepPage .panel-title{
+        margin:6px 0 8px!important;
+        width:100%!important;
+        height:32px!important;
+        padding:7px 10px!important;
+      }
+    }
+  </style>
+
+
+  <style id="aghu-v18-editor-mobile-calculator">
+    /* Texto clínico colado: espaçamento simples e previsível. */
+    .note-body{
+      line-height:1.28!important;
+    }
+    .note-body p,
+    .note-body div{
+      margin-top:0!important;
+      margin-bottom:0!important;
+      line-height:inherit!important;
+    }
+
+    /* A barra H1/H2/Aa/B/... acompanha a rolagem. */
+    .formatbar{
+      position:sticky!important;
+      top:0;
+      z-index:24!important;
+      box-shadow:0 1px 0 rgba(0,0,0,.08);
+    }
+    body.keep-focus-mode #editorPage .formatbar{
+      position:sticky!important;
+      top:51px!important;
+      z-index:26!important;
+    }
+
+    /* Modo compacto controlado também por JS conforme a largura real da área. */
+    #keepPage.compact-name-only .notes-list-layout{
+      display:block!important;
+    }
+    #keepPage.compact-name-only .list-side-actions{
+      display:none!important;
+    }
+    #keepPage.compact-name-only .table-wrap{
+      min-height:0!important;
+      border:0!important;
+      overflow:visible!important;
+    }
+    #keepPage.compact-name-only .notes-table{
+      display:block!important;
+      width:100%!important;
+      min-width:0!important;
+      table-layout:auto!important;
+    }
+    #keepPage.compact-name-only .notes-table thead{
+      display:none!important;
+    }
+    #keepPage.compact-name-only .notes-table tbody{
+      display:block!important;
+    }
+    #keepPage.compact-name-only .notes-table tr{
+      display:block!important;
+      width:100%!important;
+      min-height:0!important;
+      margin:0 0 6px!important;
+      border:1px solid #cfd5da!important;
+      border-radius:2px!important;
+      background:#fff!important;
+      box-shadow:none!important;
+    }
+    #keepPage.compact-name-only .notes-table td{
+      display:none!important;
+    }
+    #keepPage.compact-name-only .notes-table td[data-label="Nome"]{
+      display:block!important;
+      width:100%!important;
+      min-height:46px!important;
+      padding:13px 12px!important;
+      border:0!important;
+      background:#fff!important;
+      color:#111!important;
+      font-size:14px!important;
+      line-height:1.25!important;
+      white-space:normal!important;
+      overflow-wrap:anywhere!important;
+      cursor:pointer!important;
+    }
+    #keepPage.compact-name-only .notes-table td[data-label="Nome"]::before,
+    #keepPage.compact-name-only .patient-source-badge,
+    #keepPage.compact-name-only .keep-card-preview{
+      display:none!important;
+    }
+    #keepPage.compact-name-only .notes-table td[data-label="Nome"] strong{
+      display:block!important;
+      margin:0!important;
+      color:#111!important;
+      font-size:14px!important;
+      font-weight:600!important;
+    }
+    #keepPage.compact-name-only .notes-table tbody tr.selected td[data-label="Nome"]{
+      background:#e7fbfb!important;
+    }
+
+    /* Calculadora local */
+    .calculator-dialog{
+      width:min(360px,calc(100vw - 24px));
+      border:1px solid #adb4ba;
+      border-radius:4px;
+      padding:0;
+    }
+    .calculator-body{
+      padding:12px;
+      background:#f7f8f9;
+    }
+    .calculator-expression{
+      min-height:22px;
+      padding:4px 8px;
+      text-align:right;
+      color:#7b7b7b;
+      font-size:11px;
+      overflow-wrap:anywhere;
+    }
+    .calculator-display{
+      display:block;
+      width:100%;
+      min-height:54px;
+      padding:8px 10px;
+      margin-bottom:10px;
+      border:1px solid #c8cdd2;
+      background:#fff;
+      color:#161616;
+      text-align:right;
+      font:600 25px/1.35 Arial,Helvetica,sans-serif;
+      overflow-wrap:anywhere;
+    }
+    .calculator-keys{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:6px;
+    }
+    .calculator-keys button{
+      min-height:44px;
+      border:1px solid #c8cdd2;
+      border-radius:2px;
+      background:#fff;
+      color:#222;
+      font:15px Arial,Helvetica,sans-serif;
+      cursor:pointer;
+    }
+    .calculator-keys button:hover{background:#edf3f9}
+    .calculator-keys .calc-op{
+      background:#eef4fa;
+      color:#305f91;
+      font-weight:600;
+    }
+    .calculator-keys .calc-equals{
+      background:#4e7fbe;
+      border-color:#4776ad;
+      color:#fff;
+      font-weight:700;
+    }
+    .calculator-local-note{
+      margin-top:8px;
+      text-align:center;
+      color:#999;
+      font-size:9px;
+    }
+
+    @media(max-width:760px){
+      /* Fallback CSS além do detector por largura real. */
+      #keepPage .patient-source-badge,
+      #keepPage .keep-card-preview{
+        display:none!important;
+      }
+    }
+  </style>
+
 </head>
 <body>
   <div id="authScreen" class="auth-screen">
@@ -1276,6 +1526,7 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
         <button id="panelMenuBtn" class="menu-item" data-static="true"><span>▣</span>Painel Geral</button>
         <button class="menu-item" data-static="true"><span>▰</span>Prontuário Online</button>
         <button id="keepMenuBtn" class="menu-item active" data-page="keep"><span>🗒</span>Notas</button>
+<button id="calculatorMenuBtn" class="menu-item" type="button"><span>▦</span>Calculadora</button>
         <label class="keep-mode-switch" title="Quando marcado, o módulo de notas abre em uma janela central em primeiro plano">
           <input id="keepModeToggle" type="checkbox" />
           <span>Abrir em primeiro plano</span>
@@ -1455,6 +1706,7 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
               <button id="shareBtn" class="btn btn-light">↗ Compartilhar</button>
               <button id="drawBtn" class="btn btn-light">✎ Desenho</button>
               <button id="copyDocsBtn" class="btn btn-light">▤ Google Docs</button>
+              <button id="calculatorEditorBtn" class="btn btn-light" type="button">▦ Calculadora</button>
               <button id="historyBtn" class="btn btn-light">↶ Histórico</button>
               <button id="trashBtn" class="btn btn-danger">🗑 Excluir</button>
               <button id="permanentDeleteBtn" class="btn btn-danger hidden">Excluir definitivamente</button>
@@ -1590,6 +1842,45 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
 
   <div id="toast" class="app-toast hidden" role="status" aria-live="polite"></div>
 
+
+  <dialog id="calculatorDialog" class="utility-dialog calculator-dialog">
+    <div class="dialog-head">
+      <h3>Calculadora</h3>
+      <button id="calculatorCloseBtn" class="icon-btn" type="button" aria-label="Fechar">×</button>
+    </div>
+    <div class="calculator-body">
+      <div id="calculatorExpression" class="calculator-expression">&nbsp;</div>
+      <output id="calculatorDisplay" class="calculator-display" aria-live="polite">0</output>
+      <div id="calculatorKeys" class="calculator-keys">
+        <button type="button" data-calc="clear">C</button>
+        <button type="button" data-calc="back">⌫</button>
+        <button type="button" data-calc="paren">( )</button>
+        <button type="button" data-calc="/" class="calc-op">÷</button>
+
+        <button type="button" data-calc="7">7</button>
+        <button type="button" data-calc="8">8</button>
+        <button type="button" data-calc="9">9</button>
+        <button type="button" data-calc="*" class="calc-op">×</button>
+
+        <button type="button" data-calc="4">4</button>
+        <button type="button" data-calc="5">5</button>
+        <button type="button" data-calc="6">6</button>
+        <button type="button" data-calc="-" class="calc-op">−</button>
+
+        <button type="button" data-calc="1">1</button>
+        <button type="button" data-calc="2">2</button>
+        <button type="button" data-calc="3">3</button>
+        <button type="button" data-calc="+" class="calc-op">+</button>
+
+        <button type="button" data-calc="sign">±</button>
+        <button type="button" data-calc="0">0</button>
+        <button type="button" data-calc=".">,</button>
+        <button type="button" data-calc="equals" class="calc-equals">=</button>
+      </div>
+      <div class="calculator-local-note">Cálculo local • não envia dados para a internet</div>
+    </div>
+  </dialog>
+
   <dialog id="historyDialog" class="history-dialog">
     <form method="dialog" class="dialog-head">
       <h3>Histórico de versões</h3>
@@ -1723,6 +2014,9 @@ window.APP_CONFIG = {
   const els = {
     auth: $('authScreen'), app: $('appShell'), login: $('loginForm'), loginEmail: $('loginEmail'), loginPassword: $('loginPassword'), loginError: $('loginError'),
     appCounters: $('appCounters'), accessCount: $('accessCount'), notesCreatedCount: $('notesCreatedCount'),
+    calculatorMenu: $('calculatorMenuBtn'), calculatorEditor: $('calculatorEditorBtn'), calculatorDialog: $('calculatorDialog'),
+    calculatorClose: $('calculatorCloseBtn'), calculatorDisplay: $('calculatorDisplay'),
+    calculatorExpression: $('calculatorExpression'), calculatorKeys: $('calculatorKeys'),
     logout: $('logoutBtn'), syncStatus: $('syncStatus'), installApp: $('installAppBtn'), tbody: $('notesTbody'), empty: $('emptyState'), newNote: $('newNoteBtn'), noteSearch: $('noteSearch'), labelFilter: $('labelFilter'),
     emptyTrash: $('emptyTrashBtn'), openSelected: $('openSelectedBtn'), editPatientMeta: $('editPatientMetaBtn'), restoreSelected: $('restoreSelectedBtn'), deleteSelected: $('deleteSelectedBtn'),
     patientMetaDialog: $('patientMetaDialog'), patientMetaName: $('patientMetaName'), patientMetaAge: $('patientMetaAge'), patientMetaRecord: $('patientMetaRecord'),
@@ -2072,35 +2366,76 @@ window.APP_CONFIG = {
     return Number.isFinite(n)?n.toLocaleString('pt-BR'):'—';
   }
 
+  function getCachedCounters(){
+    try{
+      const raw=localStorage.getItem(COUNTERS_CACHE_KEY);
+      return raw?JSON.parse(raw):null;
+    }catch{return null;}
+  }
+
   function renderAppCounters(data){
     if(!data)return;
-    if(els.accessCount)els.accessCount.textContent=formatCounter(data.access_count);
-    if(els.notesCreatedCount)els.notesCreatedCount.textContent=formatCounter(data.notes_created_count);
-    try{localStorage.setItem(COUNTERS_CACHE_KEY,JSON.stringify(data));}catch{}
+    const normalized={
+      access_count:Number(data.access_count)||0,
+      notes_created_count:Number(data.notes_created_count)||0
+    };
+    if(els.accessCount)els.accessCount.textContent=formatCounter(normalized.access_count);
+    if(els.notesCreatedCount)els.notesCreatedCount.textContent=formatCounter(normalized.notes_created_count);
+    try{localStorage.setItem(COUNTERS_CACHE_KEY,JSON.stringify(normalized));}catch{}
   }
 
   function loadCachedAppCounters(){
-    try{
-      const raw=localStorage.getItem(COUNTERS_CACHE_KEY);
-      if(raw)renderAppCounters(JSON.parse(raw));
-    }catch{}
+    const cached=getCachedCounters();
+    if(cached)renderAppCounters(cached);
+  }
+
+  function bumpCounterLocally(field,amount=1){
+    const cached=getCachedCounters()||{access_count:0,notes_created_count:0};
+    cached[field]=Math.max(0,(Number(cached[field])||0)+amount);
+    renderAppCounters(cached);
+  }
+
+  async function readCountersDirect(){
+    const {data,error}=await supabase
+      .from('app_counters')
+      .select('access_count,notes_created_count')
+      .eq('id',1)
+      .maybeSingle();
+    if(error)throw error;
+    return data;
   }
 
   async function registerPageAccess(){
     if(!configured||!supabase||!navigator.onLine||window.__aghuAccessRegistered)return;
     window.__aghuAccessRegistered=true;
+    bumpCounterLocally('access_count',1);
+
     try{
       const {data,error}=await supabase.rpc('increment_app_access');
       if(error)throw error;
       const row=Array.isArray(data)?data[0]:data;
       if(row)renderAppCounters(row);
+      setTimeout(()=>refreshAppCounters(false),450);
     }catch(err){
-      console.warn('Contador de acessos indisponível:',err);
+      console.warn('Falha ao incrementar acesso:',err);
+      setTimeout(()=>refreshAppCounters(false),900);
     }
   }
 
-  async function refreshAppCounters(retry=false){
+  async function refreshAppCounters(retry=true){
     if(!configured||!supabase||!navigator.onLine)return;
+
+    try{
+      // A v18 permite leitura direta, que evita depender do cache RPC/PostgREST.
+      const direct=await readCountersDirect();
+      if(direct){
+        renderAppCounters(direct);
+        return;
+      }
+    }catch(directErr){
+      console.warn('Leitura direta dos contadores indisponível:',directErr);
+    }
+
     try{
       const {data,error}=await supabase.rpc('get_app_counters');
       if(error)throw error;
@@ -2108,9 +2443,16 @@ window.APP_CONFIG = {
       if(row)renderAppCounters(row);
     }catch(err){
       console.warn('Contadores indisponíveis:',err);
-      if(retry)setTimeout(()=>refreshAppCounters(false),800);
+      if(retry)setTimeout(()=>refreshAppCounters(false),1200);
     }
   }
+
+  function noteCreatedCounterImmediate(){
+    bumpCounterLocally('notes_created_count',1);
+    setTimeout(()=>refreshAppCounters(true),250);
+    setTimeout(()=>refreshAppCounters(false),900);
+  }
+
 
   function deviceSyncKey(userId){return `aghuNotes.syncConfirmed:${userId}`;}
   async function confirmFirstDeviceSync(user){
@@ -2493,7 +2835,7 @@ window.APP_CONFIG = {
     stopSyncLoop();
     state.syncTimer=setInterval(syncFromCloud,10000);
     if(!window.__aghuCountersTimer){
-      window.__aghuCountersTimer=setInterval(refreshAppCounters,60000);
+      window.__aghuCountersTimer=setInterval(()=>refreshAppCounters(false),5000);
     }
   }
   function stopSyncLoop(){if(state.syncTimer){clearInterval(state.syncTimer);state.syncTimer=null;}}
@@ -2631,7 +2973,16 @@ window.APP_CONFIG = {
       <td class="row-action"></td>`;
   }
 
+  function updateCompactNameOnlyMode(){
+    if(!els.keepPage)return false;
+    const width=Math.min(window.innerWidth||9999,els.keepPage.getBoundingClientRect().width||9999);
+    const compact=width<=760;
+    els.keepPage.classList.toggle('compact-name-only',compact);
+    return compact;
+  }
+
   function renderNotes(){
+    const compactNameOnly=updateCompactNameOnlyMode();
     const rows=filteredNotes();
     els.empty.classList.toggle('hidden',rows.length>0);
     els.emptyTrash.classList.toggle('hidden',state.filter!=='trash');
@@ -2652,6 +3003,10 @@ window.APP_CONFIG = {
     els.tbody.querySelectorAll('tr').forEach(tr=>{
       tr.addEventListener('click',e=>{
         if(e.target.closest('button')) return;
+        if(updateCompactNameOnlyMode() && e.target.closest('td[data-label="Nome"]')){
+          openNote(tr.dataset.id);
+          return;
+        }
         state.selectedId=tr.dataset.id;
         renderNotes();
       });
@@ -2996,8 +3351,7 @@ window.APP_CONFIG = {
     if(error){makeLocal();return;}
     state.notes.unshift({...data,note_labels:[],attachments:[]});
     cacheNotes();
-    refreshAppCounters(true);
-    setTimeout(()=>refreshAppCounters(false),350);
+    noteCreatedCounterImmediate();
     openNote(data.id);
   });
 
@@ -3367,6 +3721,133 @@ window.APP_CONFIG = {
     await Promise.all([loadNotes(),loadLabels()]);openNote(data.id);showToast('Cópia criada.');
   });
 
+  const calcState={expr:'',lastResult:null};
+
+  function calcPretty(expr){
+    return String(expr||'').replace(/\*/g,'×').replace(/\//g,'÷').replace(/\./g,',');
+  }
+
+  function calcRender(){
+    if(!els.calculatorDisplay)return;
+    els.calculatorExpression.textContent=calcState.expr?calcPretty(calcState.expr):'\u00a0';
+    if(calcState.lastResult!==null){
+      els.calculatorDisplay.textContent=String(calcState.lastResult).replace('.',',');
+    }else{
+      els.calculatorDisplay.textContent=calcState.expr?calcPretty(calcState.expr):'0';
+    }
+  }
+
+  function calcEvaluate(expression){
+    const s=String(expression||'').replace(/,/g,'.');
+    if(!s.trim())return 0;
+    if(!/^[0-9+\-*/().\s]+$/.test(s))throw new Error('Expressão inválida');
+
+    let i=0;
+    const skip=()=>{while(/\s/.test(s[i]||''))i++;};
+    const number=()=>{
+      skip();
+      let start=i;
+      while(/[0-9.]/.test(s[i]||''))i++;
+      if(start===i)throw new Error('Número esperado');
+      const n=Number(s.slice(start,i));
+      if(!Number.isFinite(n))throw new Error('Número inválido');
+      return n;
+    };
+    const factor=()=>{
+      skip();
+      if(s[i]==='+'){i++;return factor();}
+      if(s[i]==='-'){i++;return -factor();}
+      if(s[i]==='('){
+        i++;
+        const v=expressionParser();
+        skip();
+        if(s[i]!==')')throw new Error('Parêntese');
+        i++;
+        return v;
+      }
+      return number();
+    };
+    const term=()=>{
+      let v=factor();
+      while(true){
+        skip();
+        const op=s[i];
+        if(op!=='*'&&op!=='/')break;
+        i++;
+        const rhs=factor();
+        v=op==='*'?v*rhs:v/rhs;
+        if(!Number.isFinite(v))throw new Error('Divisão inválida');
+      }
+      return v;
+    };
+    const expressionParser=()=>{
+      let v=term();
+      while(true){
+        skip();
+        const op=s[i];
+        if(op!=='+'&&op!=='-')break;
+        i++;
+        const rhs=term();
+        v=op==='+'?v+rhs:v-rhs;
+      }
+      return v;
+    };
+    const value=expressionParser();
+    skip();
+    if(i!==s.length)throw new Error('Expressão inválida');
+    return Math.round((value+Number.EPSILON)*1e12)/1e12;
+  }
+
+  function openCalculator(){
+    calcRender();
+    els.calculatorDialog?.showModal();
+  }
+
+  els.calculatorMenu?.addEventListener('click',openCalculator);
+  els.calculatorEditor?.addEventListener('click',openCalculator);
+  els.calculatorClose?.addEventListener('click',()=>els.calculatorDialog?.close());
+
+  els.calculatorKeys?.addEventListener('click',e=>{
+    const btn=e.target.closest('button[data-calc]');
+    if(!btn)return;
+    const key=btn.dataset.calc;
+
+    if(key==='clear'){
+      calcState.expr='';
+      calcState.lastResult=null;
+    }else if(key==='back'){
+      calcState.expr=calcState.expr.slice(0,-1);
+      calcState.lastResult=null;
+    }else if(key==='equals'){
+      try{
+        const result=calcEvaluate(calcState.expr);
+        calcState.lastResult=result;
+        calcState.expr=String(result);
+      }catch{
+        calcState.lastResult='Erro';
+      }
+    }else if(key==='paren'){
+      const open=(calcState.expr.match(/\(/g)||[]).length;
+      const close=(calcState.expr.match(/\)/g)||[]).length;
+      calcState.expr+=open>close?')':'(';
+      calcState.lastResult=null;
+    }else if(key==='sign'){
+      if(calcState.expr){
+        calcState.expr=`-(${calcState.expr})`;
+      }else{
+        calcState.expr='-';
+      }
+      calcState.lastResult=null;
+    }else{
+      if(calcState.lastResult!==null && /^[0-9.]$/.test(key)){
+        calcState.expr='';
+      }
+      calcState.lastResult=null;
+      calcState.expr+=key;
+    }
+    calcRender();
+  });
+
   function notePlainText(){return `${els.title.value.trim()||'Sem título'}
 
 ${stripHtml(els.body.innerHTML)}`.trim();}
@@ -3417,6 +3898,36 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   async function restoreVersion(v){ if(!v)return; els.title.value=v.title;els.body.innerHTML=v.content_html;markDirty();els.historyDialog.close(); }
 
   document.querySelectorAll('.formatbar [data-cmd]').forEach(b=>b.addEventListener('click',()=>{els.body.focus();document.execCommand(b.dataset.cmd,false,b.dataset.value||null);markDirty();}));
+  els.body.addEventListener('paste',e=>{
+    const clipboard=e.clipboardData||window.clipboardData;
+    if(!clipboard)return;
+
+    const raw=clipboard.getData('text/plain');
+    if(!raw)return;
+
+    e.preventDefault();
+
+    const normalized=raw
+      .replace(/\r\n?/g,'\n')
+      .replace(/[ \t]+\n/g,'\n')
+      .replace(/\n[ \t]+/g,'\n')
+      .replace(/\n{2,}/g,'\n')
+      .replace(/[ \t]{2,}/g,' ')
+      .trim();
+
+    const safe=normalized
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#039;')
+      .replace(/\n/g,'<br>');
+
+    els.body.focus();
+    document.execCommand('insertHTML',false,safe);
+    markDirty();
+  });
+
   $('checklistBtn').addEventListener('click',()=>{els.body.focus();document.execCommand('insertHTML',false,'<div class="check-item"><input type="checkbox" contenteditable="false"><span>Item</span></div>');markDirty();});
   els.body.addEventListener('change',e=>{if(e.target.matches('input[type="checkbox"]'))markDirty();});
 
@@ -3537,7 +4048,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     setSyncStatus('offline');
     if(state.current)setAutosave('Salvo neste aparelho • aguardando internet','local-saved');
   });
-  window.addEventListener('focus',()=>syncFromCloud());
+  window.addEventListener('focus',()=>{refreshAppCounters(false);syncFromCloud();});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden) syncFromCloud();});
   window.addEventListener('pagehide',()=>{
     if(state.current&&state.isDirty)persistDraftNow();
@@ -3556,6 +4067,12 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
       }
     });
   }
+  window.addEventListener('resize',()=>{
+    const wasCompact=els.keepPage?.classList.contains('compact-name-only');
+    const isCompact=updateCompactNameOnlyMode();
+    if(wasCompact!==isCompact && !els.keepPage?.classList.contains('hidden'))renderNotes();
+  });
+
   bootstrap();
 })();
 
