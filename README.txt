@@ -1,30 +1,19 @@
-AGHU Notes v18
+AGHU Notes v19 — correção visual final
 
 ALTERAÇÕES:
-1. Colar prontuário:
-   - cola como texto simples;
-   - remove linhas em branco duplicadas;
-   - usa espaçamento simples no editor.
+- Nome do paciente agora é sempre preto (#111), igual às demais informações.
+- O contador "Acessos • Notas" fica fixo e visível no canto inferior esquerdo
+  da página do GitHub/PWA, inclusive no modo Primeiro plano.
+- O contador ganha fundo branco discreto e contraste suficiente para leitura.
+- Há atualização automática ao iniciar, ao renderizar a lista, ao retornar
+  para a aba e periodicamente.
 
-2. Barra H1/H2/Aa/B:
-   - fica fixa enquanto o texto é rolado.
-
-3. Celular/janela estreita:
-   - quando a área de Notas tem até 760 px, aparece SOMENTE o nome do paciente;
-   - Local, Idade, Prontuário, Data, EDIT e ações ficam ocultos;
-   - tocar no nome abre diretamente a nota.
-
-4. Contadores:
-   - execute supabase_v18_contadores.sql uma vez;
-   - o app passa a ler os números diretamente da tabela app_counters;
-   - mantém RPC como fallback;
-   - atualiza a cada 5 segundos e ao voltar para o app.
-
-5. Calculadora:
-   - local, sem conexão;
-   - disponível no menu lateral e também dentro do editor.
+SUPABASE:
+- Não há nova migração obrigatória se o SQL v18 já foi executado.
+- Se ainda não executou, use supabase_v19_contadores.sql uma vez.
 
 PUBLICAÇÃO:
-- primeiro execute o SQL v18;
-- depois substitua TODOS os arquivos no GitHub;
-- recarregue o site uma vez para ativar o cache v18.
+- substitua TODOS os arquivos do GitHub pelos deste pacote;
+- aguarde o Pages publicar;
+- recarregue a página com Ctrl+F5 no computador;
+- no celular/PWA, feche e abra novamente.

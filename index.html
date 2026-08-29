@@ -1474,6 +1474,60 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
     }
   </style>
 
+
+  <style id="aghu-v19-final-visibility">
+    /* Nome do paciente sempre com o mesmo contraste das demais informações. */
+    #keepPage .notes-table td[data-label="Nome"],
+    #keepPage .notes-table td[data-label="Nome"] strong,
+    body.keep-focus-mode #keepPage .notes-table td[data-label="Nome"],
+    body.keep-focus-mode #keepPage .notes-table td[data-label="Nome"] strong{
+      color:#111!important;
+      opacity:1!important;
+      text-shadow:none!important;
+      -webkit-text-fill-color:#111!important;
+    }
+
+    /* O contador deve permanecer visível em qualquer tela do site/PWA,
+       inclusive quando a janela "Primeiro plano" estiver aberta. */
+    .app-counters{
+      position:fixed!important;
+      left:10px!important;
+      bottom:9px!important;
+      z-index:99999!important;
+      display:flex!important;
+      visibility:visible!important;
+      opacity:1!important;
+      align-items:center!important;
+      gap:6px!important;
+      padding:4px 7px!important;
+      min-height:22px!important;
+      border:1px solid #c8cdd2!important;
+      border-radius:3px!important;
+      background:rgba(255,255,255,.96)!important;
+      color:#555!important;
+      font:10px/1.2 Arial,Helvetica,sans-serif!important;
+      box-shadow:0 1px 4px rgba(0,0,0,.12)!important;
+      pointer-events:none!important;
+      white-space:nowrap!important;
+    }
+    .app-counters strong{
+      color:#222!important;
+      font-weight:700!important;
+    }
+    .app-counters .counter-sep{
+      color:#aaa!important;
+    }
+
+    @media(max-width:620px){
+      .app-counters{
+        left:6px!important;
+        bottom:6px!important;
+        padding:3px 6px!important;
+        font-size:9px!important;
+      }
+    }
+  </style>
+
 </head>
 <body>
   <div id="authScreen" class="auth-screen">
@@ -2386,7 +2440,16 @@ window.APP_CONFIG = {
 
   function loadCachedAppCounters(){
     const cached=getCachedCounters();
-    if(cached)renderAppCounters(cached);
+    if(cached){
+      renderAppCounters(cached);
+    }else{
+      renderAppCounters({access_count:0,notes_created_count:0});
+    }
+    if(els.appCounters){
+      els.appCounters.style.display='flex';
+      els.appCounters.style.visibility='visible';
+      els.appCounters.style.opacity='1';
+    }
   }
 
   function bumpCounterLocally(field,amount=1){
@@ -2738,7 +2801,9 @@ window.APP_CONFIG = {
     loadCachedAppCounters();
     if(!configured){els.auth.classList.remove('hidden');els.loginError.textContent='Configure o Supabase na seção APP_CONFIG deste index antes do primeiro uso.';return;}
     registerPageAccess();
-    setTimeout(()=>refreshAppCounters(false),600);
+    setTimeout(()=>refreshAppCounters(true),250);
+    setTimeout(()=>refreshAppCounters(false),900);
+    setTimeout(()=>refreshAppCounters(false),2500);
     const {data}=await supabase.auth.getSession();
     if(data.session)await enterApp(data.session.user);else showAuth();
     supabase.auth.onAuthStateChange(async(_event,session)=>{
@@ -2982,6 +3047,10 @@ window.APP_CONFIG = {
   }
 
   function renderNotes(){
+    if(navigator.onLine && (!window.__aghuLastCounterRefresh || Date.now()-window.__aghuLastCounterRefresh>4000)){
+      window.__aghuLastCounterRefresh=Date.now();
+      refreshAppCounters(false);
+    }
     const compactNameOnly=updateCompactNameOnlyMode();
     const rows=filteredNotes();
     els.empty.classList.toggle('hidden',rows.length>0);
