@@ -13,14 +13,14 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="light" />
   <title>AGHU Notes</title>
-  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="manifest" href="manifest.webmanifest?v=13" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="AGHU Notes" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="aghu-touch-180-v13.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="aghu-icon-192-v13.png" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -1205,6 +1205,10 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
       .patient-meta-actions .btn{flex:1 1 150px}
     }
   </style>
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="aghu-favicon-32-v13.png" />
+  <meta name="application-name" content="AGHU Notes" />
 
 </head>
 <body>
@@ -3390,7 +3394,14 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     if(state.current&&state.isDirty)persistDraftNow();
   });
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('Service Worker:',err)));
+    window.addEventListener('load', async()=>{
+      try{
+        const reg = await navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'});
+        await reg.update();
+      }catch(err){
+        console.warn('Service Worker:',err);
+      }
+    });
   }
   bootstrap();
 })();
