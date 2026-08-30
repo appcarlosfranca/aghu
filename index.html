@@ -2034,7 +2034,13 @@ window.APP_CONFIG = {
 
   </script>
 
-  <script>
+    <div id="appCounters" class="app-counters" aria-live="polite">
+    <span>Acessos: <strong id="accessCount">0</strong></span>
+    <span class="counter-sep">•</span>
+    <span>Notas: <strong id="notesCreatedCount">0</strong></span>
+  </div>
+
+<script>
 (() => {
   const cfg = window.APP_CONFIG || {};
   const configured = cfg.SUPABASE_URL && !cfg.SUPABASE_URL.includes("SEU-PROJETO") && cfg.SUPABASE_ANON_KEY && !cfg.SUPABASE_ANON_KEY.includes("SUA-ANON-KEY");
@@ -2433,23 +2439,30 @@ window.APP_CONFIG = {
       access_count:Number(data.access_count)||0,
       notes_created_count:Number(data.notes_created_count)||0
     };
-    if(els.accessCount)els.accessCount.textContent=formatCounter(normalized.access_count);
-    if(els.notesCreatedCount)els.notesCreatedCount.textContent=formatCounter(normalized.notes_created_count);
+
+    const box=document.getElementById('appCounters');
+    const accessEl=document.getElementById('accessCount');
+    const notesEl=document.getElementById('notesCreatedCount');
+
+    if(accessEl)accessEl.textContent=formatCounter(normalized.access_count);
+    if(notesEl)notesEl.textContent=formatCounter(normalized.notes_created_count);
+
+    if(box){
+      box.style.setProperty('display','flex','important');
+      box.style.setProperty('visibility','visible','important');
+      box.style.setProperty('opacity','1','important');
+    }
+
+    els.appCounters=box||els.appCounters;
+    els.accessCount=accessEl||els.accessCount;
+    els.notesCreatedCount=notesEl||els.notesCreatedCount;
+
     try{localStorage.setItem(COUNTERS_CACHE_KEY,JSON.stringify(normalized));}catch{}
   }
 
   function loadCachedAppCounters(){
     const cached=getCachedCounters();
-    if(cached){
-      renderAppCounters(cached);
-    }else{
-      renderAppCounters({access_count:0,notes_created_count:0});
-    }
-    if(els.appCounters){
-      els.appCounters.style.display='flex';
-      els.appCounters.style.visibility='visible';
-      els.appCounters.style.opacity='1';
-    }
+    renderAppCounters(cached||{access_count:0,notes_created_count:0});
   }
 
   function bumpCounterLocally(field,amount=1){
@@ -4118,7 +4131,12 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     if(state.current)setAutosave('Salvo neste aparelho • aguardando internet','local-saved');
   });
   window.addEventListener('focus',()=>{refreshAppCounters(false);syncFromCloud();});
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden) syncFromCloud();});
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden){
+      refreshAppCounters(false);
+      syncFromCloud();
+    }
+  });
   window.addEventListener('pagehide',()=>{
     if(state.current&&state.isDirty)persistDraftNow();
     if(state.isDirty&&navigator.onLine)flushSave();
@@ -4143,14 +4161,19 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   });
 
   bootstrap();
+
+  window.addEventListener('DOMContentLoaded',()=>{
+    loadCachedAppCounters();
+    setTimeout(()=>refreshAppCounters(true),100);
+    setTimeout(()=>refreshAppCounters(false),700);
+  });
+
+  window.addEventListener('load',()=>{
+    loadCachedAppCounters();
+    refreshAppCounters(true);
+  });
 })();
 
   </script>
-
-  <div id="appCounters" class="app-counters" aria-live="polite">
-    <span>Acessos: <strong id="accessCount">—</strong></span>
-    <span class="counter-sep">•</span>
-    <span>Notas: <strong id="notesCreatedCount">—</strong></span>
-  </div>
 </body>
 </html>

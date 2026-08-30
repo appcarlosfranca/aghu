@@ -1,19 +1,24 @@
-AGHU Notes v19 — correção visual final
+AGHU Notes v20 — correção definitiva do contador
 
-ALTERAÇÕES:
-- Nome do paciente agora é sempre preto (#111), igual às demais informações.
-- O contador "Acessos • Notas" fica fixo e visível no canto inferior esquerdo
-  da página do GitHub/PWA, inclusive no modo Primeiro plano.
-- O contador ganha fundo branco discreto e contraste suficiente para leitura.
-- Há atualização automática ao iniciar, ao renderizar a lista, ao retornar
-  para a aba e periodicamente.
+CAUSA:
+Na v19, o bloco HTML do contador era carregado DEPOIS do JavaScript principal.
+Quando o app iniciava, accessCount e notesCreatedCount ainda não existiam no DOM,
+então as referências ficavam null. Por isso a caixa aparecia, mas mostrava “—”.
+
+CORREÇÃO:
+- o contador agora fica antes do JavaScript principal;
+- os elementos são procurados novamente por ID em cada atualização;
+- valor inicial = 0, nunca “—”;
+- atualização no bootstrap, DOMContentLoaded, load, foco, retorno à aba
+  e atualização periódica;
+- cache PWA atualizado para v20.
 
 SUPABASE:
-- Não há nova migração obrigatória se o SQL v18 já foi executado.
-- Se ainda não executou, use supabase_v19_contadores.sql uma vez.
+Se o SQL v18/v17 já foi executado e o SQL Editor mostra os valores corretos,
+não execute nenhum SQL novo.
 
 PUBLICAÇÃO:
-- substitua TODOS os arquivos do GitHub pelos deste pacote;
-- aguarde o Pages publicar;
-- recarregue a página com Ctrl+F5 no computador;
-- no celular/PWA, feche e abra novamente.
+1. Substitua TODOS os arquivos no GitHub pelos deste pacote.
+2. Aguarde o GitHub Pages publicar.
+3. Faça Ctrl+F5 no computador.
+4. No celular/PWA, feche completamente e abra novamente.
