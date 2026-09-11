@@ -1832,7 +1832,7 @@
     <aside class="sidebar admin-sidebar"><div class="sidebar-brand"><div class="aghu-notes-logo sidebar-aghu-logo"><div class="aghu-cross"></div><div class="aghu-word"><strong>AGHU<em>Notes</em></strong><small>Aplicativo particular de anotações</small></div></div></div><nav class="side-menu"><button class="menu-item active" type="button"><span>♟</span>Usuários e acessos</button><button id="adminExitBtn" class="menu-item" type="button"><span>↪</span>Sair</button></nav></aside>
     <div class="admin-main"><header class="topbar"><div class="search-menu admin-top-title">Administrador</div><div class="top-actions"><span class="session-box">Gestão sincronizada de contas</span></div></header><main class="workspace"><div class="tabs"><button class="tab active" type="button">♟ Usuários e acessos</button></div><section class="page admin-page">
       <div class="panel-title">Criar novo acesso</div><form id="adminCreateUserForm" class="admin-create-form" autocomplete="off"><label>Login / e-mail<input id="adminNewEmail" type="email" required></label><label>Senha<input id="adminNewPassword" type="text" minlength="4" required></label><button class="btn btn-primary" type="submit">Criar acesso</button><div id="adminCreateUserStatus" class="admin-inline-status"></div></form>
-      <div class="panel-title admin-users-title">Contas cadastradas</div><div class="table-wrap admin-users-wrap"><table class="notes-table admin-users-table"><thead><tr><th>Login</th><th>Senha</th><th>Criado em</th><th>Status</th><th>Ações</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div><div class="admin-local-warning">Gestão local: as contas existem somente neste navegador/aparelho nesta versão sem Supabase.</div>
+      <div class="panel-title admin-users-title">Contas cadastradas</div><div class="table-wrap admin-users-wrap"><table class="notes-table admin-users-table"><thead><tr><th>Login</th><th>Segurança</th><th>Criado em</th><th>Status</th><th>Ações</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div><div class="admin-local-warning">Gestão local: as contas existem somente neste navegador/aparelho nesta versão sem Supabase.</div>
     </section></main></div>
   </div>
 
@@ -2769,8 +2769,21 @@ window.APP_CONFIG={
   };
 
   async function adminInvoke(action,payload={}){
-    const {data,error}=await raw.functions.invoke('admin-users',{body:{action,...payload}});
-    if(error)throw new Error(error.message||'Falha administrativa.');
+    const {data:sessionData,error:sessionError}=await raw.auth.getSession();
+    if(sessionError)throw sessionError;
+    const token=sessionData?.session?.access_token;
+    if(!token)throw new Error('Sessão administrativa expirada. Entre novamente no Administrador.');
+
+    const {data,error}=await raw.functions.invoke('admin-users',{
+      body:{action,...payload},
+      headers:{Authorization:`Bearer ${token}`}
+    });
+
+    if(error){
+      let detail='';
+      try{ if(error?.context?.json)detail=(await error.context.json())?.error||''; }catch{}
+      throw new Error(detail||error.message||'Falha administrativa.');
+    }
     if(data?.error)throw new Error(data.error);
     return data;
   }
@@ -2806,8 +2819,7 @@ window.APP_CONFIG={
     },
     async createUser(email,password){return adminInvoke('create',{email,password})},
     async resetPassword(userId,password){return adminInvoke('reset_password',{user_id:userId,password})},
-    async toggleUser(userId){return adminInvoke('toggle_user',{user_id:userId})},
-    async deleteUser(userId){return adminInvoke('delete_user',{user_id:userId})}
+    async toggleUser(userId){return adminInvoke('toggle_user',{user_id:userId})}
   };
 
   window.AGhuRawSupabase=raw;
@@ -2831,6 +2843,7 @@ window.APP_CONFIG={
   const configured = !!window.APP_CONFIG?.SUPABASE_URL && !!window.APP_CONFIG?.SUPABASE_PUBLISHABLE_KEY && !!window.AGhuCloud;
   const supabase = configured ? window.AGhuCloud.createClient() : null;
   const LOCAL_ONLY = false;
+  const DATA_PRESERVATION_POLICY = 'remote-canonical-never-destructive-on-code-update';
 
   const $ = (id) => document.getElementById(id);
   const state = {
@@ -3606,34 +3619,39 @@ window.APP_CONFIG={
   }
   async function renderAdminUsers(){
     if(!state.adminActive)return;
-    const us=await AGhuLocalAdmin.listUsers();
-    els.adminUsersBody.innerHTML=us.map(u=>`<tr>
-      <td>${esc(u.email)}</td>
-      <td class="admin-password">Protegida</td>
-      <td>${u.createdAt?new Date(u.createdAt).toLocaleString('pt-BR'):'-'}</td>
-      <td>${u.active?'Ativo':'Bloqueado'}</td>
-      <td><div class="admin-user-actions">
-        <button data-reset-user="${u.id}" ${u.has_data?'disabled title="Conta com dados criptografados: redefinição direta bloqueada."':''}>Nova senha</button>
-        <button data-toggle-user="${u.id}">${u.active?'Bloquear':'Ativar'}</button>
-        <button class="danger" data-delete-user="${u.id}">Excluir</button>
-      </div></td>
-    </tr>`).join('')||'<tr><td colspan="5" style="text-align:center;padding:25px;color:#888">Nenhum login cadastrado.</td></tr>';
+    try{
+      const us=await AGhuLocalAdmin.listUsers();
+      els.adminUsersBody.innerHTML=us.map(u=>`<tr>
+        <td>${esc(u.email)}</td>
+        <td class="admin-password">Protegida</td>
+        <td>${u.createdAt?new Date(u.createdAt).toLocaleString('pt-BR'):'-'}</td>
+        <td>${u.active?'Ativo':'Bloqueado'}</td>
+        <td><div class="admin-user-actions">
+          <button data-reset-user="${u.id}" ${u.has_data?'disabled title="Conta com notas criptografadas: a troca de senha exige recriptografia."':''}>Nova senha</button>
+          <button data-toggle-user="${u.id}">${u.active?'Bloquear':'Ativar'}</button>
+        </div></td>
+      </tr>`).join('')||'<tr><td colspan="5" style="text-align:center;padding:25px;color:#888">Nenhum login cadastrado.</td></tr>';
 
-    els.adminUsersBody.querySelectorAll('[data-reset-user]').forEach(b=>b.onclick=async()=>{
-      if(b.disabled)return;
-      const p=prompt('Nova senha:');if(p===null)return;
-      try{await AGhuLocalAdmin.resetPassword(b.dataset.resetUser,p);await renderAdminUsers()}
-      catch(e){alert(e.message||String(e))}
-    });
-    els.adminUsersBody.querySelectorAll('[data-toggle-user]').forEach(b=>b.onclick=async()=>{
-      try{await AGhuLocalAdmin.toggleUser(b.dataset.toggleUser);await renderAdminUsers()}
-      catch(e){alert(e.message||String(e))}
-    });
-    els.adminUsersBody.querySelectorAll('[data-delete-user]').forEach(b=>b.onclick=async()=>{
-      if(!confirm('Excluir esta conta e todos os dados sincronizados deste usuário?'))return;
-      try{await AGhuLocalAdmin.deleteUser(b.dataset.deleteUser);await renderAdminUsers()}
-      catch(e){alert(e.message||String(e))}
-    });
+      els.adminUsersBody.querySelectorAll('[data-reset-user]').forEach(b=>b.onclick=async()=>{
+        if(b.disabled)return;
+        const p=prompt('Nova senha (mínimo 6 caracteres):');
+        if(p===null)return;
+        try{
+          await AGhuLocalAdmin.resetPassword(b.dataset.resetUser,p);
+          await renderAdminUsers();
+        }catch(e){alert(e.message||String(e))}
+      });
+
+      els.adminUsersBody.querySelectorAll('[data-toggle-user]').forEach(b=>b.onclick=async()=>{
+        try{
+          await AGhuLocalAdmin.toggleUser(b.dataset.toggleUser);
+          await renderAdminUsers();
+        }catch(e){alert(e.message||String(e))}
+      });
+    }catch(e){
+      els.adminUsersBody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:25px;color:#a32931">Não foi possível carregar os acessos.</td></tr>';
+      els.adminCreateUserStatus.textContent=e.message||String(e);
+    }
   }
 
   async function enterAdmin(){state.adminActive=true;els.auth.classList.add('hidden');els.app.classList.add('hidden');els.adminPanel.classList.remove('hidden');await renderAdminUsers()}
@@ -3651,7 +3669,38 @@ window.APP_CONFIG={
     }
   });
 
-  els.adminCreateUserForm?.addEventListener('submit',async e=>{e.preventDefault();els.adminCreateUserStatus.textContent='';try{await AGhuLocalAdmin.createUser(els.adminNewEmail.value,els.adminNewPassword.value);els.adminNewEmail.value='';els.adminNewPassword.value='';els.adminCreateUserStatus.textContent='Acesso criado.';await renderAdminUsers()}catch(x){els.adminCreateUserStatus.textContent=x.message}});
+  els.adminCreateUserForm?.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const email=String(els.adminNewEmail.value||'').trim().toLowerCase();
+    const password=String(els.adminNewPassword.value||'');
+    const submit=els.adminCreateUserForm.querySelector('button[type="submit"]');
+
+    els.adminCreateUserStatus.textContent='';
+    if(!email){
+      els.adminCreateUserStatus.textContent='Informe o e-mail do novo acesso.';
+      return;
+    }
+    if(password.length<6){
+      els.adminCreateUserStatus.textContent='A senha precisa ter pelo menos 6 caracteres.';
+      return;
+    }
+
+    if(submit)submit.disabled=true;
+    els.adminCreateUserStatus.textContent='Criando acesso no Supabase...';
+
+    try{
+      const result=await AGhuLocalAdmin.createUser(email,password);
+      els.adminNewEmail.value='';
+      els.adminNewPassword.value='';
+      els.adminCreateUserStatus.textContent=`Acesso criado: ${result?.user?.email||email}`;
+      await renderAdminUsers();
+    }catch(x){
+      console.error('Criar acesso:',x);
+      els.adminCreateUserStatus.textContent=x.message||'Não foi possível criar o acesso.';
+    }finally{
+      if(submit)submit.disabled=false;
+    }
+  });
 
   function showAuth(){els.adminPanel?.classList.add('hidden');stopSyncLoop();stopReminderLoop();state.user=null;document.body.classList.remove('keep-focus-mode');els.keepFocusBar?.classList.add('hidden');els.app.classList.add('hidden');els.auth.classList.remove('hidden');}
   async function enterApp(user){
@@ -4639,8 +4688,7 @@ window.APP_CONFIG={
       });
       if(error && !String(error.message||'').toLowerCase().includes('duplicate'))return false;
       if(!error){
-        refreshAppCounters(true);
-        setTimeout(()=>refreshAppCounters(false),350);
+
       }
     }else{
       const {error}=await supabase.from('notes').update({
@@ -5377,7 +5425,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   $('menuSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.side-menu button').forEach(b=>b.style.display=!q||b.textContent.toLowerCase().includes(q)?'':'none');});
 
   window.addEventListener('online',async()=>{
-    refreshAppCounters();
+
     setSyncStatus('syncing');
     await syncPendingDrafts();
     await syncPendingLocalAttachments();
@@ -5389,7 +5437,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     setSyncStatus('offline');
     if(state.current)setAutosave('Salvo localmente','local-saved');
   });
-  window.addEventListener('focus',()=>{refreshAppCounters(false);syncFromCloud();});
+  window.addEventListener('focus',()=>{syncFromCloud();});
   document.addEventListener('visibilitychange',()=>{
     if(!document.hidden){
         syncFromCloud();
