@@ -1790,6 +1790,17 @@
     }
   </style>
 
+  <style id="admin-create-v31-style">
+    .admin-create-help{
+      margin:-1px 0 0;
+      padding:7px 10px;
+      border:1px solid #c9ced3;
+      border-bottom:0;
+      background:#f8fafc;
+      color:#6f7880;
+      font:10px/1.35 Arial,Helvetica,sans-serif;
+    }
+  </style>
 </head>
 <body>
   <div id="authScreen" class="auth-screen">
@@ -1831,7 +1842,7 @@
   <div id="adminPanel" class="admin-shell hidden">
     <aside class="sidebar admin-sidebar"><div class="sidebar-brand"><div class="aghu-notes-logo sidebar-aghu-logo"><div class="aghu-cross"></div><div class="aghu-word"><strong>AGHU<em>Notes</em></strong><small>Aplicativo particular de anotações</small></div></div></div><nav class="side-menu"><button class="menu-item active" type="button"><span>♟</span>Usuários e acessos</button><button id="adminExitBtn" class="menu-item" type="button"><span>↪</span>Sair</button></nav></aside>
     <div class="admin-main"><header class="topbar"><div class="search-menu admin-top-title">Administrador</div><div class="top-actions"><span class="session-box">Gestão sincronizada de contas</span></div></header><main class="workspace"><div class="tabs"><button class="tab active" type="button">♟ Usuários e acessos</button></div><section class="page admin-page">
-      <div class="panel-title">Criar novo acesso</div><form id="adminCreateUserForm" class="admin-create-form" autocomplete="off"><label>Login / e-mail<input id="adminNewEmail" type="email" required></label><label>Senha<input id="adminNewPassword" type="text" minlength="6" required></label><button class="btn btn-primary" type="submit">Criar acesso</button><div id="adminCreateUserStatus" class="admin-inline-status"></div></form>
+      <div class="panel-title">Criar novo acesso</div><div class="admin-create-help">Cadastre o cliente diretamente aqui. Não é necessário criar usuário manualmente no painel do Supabase.</div><form id="adminCreateUserForm" class="admin-create-form" autocomplete="off"><label>Login / e-mail<input id="adminNewEmail" type="email" required></label><label>Senha<input id="adminNewPassword" type="text" minlength="6" required></label><button class="btn btn-primary" type="submit">Criar acesso</button><div id="adminCreateUserStatus" class="admin-inline-status"></div></form>
       <div class="panel-title admin-users-title">Contas cadastradas</div><div class="table-wrap admin-users-wrap"><table class="notes-table admin-users-table"><thead><tr><th>Login</th><th>Segurança</th><th>Criado em</th><th>Status</th><th>Ações</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div><div class="admin-local-warning">Gestão local: as contas existem somente neste navegador/aparelho nesta versão sem Supabase.</div>
     </section></main></div>
   </div>
@@ -3002,7 +3013,8 @@ window.APP_CONFIG={
   const supabase = configured ? window.AGhuCloud.createClient() : null;
   const LOCAL_ONLY = false;
   const DATA_PRESERVATION_POLICY = 'remote-canonical-never-destructive-on-code-update';
-  const ADMIN_ACCESS_CACHE_POLICY = 'supabase-plus-local-mirror-v30-reconciled';
+  const ADMIN_ACCESS_CACHE_POLICY = 'admin-ui-provisioning-v31';
+  const ADMIN_PROVISIONING_POLICY = 'all-new-users-created-from-aghu-admin';
 
   const $ = (id) => document.getElementById(id);
   const state = {
@@ -3784,7 +3796,7 @@ window.APP_CONFIG={
         <td>${esc(u.email)}</td>
         <td class="admin-password">Protegida</td>
         <td>${u.createdAt?new Date(u.createdAt).toLocaleString('pt-BR'):'-'}</td>
-        <td>${u.active?'Ativo':'Bloqueado'}${u.local_cache?' • cache local':' • Supabase'}</td>
+        <td>${u.active?'Ativo':'Bloqueado'}</td>
         <td><div class="admin-user-actions">
           <button data-reset-user="${u.id}" ${u.has_data?'disabled title="Conta com notas criptografadas: a troca de senha exige recriptografia."':''}>Nova senha</button>
           <button data-toggle-user="${u.id}">${u.active?'Bloquear':'Ativar'}</button>
@@ -3845,7 +3857,7 @@ window.APP_CONFIG={
     }
 
     if(submit)submit.disabled=true;
-    els.adminCreateUserStatus.textContent='Criando acesso no Supabase...';
+    els.adminCreateUserStatus.textContent='Criando acesso...';
 
     try{
       const result=await AGhuLocalAdmin.createUser(email,password);
@@ -3853,8 +3865,8 @@ window.APP_CONFIG={
       els.adminNewPassword.value='';
       els.adminCreateUserStatus.textContent=
         result?.existing
-          ? `Acesso já existente e reconciliado: ${result?.user?.email||email}`
-          : `Acesso criado e sincronizado: ${result?.user?.email||email}`;
+          ? `Acesso já existente: ${result?.user?.email||email}`
+          : `Acesso criado: ${result?.user?.email||email}`;
       await renderAdminUsers();
     }catch(x){
       console.error('Criar acesso:',x);

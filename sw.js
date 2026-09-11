@@ -1,4 +1,4 @@
-const CACHE="aghu-notes-supabase-v30";
+const CACHE="aghu-notes-supabase-v31";
 const ASSETS=[
   "./","./index.html","./manifest.webmanifest","./favicon.ico",
   "./favicon-96-v16.png","./favicon-48-v16.png",
