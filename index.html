@@ -2876,9 +2876,10 @@ window.APP_CONFIG={
     async logout(){currentKey=null;currentUserId=null;await raw.auth.signOut()},
 
     async listUsers(){
+      const cached=readAdminAccessCache();
       try{
         const data=await adminInvoke('list');
-        const remote=(data.users||[]).map(u=>({
+        const remote=(data?.users||[]).map(u=>({
           id:u.id,
           email:u.email,
           role:u.role||'user',
@@ -2889,10 +2890,19 @@ window.APP_CONFIG={
           has_data:!!u.has_data,
           local_cache:false
         }));
-        mergeAdminAccessCache(remote);
-        return remote;
+
+        const merged=mergeAdminAccessCache(remote);
+        const remoteIds=new Set(remote.map(u=>u.id));
+
+        // Não faz um acesso confirmado desaparecer da interface só porque
+        // houve atraso temporário de reconciliação no backend.
+        return merged.map(u=>({
+          ...u,
+          password:'Protegida',
+          createdAt:u.created_at,
+          local_cache:!remoteIds.has(u.id)
+        }));
       }catch(err){
-        const cached=readAdminAccessCache();
         if(cached.length){
           return cached.map(u=>({
             ...u,
@@ -2906,12 +2916,57 @@ window.APP_CONFIG={
     },
 
     async createUser(email,password){
-      const data=await adminInvoke('create',{email,password});
-      if(!data?.user?.id||!data?.user?.email){
-        throw new Error('O Supabase não confirmou a criação do acesso.');
+      email=String(email||'').trim().toLowerCase();
+
+      // 1) Tenta criar/reconciliar no backend.
+      const data=await adminInvoke('create_or_reconcile',{email,password});
+
+      // 2) Aceita diferentes envelopes de resposta para evitar incompatibilidade
+      // entre versões do SDK/runtime da Edge Function.
+      let user=
+        data?.user ||
+        data?.created_user ||
+        data?.data?.user ||
+        data?.result?.user ||
+        null;
+
+      // 3) Se a criação ocorreu no Auth mas a resposta não trouxe o usuário,
+      // consulta a lista reconciliada e confirma pelo e-mail.
+      if(!user?.id){
+        for(let attempt=0;attempt<4;attempt++){
+          if(attempt)await new Promise(r=>setTimeout(r,350*attempt));
+          const listed=await adminInvoke('list');
+          const found=(listed?.users||[]).find(
+            u=>String(u.email||'').trim().toLowerCase()===email
+          );
+          if(found){
+            user={
+              id:found.id,
+              email:found.email,
+              created_at:found.created_at,
+              active:found.active!==false
+            };
+            break;
+          }
+        }
       }
-      cacheCreatedAccess(data.user);
-      return data;
+
+      if(!user?.id||!user?.email){
+        throw new Error(
+          data?.error ||
+          'O Supabase não confirmou o novo acesso. Nenhum registro foi considerado salvo.'
+        );
+      }
+
+      cacheCreatedAccess(user);
+
+      // 4) Confirma localmente e devolve forma estável.
+      return {
+        ok:true,
+        user,
+        reconciled:!!data?.reconciled,
+        existing:!!data?.existing
+      };
     },
 
     async resetPassword(userId,password){
@@ -2947,7 +3002,7 @@ window.APP_CONFIG={
   const supabase = configured ? window.AGhuCloud.createClient() : null;
   const LOCAL_ONLY = false;
   const DATA_PRESERVATION_POLICY = 'remote-canonical-never-destructive-on-code-update';
-  const ADMIN_ACCESS_CACHE_POLICY = 'supabase-plus-local-mirror-v29';
+  const ADMIN_ACCESS_CACHE_POLICY = 'supabase-plus-local-mirror-v30-reconciled';
 
   const $ = (id) => document.getElementById(id);
   const state = {
@@ -3796,7 +3851,10 @@ window.APP_CONFIG={
       const result=await AGhuLocalAdmin.createUser(email,password);
       els.adminNewEmail.value='';
       els.adminNewPassword.value='';
-      els.adminCreateUserStatus.textContent=`Acesso criado e sincronizado: ${result?.user?.email||email}`;
+      els.adminCreateUserStatus.textContent=
+        result?.existing
+          ? `Acesso já existente e reconciliado: ${result?.user?.email||email}`
+          : `Acesso criado e sincronizado: ${result?.user?.email||email}`;
       await renderAdminUsers();
     }catch(x){
       console.error('Criar acesso:',x);
