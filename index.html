@@ -1902,6 +1902,1481 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>window.APP_CONFIG={SUPABASE_URL:"https://aufujiafalafuncsbjzu.supabase.co",SUPABASE_ANON_KEY:"sb_publishable_u0p7ZsvaBivvZwOgqVowcw_opxxFTOO"};</script>
 <style id="aghu-cloud-v28-style">.sync-status.syncing{color:#b47b00!important}.sync-status.offline{color:#9a4248!important}.sync-status:not(.offline):not(.syncing){color:#2f7d70!important}</style>
+
+<style id="aghu-v30-card-refinement">
+  /* Mantém a tabela tradicional intacta. As regras abaixo só valem em Janelas. */
+  #keepPage.notes-view-cards .notes-table tbody{
+    grid-template-columns:repeat(auto-fill,minmax(270px,1fr))!important;
+    gap:14px!important;
+    align-items:stretch!important;
+  }
+
+  #keepPage.notes-view-cards .notes-table tr[data-id]{
+    --note-accent:#171717;
+    display:flex!important;
+    flex-direction:column!important;
+    min-height:230px!important;
+    height:100%!important;
+    border:1px solid var(--note-accent)!important;
+    border-radius:12px!important;
+    background:linear-gradient(180deg,#ffffff 0%,#fdfdfd 100%)!important;
+    overflow:hidden!important;
+    box-shadow:
+      0 1px 2px rgba(0,0,0,.035),
+      0 0 0 1px color-mix(in srgb,var(--note-accent) 10%,transparent),
+      0 0 9px color-mix(in srgb,var(--note-accent) 13%,transparent)!important;
+    transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease!important;
+  }
+
+  #keepPage.notes-view-cards .notes-table tr[data-id]:hover{
+    transform:translateY(-1px)!important;
+    border-color:var(--note-accent)!important;
+    box-shadow:
+      0 4px 12px rgba(0,0,0,.07),
+      0 0 0 1px color-mix(in srgb,var(--note-accent) 18%,transparent),
+      0 0 14px color-mix(in srgb,var(--note-accent) 20%,transparent)!important;
+  }
+
+  #keepPage.notes-view-cards .notes-table tr[data-id].selected{
+    border-color:var(--note-accent)!important;
+    box-shadow:
+      0 0 0 1px var(--note-accent),
+      0 0 16px color-mix(in srgb,var(--note-accent) 25%,transparent)!important;
+  }
+
+  #keepPage.notes-view-cards .notes-table td[data-label="Nome"]{
+    display:flex!important;
+    flex:1 1 auto!important;
+    flex-direction:column!important;
+    grid-column:auto!important;
+    width:100%!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    min-width:0!important;
+  }
+
+  /* Cabeçalho de identificação rápida do cartão */
+  .note-card-idbar{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    min-height:38px;
+    padding:7px 10px;
+    border-bottom:1px solid rgba(0,0,0,.075);
+    background:linear-gradient(180deg,#fafbfc,#f6f8f9);
+  }
+  .note-card-firstname{
+    flex:0 1 auto;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:#202428;
+    font:700 11px/1.2 Arial,Helvetica,sans-serif;
+    letter-spacing:.01em;
+  }
+  .note-card-meta{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    min-width:0;
+    margin-left:auto;
+  }
+  .note-card-chip{
+    display:inline-flex;
+    align-items:center;
+    min-height:20px;
+    max-width:105px;
+    padding:2px 6px;
+    border:1px solid #d7dce0;
+    border-radius:9px;
+    background:#fff;
+    color:#68727a;
+    font:9px/1 Arial,Helvetica,sans-serif;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  /* Seletor de cor do contorno — discreto */
+  .note-card-accent-wrap{
+    position:relative;
+    flex:0 0 20px;
+    width:20px;
+    height:20px;
+    border:1px solid #cfd4d8;
+    border-radius:50%;
+    background:#fff;
+    overflow:hidden;
+    cursor:pointer;
+  }
+  .note-card-accent-dot{
+    position:absolute;
+    inset:4px;
+    border-radius:50%;
+    background:var(--note-accent);
+    box-shadow:0 0 5px color-mix(in srgb,var(--note-accent) 38%,transparent);
+    pointer-events:none;
+  }
+  .note-card-accent-input{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    opacity:0;
+    cursor:pointer;
+  }
+
+  /* Corpo do cartão */
+  #keepPage.notes-view-cards .patient-name-main{
+    padding:12px 12px 7px!important;
+    min-height:0!important;
+    align-items:flex-start!important;
+  }
+  #keepPage.notes-view-cards .patient-name-main strong{
+    font-size:14px!important;
+    line-height:1.25!important;
+    color:#15191d!important;
+  }
+  #keepPage.notes-view-cards .quick-ref-add{
+    margin-left:auto!important;
+    flex:0 0 auto!important;
+    padding:2px 4px!important;
+    color:#71808c!important;
+  }
+  #keepPage.notes-view-cards .quick-ref-count{
+    flex:0 0 auto!important;
+  }
+  #keepPage.notes-view-cards .keep-card-preview{
+    margin:0 12px 10px!important;
+    color:#606970!important;
+    font-size:10.5px!important;
+    line-height:1.45!important;
+    -webkit-line-clamp:5!important;
+  }
+  #keepPage.notes-view-cards .quick-ref-zone{
+    margin:0 12px 10px!important;
+  }
+
+  /* Remove os blocos quebrados de Idade/Prontuário no topo; eles já estão no cabeçalho do cartão */
+  #keepPage.notes-view-cards .notes-table td[data-label="Idade"],
+  #keepPage.notes-view-cards .notes-table td[data-label="Prontuário"]{
+    display:none!important;
+  }
+
+  /* Ações sempre alinhadas e uniformes na base */
+  #keepPage.notes-view-cards .notes-table td.row-action{
+    display:inline-flex!important;
+    width:20%!important;
+    min-height:36px!important;
+    padding:0!important;
+    border-top:1px solid rgba(0,0,0,.075)!important;
+    border-right:1px solid rgba(0,0,0,.055)!important;
+    background:#fafbfc!important;
+    margin:0!important;
+  }
+  #keepPage.notes-view-cards .notes-table td.row-action:last-child{
+    border-right:0!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id]{
+    flex-wrap:wrap!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id] > td.row-action{
+    flex:0 0 20%!important;
+    align-self:flex-end!important;
+  }
+
+  /* Garante que o Nome ocupe a linha inteira antes das ações */
+  #keepPage.notes-view-cards .notes-table tr[data-id] > td[data-label="Nome"]{
+    flex:1 0 100%!important;
+  }
+
+  /* Seções Fixadas / Não Fixadas mais suaves */
+  #keepPage.notes-view-cards .notes-group-row{
+    margin:4px 0 -2px!important;
+  }
+  #keepPage.notes-view-cards .notes-group-row td{
+    padding:4px 1px!important;
+    color:#65717b!important;
+    font-size:10px!important;
+    font-weight:700!important;
+    letter-spacing:.02em;
+  }
+
+  /* Primeiro plano: mantém exatamente o mesmo refinamento */
+  body.keep-focus-mode #keepPage.notes-view-cards .notes-table tr[data-id]{
+    display:flex!important;
+    flex-direction:column!important;
+    flex-wrap:wrap!important;
+    min-height:230px!important;
+    border:1px solid var(--note-accent)!important;
+    border-radius:12px!important;
+    background:linear-gradient(180deg,#fff,#fdfdfd)!important;
+  }
+  body.keep-focus-mode #keepPage.notes-view-cards .notes-table td[data-label="Idade"],
+  body.keep-focus-mode #keepPage.notes-view-cards .notes-table td[data-label="Prontuário"]{
+    display:none!important;
+  }
+  body.keep-focus-mode #keepPage.notes-view-cards .notes-table td[data-label="Nome"]{
+    display:flex!important;
+    flex:1 0 100%!important;
+    padding:0!important;
+    background:transparent!important;
+  }
+
+  @media(max-width:700px){
+    #keepPage.notes-view-cards .notes-table tbody{
+      grid-template-columns:repeat(2,minmax(0,1fr))!important;
+      gap:9px!important;
+    }
+    .note-card-idbar{
+      flex-wrap:wrap;
+      gap:5px;
+      padding:6px 8px;
+    }
+    .note-card-firstname{
+      max-width:calc(100% - 28px);
+    }
+    .note-card-meta{
+      width:100%;
+      margin-left:0;
+      justify-content:flex-start;
+    }
+  }
+  @media(max-width:480px){
+    #keepPage.notes-view-cards .notes-table tbody{
+      grid-template-columns:1fr!important;
+    }
+  }
+</style>
+
+
+<style id="aghu-v31-responsive-menu-neon">
+  /* =========================================================
+     A. RESPONSIVIDADE GLOBAL
+     ========================================================= */
+  html,body{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    overflow-x:hidden;
+  }
+  body{
+    min-height:100%;
+  }
+  .app-shell,
+  .workspace,
+  .content,
+  .page,
+  .editor-shell,
+  .notes-list-layout,
+  .notes-grid-area{
+    min-width:0!important;
+    max-width:100%!important;
+  }
+  .workspace{
+    width:min(100%,100vw);
+    overflow-x:hidden;
+  }
+  .content{
+    width:100%;
+    padding:clamp(6px,1.35vw,14px)!important;
+  }
+  .page{
+    width:100%;
+    padding:clamp(7px,1.5vw,16px)!important;
+  }
+
+  .topbar{
+    width:100%;
+    min-width:0;
+    min-height:74px;
+    height:auto!important;
+    padding:8px clamp(7px,1.3vw,14px)!important;
+    flex-wrap:wrap;
+  }
+  .menu-search-wrap{
+    flex:1 1 280px;
+    width:auto!important;
+    min-width:120px;
+    max-width:570px;
+  }
+  .topbar-right{
+    flex:0 1 auto;
+    min-width:0;
+    gap:clamp(7px,1.4vw,18px)!important;
+  }
+  .tabs{
+    width:100%;
+    max-width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:thin;
+  }
+  .tab{
+    flex:0 0 auto;
+    white-space:nowrap;
+  }
+
+  .toolbar-row{
+    width:100%;
+    min-width:0;
+    flex-wrap:wrap!important;
+  }
+  .search-notes{
+    flex:1 1 280px;
+    min-width:0;
+    width:auto!important;
+    max-width:100%;
+  }
+  .notes-view-toolbar{
+    flex:0 1 auto;
+    min-width:0;
+  }
+  .filters-row{
+    width:100%;
+    max-width:100%;
+  }
+  .filters-row>*{
+    max-width:100%;
+  }
+
+  /* Em linhas, eventual largura extra fica contida na tabela, nunca na página. */
+  .table-wrap{
+    width:100%;
+    max-width:100%;
+    overflow:auto!important;
+    overscroll-behavior-inline:contain;
+  }
+
+  /* Editor */
+  #editorPage{
+    min-width:0;
+    max-width:100%;
+  }
+  .editor-header{
+    width:100%;
+    min-width:0;
+    align-items:center;
+  }
+  .editor-header>div:first-child{
+    min-width:0;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:5px;
+  }
+  .editor-actions{
+    width:auto!important;
+    min-width:0;
+    margin-left:auto;
+  }
+  .editor-shell{
+    width:100%;
+    min-height:clamp(420px,calc(100vh - 195px),900px)!important;
+    overflow:visible;
+  }
+  .note-title{
+    width:100%;
+    min-width:0;
+    font-size:clamp(17px,2.1vw,22px)!important;
+    padding:clamp(10px,1.7vw,15px) clamp(10px,1.8vw,17px)!important;
+  }
+
+  /* Toolbar rica permanece dentro do editor e nunca rompe a viewport. */
+  .word-toolbar{
+    position:sticky!important;
+    top:0!important;
+    z-index:220!important;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    flex-wrap:wrap!important;
+    overflow-x:hidden;
+    gap:4px!important;
+  }
+  .word-group{
+    min-width:0;
+    max-width:100%;
+    flex-wrap:wrap;
+  }
+  .word-group select{
+    max-width:100%;
+  }
+
+  .note-body{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    min-height:clamp(300px,48vh,620px)!important;
+    padding:clamp(10px,2vw,18px)!important;
+    overflow-wrap:anywhere;
+    word-break:normal;
+  }
+  .note-body img,
+  .note-body video,
+  .note-body iframe{
+    max-width:100%!important;
+    height:auto!important;
+  }
+  .note-body table{
+    max-width:100%!important;
+  }
+  .note-body pre{
+    max-width:100%;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+  }
+
+  .meta-tools{
+    width:100%;
+    max-width:100%;
+    grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr))!important;
+  }
+  .image-gallery{
+    max-width:100%;
+  }
+  .image-card{
+    width:clamp(105px,22vw,145px)!important;
+    max-width:100%;
+  }
+
+  /* Dialogs autoajustáveis. */
+  dialog,
+  .utility-dialog,
+  .history-dialog,
+  .google-docs-dialog,
+  .admin-login-dialog,
+  .quick-image-viewer-dialog{
+    max-width:calc(100vw - 16px)!important;
+    max-height:calc(100dvh - 16px)!important;
+    overflow:auto;
+  }
+
+  /* =========================================================
+     B. MENU DA NOTA — PORTAL FLUTUANTE SEM CONFLITO
+     ========================================================= */
+  .note-menu-host{
+    position:relative;
+    z-index:310;
+  }
+  .note-menu-button{
+    position:relative;
+    z-index:311;
+    min-width:88px;
+  }
+  .note-actions-menu.note-menu-portal{
+    position:fixed!important;
+    inset:auto!important;
+    z-index:32000!important;
+    width:min(220px,calc(100vw - 16px))!important;
+    max-height:calc(100dvh - 18px)!important;
+    padding:4px 0!important;
+    overflow:auto!important;
+    overscroll-behavior:contain;
+    border:1px solid #adb6bd!important;
+    border-radius:4px!important;
+    background:#fff!important;
+    box-shadow:0 9px 26px rgba(0,0,0,.20)!important;
+    isolation:isolate;
+  }
+  .note-actions-menu.note-menu-portal .note-menu-item{
+    min-height:36px!important;
+    display:flex!important;
+    align-items:center;
+    white-space:nowrap;
+  }
+  .note-actions-menu.note-menu-portal.hidden{
+    display:none!important;
+  }
+
+  /* Toolbar nunca disputa camada com o menu lateral. */
+  .word-toolbar{
+    isolation:isolate;
+  }
+
+  /* =========================================================
+     C. LINHA NEON DINÂMICA PERCORRENDO O PERÍMETRO
+     ========================================================= */
+  @property --aghu-neon-angle{
+    syntax:"<angle>";
+    inherits:false;
+    initial-value:0deg;
+  }
+
+  #keepPage.notes-view-cards .notes-table tr[data-id]{
+    position:relative!important;
+    isolation:isolate;
+    --note-accent:#171717;
+    --aghu-neon-angle:0deg;
+    border-color:color-mix(in srgb,var(--note-accent) 55%,#c8cdd2)!important;
+  }
+
+  /* Traço móvel: corre continuamente pelos quatro lados. */
+  #keepPage.notes-view-cards .notes-table tr[data-id]::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:12;
+    border-radius:inherit;
+    padding:1.35px;
+    pointer-events:none;
+    background:
+      conic-gradient(
+        from var(--aghu-neon-angle),
+        transparent 0deg 245deg,
+        color-mix(in srgb,var(--note-accent) 32%,#ffffff) 266deg,
+        color-mix(in srgb,var(--note-accent) 72%,#ffffff) 280deg,
+        var(--note-accent) 300deg 319deg,
+        color-mix(in srgb,var(--note-accent) 62%,#ffffff) 330deg,
+        transparent 350deg 360deg
+      );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite:exclude;
+    filter:drop-shadow(0 0 2px color-mix(in srgb,var(--note-accent) 42%,transparent));
+    animation:aghuNeonPerimeter 3.6s linear infinite;
+  }
+
+  #keepPage.notes-view-cards .notes-table tr[data-id].selected::before{
+    padding:1.7px;
+    filter:drop-shadow(0 0 4px color-mix(in srgb,var(--note-accent) 58%,transparent));
+    animation-duration:2.7s;
+  }
+
+  @keyframes aghuNeonPerimeter{
+    to{--aghu-neon-angle:360deg}
+  }
+
+  /* Todo conteúdo continua clicável acima do traço. */
+  #keepPage.notes-view-cards .notes-table tr[data-id] > *{
+    position:relative;
+    z-index:1;
+  }
+
+  /* =========================================================
+     D. BREAKPOINTS FLUIDOS
+     ========================================================= */
+  @media(max-width:1100px){
+    :root{--sidebar:190px}
+    .sidebar{width:190px}
+    .topbar-right .user-badge{display:none}
+    #keepPage.notes-view-cards .notes-table tbody{
+      grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr))!important;
+    }
+  }
+
+  @media(max-width:840px){
+    :root{--sidebar:205px}
+    .sidebar{
+      position:fixed!important;
+      left:0;
+      top:0;
+      bottom:0;
+      height:100dvh!important;
+      z-index:5000!important;
+      width:min(205px,82vw)!important;
+      box-shadow:8px 0 24px rgba(0,0,0,.16);
+    }
+    .sidebar.collapsed{
+      width:min(205px,82vw)!important;
+      transform:translateX(-105%)!important;
+      border-right:0!important;
+    }
+    .workspace{
+      width:100%!important;
+      margin:0!important;
+    }
+    .topbar{
+      min-height:62px;
+    }
+    .menu-search-wrap{
+      order:2;
+      flex-basis:100%;
+      max-width:none;
+      height:36px;
+    }
+    .topbar-right{
+      margin-left:auto;
+    }
+    .editor-header{
+      gap:7px;
+    }
+    .editor-actions{
+      width:auto!important;
+    }
+    .word-toolbar{
+      padding:5px!important;
+    }
+    .word-group{
+      border-right:0!important;
+      padding-right:2px!important;
+      margin-right:0!important;
+    }
+  }
+
+  @media(max-width:700px){
+    .content{padding:5px!important}
+    .page{padding:7px!important}
+
+    .toolbar-row{
+      flex-direction:column!important;
+      align-items:stretch!important;
+    }
+    .notes-view-toolbar{
+      width:100%!important;
+      display:flex;
+      justify-content:space-between;
+      gap:7px;
+    }
+    .notes-view-switch{
+      flex:1 1 auto;
+    }
+    .view-mode-btn{
+      flex:1 1 50%;
+      min-width:0;
+    }
+    #newNoteBtn{
+      flex:0 0 auto;
+      width:auto!important;
+    }
+
+    #keepPage.notes-view-cards .notes-table tbody{
+      grid-template-columns:repeat(2,minmax(0,1fr))!important;
+      gap:8px!important;
+    }
+
+    .editor-header{
+      align-items:center!important;
+      flex-wrap:nowrap!important;
+    }
+    .editor-header>div:first-child{
+      flex:1 1 auto;
+    }
+    .editor-actions{
+      flex:0 0 auto;
+      width:auto!important;
+    }
+    .editor-actions .btn{
+      flex:0 0 auto!important;
+    }
+
+    /* Seletores ocupam a primeira faixa; botões continuam em linhas subsequentes. */
+    .word-group-selects{
+      display:grid!important;
+      grid-template-columns:minmax(92px,1fr) minmax(100px,1.25fr) 58px!important;
+      width:100%;
+      max-width:100%;
+    }
+    #paragraphStyleSelect,
+    #fontNameSelect,
+    #fontSizeSelect{
+      width:100%!important;
+      min-width:0!important;
+    }
+
+    .note-menu-button{
+      min-width:74px;
+      padding-inline:9px!important;
+    }
+
+    .campaign-jk{
+      max-width:100vw;
+    }
+  }
+
+  @media(max-width:520px){
+    #keepPage.notes-view-cards .notes-table tbody{
+      grid-template-columns:1fr!important;
+    }
+    .filters-row{
+      gap:5px!important;
+    }
+    .filter{
+      padding:6px 8px!important;
+    }
+    .editor-header{
+      margin-bottom:7px!important;
+    }
+    .autosave-state{
+      margin-left:3px!important;
+      font-size:9px!important;
+    }
+    .note-menu-button{
+      font-size:10px!important;
+    }
+    .word-toolbar button{
+      min-width:29px!important;
+      padding-inline:5px!important;
+    }
+  }
+
+  @media(max-width:380px){
+    .notes-view-toolbar{
+      flex-wrap:wrap;
+    }
+    .notes-view-switch{
+      width:100%;
+    }
+    #newNoteBtn{
+      width:100%!important;
+    }
+    .word-group-selects{
+      grid-template-columns:1fr 1fr 54px!important;
+    }
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    #keepPage.notes-view-cards .notes-table tr[data-id]::before{
+      animation:none!important;
+      --aghu-neon-angle:300deg;
+    }
+    #keepPage.notes-view-cards .notes-table tr[data-id]{
+      transition:none!important;
+    }
+  }
+</style>
+
+
+<style id="aghu-v32-rainbow-neon-border">
+/* v32 - Borda neon multicolor contínua em movimento, no estilo do exemplo enviado */
+#keepPage.notes-view-cards .notes-table tr[data-id]{
+  position:relative!important;
+  isolation:isolate!important;
+  border:1px solid rgba(12,18,28,.18)!important;
+  border-radius:14px!important;
+  overflow:visible!important;
+  background:linear-gradient(180deg,#ffffff 0%,#fbfcfd 100%)!important;
+  box-shadow:0 2px 10px rgba(0,0,0,.05)!important;
+}
+
+#keepPage.notes-view-cards .notes-table tr[data-id]::before,
+#keepPage.notes-view-cards .notes-table tr[data-id]::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+}
+
+/* Halo luminoso suave */
+#keepPage.notes-view-cards .notes-table tr[data-id]::before{
+  inset:-2px;
+  padding:2px;
+  background:conic-gradient(
+    from var(--aghu-neon-angle, 0deg),
+    rgba(0,0,0,0) 0deg 56deg,
+    rgba(0,245,255,.16) 68deg,
+    rgba(0,245,255,.52) 78deg,
+    rgba(0,153,255,.72) 92deg,
+    rgba(0,98,255,.88) 106deg,
+    rgba(123,92,255,.98) 118deg,
+    rgba(183,66,255,.98) 130deg,
+    rgba(255,0,204,.94) 141deg,
+    rgba(255,0,204,.38) 154deg,
+    rgba(0,0,0,0) 168deg 360deg
+  );
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  filter:blur(3.6px) saturate(1.18);
+  opacity:.98;
+  z-index:0;
+  animation:aghuRainbowOrbit 3s linear infinite;
+}
+
+/* Traço neon nítido */
+#keepPage.notes-view-cards .notes-table tr[data-id]::after{
+  inset:0;
+  padding:1.4px;
+  background:conic-gradient(
+    from var(--aghu-neon-angle, 0deg),
+    rgba(0,0,0,0) 0deg 54deg,
+    #00eeff 72deg,
+    #00c8ff 84deg,
+    #008cff 96deg,
+    #355dff 110deg,
+    #6f52ff 122deg,
+    #a33cff 132deg,
+    #ff00d0 142deg,
+    rgba(255,0,208,.15) 151deg,
+    rgba(0,0,0,0) 164deg 360deg
+  );
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  box-shadow:
+    0 0 6px rgba(0,238,255,.38),
+    0 0 10px rgba(255,0,208,.22);
+  z-index:0;
+  animation:aghuRainbowOrbit 3s linear infinite;
+}
+
+#keepPage.notes-view-cards .notes-table tr[data-id]:hover::before,
+#keepPage.notes-view-cards .notes-table tr[data-id].selected::before{
+  filter:blur(4.4px) saturate(1.24);
+}
+#keepPage.notes-view-cards .notes-table tr[data-id]:hover::after,
+#keepPage.notes-view-cards .notes-table tr[data-id].selected::after{
+  box-shadow:
+    0 0 8px rgba(0,238,255,.5),
+    0 0 14px rgba(255,0,208,.28);
+}
+
+#keepPage.notes-view-cards .notes-table tr[data-id] > *{
+  position:relative;
+  z-index:1;
+}
+
+/* Pequena moldura interna para suavidade visual */
+#keepPage.notes-view-cards .notes-table tr[data-id] td[data-label="Nome"]{
+  border-radius:12px!important;
+  overflow:hidden!important;
+}
+
+/* Mantém o seletor de cor, mas com visual discreto para não conflitar com a borda multicolor */
+#keepPage.notes-view-cards .note-card-accent-dot{
+  box-shadow:0 0 0 1px rgba(0,0,0,.06),0 0 4px rgba(0,0,0,.10)!important;
+}
+
+@property --aghu-neon-angle{
+  syntax:"<angle>";
+  inherits:false;
+  initial-value:0deg;
+}
+@keyframes aghuRainbowOrbit{
+  to{ --aghu-neon-angle:360deg; }
+}
+
+@media(prefers-reduced-motion:reduce){
+  #keepPage.notes-view-cards .notes-table tr[data-id]::before,
+  #keepPage.notes-view-cards .notes-table tr[data-id]::after{
+    animation:none!important;
+    --aghu-neon-angle:118deg;
+  }
+}
+</style>
+
+
+<style id="aghu-v33-neon-orbit-fix">
+/* v33 - a linha neon não fica estática: o próprio traço percorre continuamente o perímetro */
+#keepPage.notes-view-cards .notes-table tr[data-id]{
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:visible!important;
+  border:1px solid rgba(14,18,28,.14)!important;
+  border-radius:14px!important;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id]::before,
+#keepPage.notes-view-cards .notes-table tr[data-id]::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  transform-origin:center center;
+  will-change:transform,filter;
+}
+/* brilho difuso que acompanha o percurso */
+#keepPage.notes-view-cards .notes-table tr[data-id]::before{
+  inset:-2px;
+  padding:2px;
+  background:conic-gradient(
+    from 0turn,
+    transparent 0deg 302deg,
+    rgba(0,255,255,.12) 314deg,
+    rgba(0,255,255,.45) 324deg,
+    rgba(0,178,255,.78) 334deg,
+    rgba(63,103,255,.96) 344deg,
+    rgba(129,77,255,1) 351deg,
+    rgba(255,0,204,.96) 357deg,
+    rgba(255,0,204,.30) 360deg
+  );
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  filter:blur(4px) saturate(1.22);
+  opacity:1;
+  z-index:0;
+  animation:aghuV33BorderOrbit 2.65s linear infinite;
+}
+/* traço neon principal percorrendo a borda */
+#keepPage.notes-view-cards .notes-table tr[data-id]::after{
+  inset:0;
+  padding:1.5px;
+  background:conic-gradient(
+    from 0turn,
+    transparent 0deg 304deg,
+    #00f4ff 317deg,
+    #00d0ff 328deg,
+    #008cff 338deg,
+    #4a6bff 347deg,
+    #8e49ff 354deg,
+    #ff00d0 359deg,
+    transparent 360deg
+  );
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  box-shadow:0 0 7px rgba(0,238,255,.42),0 0 12px rgba(255,0,208,.24);
+  z-index:0;
+  animation:aghuV33BorderOrbit 2.65s linear infinite;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id]:hover::before,
+#keepPage.notes-view-cards .notes-table tr[data-id].selected::before{
+  filter:blur(5px) saturate(1.35);
+}
+#keepPage.notes-view-cards .notes-table tr[data-id]:hover::after,
+#keepPage.notes-view-cards .notes-table tr[data-id].selected::after{
+  box-shadow:0 0 9px rgba(0,238,255,.58),0 0 15px rgba(255,0,208,.32);
+}
+#keepPage.notes-view-cards .notes-table tr[data-id] > *{position:relative;z-index:1}
+@keyframes aghuV33BorderOrbit{to{transform:rotate(1turn)}}
+@media(prefers-reduced-motion:reduce){
+  #keepPage.notes-view-cards .notes-table tr[data-id]::before,
+  #keepPage.notes-view-cards .notes-table tr[data-id]::after{animation:none!important}
+}
+</style>
+
+
+<style id="aghu-v34-cyan-neon-beam">
+/* v34 - feixe neon ciano, fino, sutil e em movimento contínuo ao redor de cada bloco */
+#keepPage.notes-view-cards .notes-table tr[data-id]{
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:visible!important;
+  border:1px solid rgba(15,26,36,.14)!important;
+  border-radius:14px!important;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id]::before,
+#keepPage.notes-view-cards .notes-table tr[data-id]::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  will-change:transform,filter;
+}
+/* halo difuso, discreto */
+#keepPage.notes-view-cards .notes-table tr[data-id]::before{
+  inset:-1.5px;
+  padding:1.5px;
+  background:conic-gradient(
+    from 0turn,
+    transparent 0deg 326deg,
+    rgba(0,255,255,0.00) 326deg,
+    rgba(65,245,255,0.16) 334deg,
+    rgba(65,245,255,0.34) 344deg,
+    rgba(65,245,255,0.52) 352deg,
+    rgba(65,245,255,0.18) 360deg
+  );
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  filter:blur(3px);
+  opacity:.92;
+  z-index:0;
+  animation:aghuV34CyanOrbit 4.4s linear infinite;
+}
+/* feixe principal, fino e contínuo */
+#keepPage.notes-view-cards .notes-table tr[data-id]::after{
+  inset:0;
+  padding:1.1px;
+  background:conic-gradient(
+    from 0turn,
+    transparent 0deg 328deg,
+    rgba(102,250,255,0.00) 328deg,
+    rgba(102,250,255,0.85) 340deg,
+    #66faff 349deg,
+    #1feeff 356deg,
+    rgba(102,250,255,0.25) 360deg
+  );
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  box-shadow:0 0 5px rgba(31,238,255,.20),0 0 8px rgba(31,238,255,.12);
+  opacity:.95;
+  z-index:0;
+  animation:aghuV34CyanOrbit 4.4s linear infinite;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id]:hover::before,
+#keepPage.notes-view-cards .notes-table tr[data-id].selected::before{
+  filter:blur(3.8px);
+  opacity:1;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id]:hover::after,
+#keepPage.notes-view-cards .notes-table tr[data-id].selected::after{
+  box-shadow:0 0 6px rgba(31,238,255,.28),0 0 10px rgba(31,238,255,.18);
+  opacity:1;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id] > *{position:relative;z-index:1}
+@keyframes aghuV34CyanOrbit{to{transform:rotate(1turn)}}
+@media (prefers-reduced-motion:reduce){
+  #keepPage.notes-view-cards .notes-table tr[data-id]::before,
+  #keepPage.notes-view-cards .notes-table tr[data-id]::after{animation:none!important}
+}
+</style>
+
+
+<style id="aghu-v35-cards-smaller-orbiting-beam">
+/* v35 - mantém o modo Linhas intacto; refina apenas o modo Janelas */
+#keepPage.notes-view-cards .notes-table tbody{
+  grid-template-columns:repeat(auto-fill,minmax(224px,246px))!important;
+  justify-content:flex-start!important;
+  gap:12px!important;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id]{
+  --note-accent:#0b0f14;
+  position:relative!important;
+  isolation:isolate!important;
+  display:flex!important;
+  flex-direction:column!important;
+  flex-wrap:wrap!important;
+  width:100%!important;
+  min-height:188px!important;
+  height:auto!important;
+  border:1px solid rgba(15,21,28,.12)!important;
+  border-radius:12px!important;
+  overflow:visible!important;
+  background:linear-gradient(180deg,#fff 0%,#fcfcfd 100%)!important;
+  box-shadow:0 1px 4px rgba(0,0,0,.035)!important;
+  transition:transform .16s ease, box-shadow .16s ease!important;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id]::before,
+#keepPage.notes-view-cards .notes-table tr[data-id]::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+}
+/* brilho difuso em movimento contínuo */
+#keepPage.notes-view-cards .notes-table tr[data-id]::before{
+  inset:-1.5px;
+  padding:1.5px;
+  background:conic-gradient(
+    from 0turn,
+    transparent 0deg 320deg,
+    rgba(0,255,255,0) 320deg,
+    rgba(64,245,255,.10) 330deg,
+    rgba(64,245,255,.30) 340deg,
+    rgba(64,245,255,.54) 348deg,
+    rgba(64,245,255,.18) 356deg,
+    transparent 360deg
+  );
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  filter:blur(3.2px);
+  opacity:.96;
+  z-index:0;
+  animation:aghuV35BeamOrbit 2.8s linear infinite;
+}
+/* feixe fino e sutil orbitando a borda inteira em ciclo contínuo */
+#keepPage.notes-view-cards .notes-table tr[data-id]::after{
+  inset:0;
+  padding:1px;
+  background:conic-gradient(
+    from 0turn,
+    transparent 0deg 322deg,
+    rgba(105,250,255,0) 322deg,
+    rgba(105,250,255,.82) 336deg,
+    #66faff 346deg,
+    #1feeff 353deg,
+    rgba(105,250,255,.22) 360deg
+  );
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  box-shadow:0 0 4px rgba(31,238,255,.24),0 0 8px rgba(31,238,255,.12);
+  opacity:.98;
+  z-index:0;
+  animation:aghuV35BeamOrbit 2.8s linear infinite;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id] > *{position:relative;z-index:1}
+#keepPage.notes-view-cards .notes-table tr[data-id]:hover{transform:translateY(-1px)!important;box-shadow:0 3px 9px rgba(0,0,0,.06)!important}
+#keepPage.notes-view-cards .notes-table tr[data-id].selected{box-shadow:0 0 0 1px rgba(31,238,255,.26),0 0 10px rgba(31,238,255,.10)!important}
+
+/* janelas menores e mais organizadas */
+#keepPage.notes-view-cards .notes-table td[data-label="Nome"]{padding:0!important}
+.note-card-idbar{
+  min-height:34px!important;
+  padding:6px 9px!important;
+  gap:6px!important;
+  border-bottom:1px solid rgba(0,0,0,.06)!important;
+  background:linear-gradient(180deg,#fbfbfc,#f6f8f9)!important;
+}
+.note-card-firstname{font-size:11px!important}
+.note-card-chip{
+  min-height:18px!important;
+  padding:1px 6px!important;
+  font-size:9px!important;
+  max-width:98px!important;
+}
+#keepPage.notes-view-cards .patient-name-main{padding:10px 11px 6px!important}
+#keepPage.notes-view-cards .patient-name-main strong{
+  font-size:13px!important;
+  line-height:1.22!important;
+  color:#14181c!important;
+}
+#keepPage.notes-view-cards .keep-card-preview{
+  margin:0 11px 8px!important;
+  font-size:10px!important;
+  line-height:1.36!important;
+  -webkit-line-clamp:4!important;
+}
+#keepPage.notes-view-cards .quick-ref-zone{margin:0 11px 8px!important}
+#keepPage.notes-view-cards .quick-ref-thumb:first-child{height:112px!important}
+#keepPage.notes-view-cards .quick-ref-thumb:not(:first-child){width:42px!important;height:42px!important}
+#keepPage.notes-view-cards .notes-table td.row-action{
+  min-height:34px!important;
+  background:#fbfbfc!important;
+  border-top:1px solid rgba(0,0,0,.065)!important;
+}
+#keepPage.notes-view-cards .notes-group-row td{
+  padding:5px 3px!important;
+  color:#6a757e!important;
+  font-size:10px!important;
+  font-weight:700!important;
+}
+@keyframes aghuV35BeamOrbit{to{transform:rotate(1turn)}}
+@media(max-width:760px){
+  #keepPage.notes-view-cards .notes-table tbody{
+    grid-template-columns:repeat(auto-fill,minmax(200px,1fr))!important;
+    gap:10px!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id]{min-height:176px!important}
+}
+@media(max-width:520px){
+  #keepPage.notes-view-cards .notes-table tbody{grid-template-columns:1fr 1fr!important;gap:8px!important}
+}
+@media(max-width:430px){
+  #keepPage.notes-view-cards .notes-table tbody{grid-template-columns:1fr!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #keepPage.notes-view-cards .notes-table tr[data-id]::before,
+  #keepPage.notes-view-cards .notes-table tr[data-id]::after{animation:none!important}
+}
+</style>
+
+
+<style id="aghu-v36-cards-menu-refine">
+/* v36 - preserva o modo Linhas; refina apenas Janelas */
+#keepPage.notes-view-cards .notes-table tbody{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fill,minmax(232px,232px))!important;
+  justify-content:flex-start!important;
+  gap:12px!important;
+  align-items:start!important;
+}
+#keepPage.notes-view-cards .notes-table .notes-group-row{
+  display:block!important;
+  grid-column:1/-1!important;
+  margin:2px 0 -4px!important;
+}
+#keepPage.notes-view-cards .notes-group-row td{
+  padding:4px 2px!important;
+  color:#65717b!important;
+  font-size:10px!important;
+  font-weight:700!important;
+  background:transparent!important;
+  border:0!important;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id]{
+  --note-accent:#20262c;
+  position:relative!important;
+  isolation:isolate!important;
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  grid-template-rows:auto 34px!important;
+  width:232px!important;
+  min-width:232px!important;
+  max-width:232px!important;
+  min-height:186px!important;
+  height:auto!important;
+  margin:0!important;
+  border:1px solid color-mix(in srgb,var(--note-accent) 45%, #cdd4da)!important;
+  border-radius:14px!important;
+  overflow:hidden!important;
+  background:linear-gradient(180deg,#ffffff 0%,#fcfcfd 100%)!important;
+  box-shadow:0 1px 4px rgba(0,0,0,.035)!important;
+  transition:transform .18s ease,box-shadow .18s ease!important;
+}
+/* linha permanente, discreta, na cor escolhida */
+#keepPage.notes-view-cards .notes-table tr[data-id]::before,
+#keepPage.notes-view-cards .notes-table tr[data-id]::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id]::before{
+  border:1px solid color-mix(in srgb,var(--note-accent) 72%, #eef2f5);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--note-accent) 16%, transparent);
+  opacity:.92;
+  z-index:0;
+}
+/* feixe neon ciano visível, contínuo e lento percorrendo o perímetro */
+#keepPage.notes-view-cards .notes-table tr[data-id]::after{
+  inset:-1px;
+  padding:1.15px;
+  background:conic-gradient(
+    from 0turn,
+    transparent 0deg 326deg,
+    rgba(90,248,255,0) 326deg,
+    rgba(90,248,255,.12) 334deg,
+    rgba(90,248,255,.46) 342deg,
+    #79fbff 350deg,
+    #14efff 356deg,
+    rgba(90,248,255,.18) 360deg
+  );
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  filter:drop-shadow(0 0 4px rgba(20,239,255,.22)) drop-shadow(0 0 7px rgba(20,239,255,.12));
+  opacity:1;
+  z-index:0;
+  animation:aghuV36BeamOrbit 7.2s linear infinite;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id] > *{position:relative;z-index:1}
+#keepPage.notes-view-cards .notes-table tr[data-id]:hover{transform:translateY(-1px)!important;box-shadow:0 4px 10px rgba(0,0,0,.07)!important}
+#keepPage.notes-view-cards .notes-table tr[data-id].selected{box-shadow:0 0 0 1px color-mix(in srgb,var(--note-accent) 30%, white),0 4px 11px rgba(0,0,0,.08)!important;background:#fff!important}
+
+#keepPage.notes-view-cards .notes-table td{width:auto!important;height:auto!important;min-height:0!important;white-space:normal!important;background:transparent!important;border:0!important;padding:0!important}
+#keepPage.notes-view-cards .notes-table td[data-label="Nome"]{
+  grid-column:1/-1!important;
+  grid-row:1!important;
+  display:flex!important;
+  flex-direction:column!important;
+  width:100%!important;
+  padding:0!important;
+  background:transparent!important;
+}
+#keepPage.notes-view-cards .notes-table td[data-label="Idade"],
+#keepPage.notes-view-cards .notes-table td[data-label="Prontuário"]{display:none!important}
+
+.note-card-idbar{
+  display:flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  min-height:34px!important;
+  padding:6px 9px!important;
+  border-bottom:1px solid rgba(0,0,0,.055)!important;
+  background:linear-gradient(180deg,#fafbfc,#f6f8f9)!important;
+}
+.note-card-firstname{font-size:11px!important;color:#202428!important}
+.note-card-meta{gap:5px!important;margin-left:auto!important}
+.note-card-chip{
+  min-height:18px!important;
+  max-width:90px!important;
+  padding:1px 6px!important;
+  border-radius:10px!important;
+  border:1px solid #d6dce2!important;
+  background:#fff!important;
+  color:#67717a!important;
+  font-size:9px!important;
+}
+.note-card-accent-wrap{width:18px!important;height:18px!important;flex:0 0 18px!important;border-color:#cfd6dc!important;background:#fff!important}
+.note-card-accent-dot{inset:3px!important;box-shadow:none!important}
+
+#keepPage.notes-view-cards .patient-name-main{
+  padding:9px 11px 5px!important;
+  min-height:0!important;
+  align-items:flex-start!important;
+}
+#keepPage.notes-view-cards .patient-name-main strong{
+  display:block!important;
+  font-size:12.8px!important;
+  line-height:1.2!important;
+  color:#15191d!important;
+  overflow-wrap:anywhere!important;
+}
+#keepPage.notes-view-cards .quick-ref-add{
+  margin-left:auto!important;
+  padding:2px 0!important;
+  color:#6f7d89!important;
+  font-size:9px!important;
+}
+#keepPage.notes-view-cards .quick-ref-count{font-size:9px!important;color:#68727a!important}
+#keepPage.notes-view-cards .keep-card-preview{
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical!important;
+  -webkit-line-clamp:4!important;
+  overflow:hidden!important;
+  margin:0 11px 7px!important;
+  color:#555f68!important;
+  font-size:10px!important;
+  line-height:1.32!important;
+}
+#keepPage.notes-view-cards .quick-ref-zone{margin:0 11px 7px!important;padding:0!important;border:0!important;background:transparent!important}
+#keepPage.notes-view-cards .quick-ref-paste-hint{display:none!important}
+#keepPage.notes-view-cards .quick-ref-strip{display:flex!important;gap:4px!important;flex-wrap:wrap!important}
+#keepPage.notes-view-cards .quick-ref-thumb:first-child{width:100%!important;height:92px!important;flex:0 0 100%!important;border-radius:5px!important}
+#keepPage.notes-view-cards .quick-ref-thumb:not(:first-child){width:36px!important;height:36px!important}
+#keepPage.notes-view-cards .quick-ref-thumb img{object-fit:cover!important}
+#keepPage.notes-view-cards .quick-ref-thumb:first-child img{object-fit:contain!important;background:#f3f4f5!important}
+
+/* ações suaves no rodapé do bloco */
+#keepPage.notes-view-cards .notes-table tr[data-id] > td.row-action{
+  grid-row:2!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:34px!important;
+  padding:0!important;
+  background:#fafbfc!important;
+  border-top:1px solid rgba(0,0,0,.055)!important;
+  border-right:1px solid rgba(0,0,0,.045)!important;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id] > td.row-action:last-child{border-right:0!important}
+#keepPage.notes-view-cards .notes-table .grid-icon-btn{
+  width:100%!important;
+  height:32px!important;
+  border:0!important;
+  background:transparent!important;
+  color:#7b6b56!important;
+  font-size:12px!important;
+  line-height:1!important;
+}
+#keepPage.notes-view-cards .notes-table .grid-icon-btn:hover{background:#f2f6fa!important;color:#5f6a73!important}
+#keepPage.notes-view-cards .notes-table .grid-icon-btn.danger{color:#a33333!important}
+#keepPage.notes-view-cards .notes-table .grid-icon-btn.restore{color:#2b7e54!important}
+
+/* menu interno da nota: visual mais suave e compatível com toolbar */
+.note-menu-host{position:relative!important;z-index:1000!important}
+.note-menu-button{
+  min-width:88px!important;
+  height:34px!important;
+  border:1px solid #c6ccd2!important;
+  background:#fbfcfd!important;
+  color:#2f3a43!important;
+  box-shadow:none!important;
+}
+.note-actions-menu.note-menu-portal{
+  z-index:33000!important;
+  width:min(205px,calc(100vw - 16px))!important;
+  border:1px solid #c6ccd2!important;
+  border-radius:8px!important;
+  background:#fff!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.14)!important;
+  padding:5px 0!important;
+}
+.note-actions-menu.note-menu-portal .note-menu-item{
+  min-height:34px!important;
+  padding:7px 11px!important;
+  border-bottom:1px solid #eef1f4!important;
+  color:#2e3841!important;
+  font-size:11px!important;
+}
+.note-actions-menu.note-menu-portal .note-menu-item:last-child{border-bottom:0!important}
+.note-actions-menu.note-menu-portal .note-menu-item:hover{background:#eef5fb!important}
+.note-actions-menu.note-menu-portal .danger-menu-item{color:#a32931!important}
+
+@keyframes aghuV36BeamOrbit{to{transform:rotate(1turn)}}
+@media(max-width:920px){
+  #keepPage.notes-view-cards .notes-table tbody{grid-template-columns:repeat(auto-fill,minmax(220px,220px))!important}
+  #keepPage.notes-view-cards .notes-table tr[data-id]{width:220px!important;min-width:220px!important;max-width:220px!important}
+}
+@media(max-width:700px){
+  #keepPage.notes-view-cards .notes-table tbody{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+  #keepPage.notes-view-cards .notes-table tr[data-id]{width:auto!important;min-width:0!important;max-width:none!important;min-height:176px!important}
+}
+@media(max-width:480px){
+  #keepPage.notes-view-cards .notes-table tbody{grid-template-columns:1fr!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #keepPage.notes-view-cards .notes-table tr[data-id]::after{animation:none!important}
+}
+</style>
+
+
+<style id="aghu-v37-neon-menu-update">
+/* v37: preserva o layout atual e só reforça o feixe contínuo e o menu */
+#keepPage.notes-view-cards .notes-table tr[data-id]{
+  position:relative!important;
+  overflow:hidden!important;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id]::before,
+#keepPage.notes-view-cards .notes-table tr[data-id]::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+}
+/* linha permanente, discreta e suave na cor escolhida */
+#keepPage.notes-view-cards .notes-table tr[data-id]::before{
+  border:1px solid color-mix(in srgb,var(--note-accent, #1d2329) 72%, #d7dde2)!important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb,var(--note-accent, #1d2329) 14%, transparent),
+    0 0 0 0.5px color-mix(in srgb,var(--note-accent, #1d2329) 14%, transparent)!important;
+  opacity:.98!important;
+  z-index:0!important;
+}
+/* feixe ciano em movimento contínuo: 3s para dar uma volta completa */
+#keepPage.notes-view-cards .notes-table tr[data-id]::after{
+  inset:-1px!important;
+  padding:1.4px!important;
+  background:conic-gradient(
+    from 0turn,
+    rgba(0,0,0,0) 0deg 332deg,
+    rgba(26,243,255,0) 332deg,
+    rgba(26,243,255,.18) 338deg,
+    rgba(26,243,255,.48) 344deg,
+    rgba(122,252,255,.95) 350deg,
+    rgba(20,239,255,1) 356deg,
+    rgba(26,243,255,.28) 360deg
+  )!important;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;
+  -webkit-mask-composite:xor!important;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;
+  mask-composite:exclude!important;
+  filter:drop-shadow(0 0 5px rgba(20,239,255,.38)) drop-shadow(0 0 9px rgba(20,239,255,.18))!important;
+  opacity:1!important;
+  z-index:0!important;
+  animation:aghuV37BeamOrbit 3s linear infinite!important;
+  will-change:transform!important;
+}
+#keepPage.notes-view-cards .notes-table tr[data-id] > *{position:relative;z-index:1!important}
+#keepPage.notes-view-cards .notes-table .grid-icon-btn{
+  width:100%!important;
+  height:30px!important;
+  font-size:11px!important;
+  color:#7a6a55!important;
+}
+#keepPage.notes-view-cards .notes-table .grid-icon-btn:hover{background:#f4f7fa!important;color:#54606b!important}
+#keepPage.notes-view-cards .notes-table td.row-action{
+  background:#fafbfd!important;
+}
+.note-menu-button{
+  position:relative!important;
+  z-index:22010!important;
+}
+.note-actions-menu.note-menu-portal{
+  z-index:42000!important;
+}
+@keyframes aghuV37BeamOrbit{to{transform:rotate(1turn)}}
+@media(prefers-reduced-motion:reduce){
+  #keepPage.notes-view-cards .notes-table tr[data-id]::after{animation:none!important}
+}
+</style>
+
 </head>
 <body>
   <div id="authScreen" class="auth-screen">
@@ -2569,19 +4044,87 @@
   };
 
 
-  function closeNoteActionsMenu(){
-    els.noteActionsMenu?.classList.add('hidden');
+  function ensureNoteActionsPortal(){
+    if(!els.noteActionsMenu)return;
+    els.noteActionsMenu.classList.add('note-menu-portal');
+    if(els.noteActionsMenu.parentElement!==document.body){
+      document.body.appendChild(els.noteActionsMenu);
+    }
   }
+
+  function positionNoteActionsMenu(){
+    if(!els.noteActionsMenu||!els.noteMenuBtn||els.noteActionsMenu.classList.contains('hidden'))return;
+
+    const btn=els.noteMenuBtn.getBoundingClientRect();
+    const menu=els.noteActionsMenu;
+    const vw=Math.max(document.documentElement.clientWidth,window.innerWidth||0);
+    const vh=Math.max(document.documentElement.clientHeight,window.innerHeight||0);
+    const gap=6;
+    const edge=8;
+
+    menu.style.visibility='hidden';
+    menu.style.left='0px';
+    menu.style.top='0px';
+
+    const mw=Math.min(menu.offsetWidth||220,vw-(edge*2));
+    const mh=Math.min(menu.scrollHeight||menu.offsetHeight||360,vh-(edge*2));
+
+    let left=btn.right-mw;
+    left=Math.max(edge,Math.min(left,vw-mw-edge));
+
+    let top=btn.bottom+gap;
+    if(top+mh>vh-edge){
+      top=btn.top-mh-gap;
+    }
+    top=Math.max(edge,Math.min(top,vh-mh-edge));
+
+    menu.style.width=`${mw}px`;
+    menu.style.left=`${Math.round(left)}px`;
+    menu.style.top=`${Math.round(top)}px`;
+    menu.style.right='auto';
+    menu.style.bottom='auto';
+    menu.style.visibility='visible';
+  }
+
+  function openNoteActionsMenu(){
+    if(!els.noteActionsMenu)return;
+    ensureNoteActionsPortal();
+    els.noteActionsMenu.classList.remove('hidden');
+    requestAnimationFrame(positionNoteActionsMenu);
+  }
+
+  function closeNoteActionsMenu(){
+    if(!els.noteActionsMenu)return;
+    els.noteActionsMenu.classList.add('hidden');
+    els.noteActionsMenu.style.visibility='';
+  }
+
   els.noteMenuBtn?.addEventListener('click',e=>{
+    e.preventDefault();
     e.stopPropagation();
-    els.noteActionsMenu?.classList.toggle('hidden');
+    if(els.noteActionsMenu?.classList.contains('hidden'))openNoteActionsMenu();
+    else closeNoteActionsMenu();
   });
+
   els.noteActionsMenu?.addEventListener('click',e=>{
+    e.stopPropagation();
     if(e.target.closest('button'))setTimeout(closeNoteActionsMenu,0);
   });
+
   document.addEventListener('click',e=>{
-    if(!e.target.closest('.note-menu-host'))closeNoteActionsMenu();
+    if(e.target===els.noteMenuBtn||els.noteMenuBtn?.contains(e.target))return;
+    if(els.noteActionsMenu?.contains(e.target))return;
+    closeNoteActionsMenu();
   });
+
+  window.addEventListener('resize',()=>{
+    if(!els.noteActionsMenu?.classList.contains('hidden'))positionNoteActionsMenu();
+  },{passive:true});
+
+  /* Captura rolagem de qualquer ancestral, inclusive o editor em primeiro plano. */
+  window.addEventListener('scroll',()=>{
+    if(!els.noteActionsMenu?.classList.contains('hidden'))positionNoteActionsMenu();
+  },true);
 
   function fmtDate(v){
     if(!v) return '-';
@@ -3762,6 +5305,45 @@
     return compact;
   }
 
+
+  function noteAccentColor(note){
+    const raw=String(note?.patient_meta?.cardAccent||'#171717').trim();
+    return /^#[0-9a-f]{6}$/i.test(raw)?raw:'#171717';
+  }
+
+  function firstNameFromDisplay(name=''){
+    const clean=String(name||'').trim();
+    if(!clean)return'Nota';
+    const first=clean.split(/\s+/)[0];
+    return first.length>18?first.slice(0,18):first;
+  }
+
+  function safeCardMeta(value,fallback='—'){
+    const v=String(value??'').trim();
+    return v&&v!=='0'?v:fallback;
+  }
+
+  async function updateCardAccent(noteId,color){
+    if(!/^#[0-9a-f]{6}$/i.test(String(color||'')))return;
+    const note=state.notes.find(n=>n.id===noteId);
+    if(!note)return;
+    const patient_meta={...(note.patient_meta||{}),cardAccent:color};
+    setSyncStatus('syncing');
+    const {error}=await supabase.from('notes')
+      .update({patient_meta,updated_at:new Date().toISOString()})
+      .eq('id',noteId);
+    if(error){
+      showToast('Não foi possível alterar a cor da nota.');
+      setSyncStatus('ok');
+      return;
+    }
+    note.patient_meta=patient_meta;
+    if(state.current?.id===noteId)state.current.patient_meta=patient_meta;
+    cacheNotes();
+    renderNotes();
+    setSyncStatus('ok');
+  }
+
   function renderNotes(){
     const rows=filteredNotes();
     updateCompactNameOnlyMode();
@@ -3777,13 +5359,33 @@
         ? `<span class="quick-ref-count" title="Imagens para consulta rápida">${qrefs.length} img</span>`
         : '';
 
-      return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}">
+      const accent=noteAccentColor(n);
+      const firstName=firstNameFromDisplay(meta.name);
+      const age=safeCardMeta(meta.age);
+      const record=safeCardMeta(meta.record);
+
+      return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}" style="--note-accent:${accent}">
         <td data-label="Nome" class="patient-name-cell" data-name-cell="${n.id}">
+          <div class="note-card-idbar">
+            <span class="note-card-firstname" title="${esc(meta.name)}">${esc(firstName)}</span>
+            <div class="note-card-meta">
+              <span class="note-card-chip" title="Idade">Idade: ${esc(age)}</span>
+              <span class="note-card-chip" title="Prontuário / POL">Pront.: ${esc(record)}</span>
+              <label class="note-card-accent-wrap" title="Cor do contorno da nota">
+                <span class="note-card-accent-dot"></span>
+                <input class="note-card-accent-input" type="color" value="${accent}" data-card-accent="${n.id}" aria-label="Selecionar cor do contorno">
+              </label>
+            </div>
+          </div>
+
           <div class="patient-name-main">
             <strong>${esc(meta.name)}</strong>
             ${hint}
             <button class="quick-ref-add" type="button" data-add-quick-image="${n.id}" title="Adicionar imagem para consulta rápida">＋ imagem</button>
           </div>
+
+          <div class="keep-card-preview">${esc(stripHtml(n.content_html||'').slice(0,420))}</div>
+
           <div class="quick-ref-zone" data-quick-zone="${n.id}" tabindex="0" aria-label="Cole uma imagem para consulta rápida">
             <div class="quick-ref-paste-hint">Selecione esta nota e cole um print com Ctrl+V, ou use “＋ imagem”.</div>
             <div class="quick-ref-strip" data-quick-strip="${n.id}"></div>
@@ -3806,13 +5408,25 @@
 
     els.tbody.querySelectorAll('tr[data-id]').forEach(tr=>{
       tr.addEventListener('click',e=>{
-        if(e.target.closest('button')||e.target.closest('.quick-ref-thumb'))return;
+        if(e.target.closest('button')||e.target.closest('input')||e.target.closest('.quick-ref-thumb'))return;
         state.selectedId=tr.dataset.id;
         renderNotes();
       });
       tr.addEventListener('dblclick',e=>{
-        if(e.target.closest('.quick-ref-zone')||e.target.closest('button'))return;
+        if(e.target.closest('.quick-ref-zone')||e.target.closest('button')||e.target.closest('input'))return;
         openNote(tr.dataset.id);
+      });
+    });
+
+    els.tbody.querySelectorAll('[data-card-accent]').forEach(input=>{
+      input.addEventListener('click',e=>e.stopPropagation());
+      input.addEventListener('input',e=>{
+        const tr=input.closest('tr[data-id]');
+        if(tr)tr.style.setProperty('--note-accent',input.value);
+      });
+      input.addEventListener('change',async e=>{
+        e.stopPropagation();
+        await updateCardAccent(input.dataset.cardAccent,input.value);
       });
     });
 
@@ -5132,5 +6746,163 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
 })();
 
   </script>
+
+<script id="aghu-v36-note-menu-fix">
+(function(){
+  function ready(fn){if(document.readyState!=='loading')fn();else document.addEventListener('DOMContentLoaded',fn,{once:true});}
+  ready(function(){
+    const btn=document.getElementById('noteMenuBtn');
+    const menu=document.getElementById('noteActionsMenu');
+    if(!btn||!menu) return;
+    function ensurePortal(){
+      menu.classList.add('note-menu-portal');
+      if(menu.parentElement!==document.body) document.body.appendChild(menu);
+    }
+    function position(){
+      if(menu.classList.contains('hidden')) return;
+      ensurePortal();
+      const r=btn.getBoundingClientRect();
+      const vw=Math.max(document.documentElement.clientWidth, window.innerWidth||0);
+      const vh=Math.max(document.documentElement.clientHeight, window.innerHeight||0);
+      const edge=8, gap=6;
+      menu.style.visibility='hidden';
+      menu.style.display='block';
+      menu.style.left='0px';
+      menu.style.top='0px';
+      const mw=Math.min(menu.offsetWidth||205, vw-(edge*2));
+      const mh=Math.min(menu.scrollHeight||menu.offsetHeight||260, vh-(edge*2));
+      let left=Math.min(Math.max(edge, r.right-mw), vw-mw-edge);
+      let top=r.bottom+gap;
+      if(top+mh>vh-edge) top=r.top-mh-gap;
+      top=Math.min(Math.max(edge, top), vh-mh-edge);
+      menu.style.width=mw+'px';
+      menu.style.left=Math.round(left)+'px';
+      menu.style.top=Math.round(top)+'px';
+      menu.style.visibility='visible';
+    }
+    function openMenu(){ensurePortal(); menu.classList.remove('hidden'); requestAnimationFrame(position);}
+    function closeMenu(){menu.classList.add('hidden'); menu.style.visibility='';}
+    function toggleMenu(){ if(menu.classList.contains('hidden')) openMenu(); else closeMenu(); }
+    window.__aghuToggleNoteMenu = toggleMenu;
+    document.addEventListener('click', function(e){
+      const trigger=e.target.closest('#noteMenuBtn');
+      if(trigger){
+        e.preventDefault();
+        e.stopPropagation();
+        if(typeof e.stopImmediatePropagation==='function') e.stopImmediatePropagation();
+        toggleMenu();
+        return;
+      }
+      if(menu.contains(e.target)) return;
+      closeMenu();
+    }, true);
+    document.addEventListener('touchstart', function(e){
+      const trigger=e.target.closest('#noteMenuBtn');
+      if(trigger){
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMenu();
+      }
+    }, {capture:true, passive:false});
+    window.addEventListener('resize', position, {passive:true});
+    window.addEventListener('scroll', position, true);
+  });
+})();
+</script>
+
+
+<script id="aghu-v37-force-note-menu">
+(function(){
+  function init(){
+    const btn = document.getElementById('noteMenuBtn');
+    const menu = document.getElementById('noteActionsMenu');
+    if(!btn || !menu) return;
+
+    function ensurePortal(){
+      menu.classList.add('note-menu-portal');
+      if(menu.parentElement !== document.body){
+        document.body.appendChild(menu);
+      }
+    }
+
+    function place(){
+      if(menu.classList.contains('hidden')) return;
+      ensurePortal();
+      const r = btn.getBoundingClientRect();
+      const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+      const vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+      const edge = 8;
+      const gap = 6;
+
+      menu.style.visibility = 'hidden';
+      menu.style.display = 'block';
+      menu.style.left = '0px';
+      menu.style.top = '0px';
+      menu.style.right = 'auto';
+      menu.style.bottom = 'auto';
+
+      const mw = Math.min((menu.offsetWidth || 205), vw - edge*2);
+      const mh = Math.min((menu.scrollHeight || menu.offsetHeight || 280), vh - edge*2);
+      let left = Math.min(Math.max(edge, r.right - mw), vw - mw - edge);
+      let top = r.bottom + gap;
+      if(top + mh > vh - edge){ top = r.top - mh - gap; }
+      top = Math.min(Math.max(edge, top), vh - mh - edge);
+
+      menu.style.width = mw + 'px';
+      menu.style.left = Math.round(left) + 'px';
+      menu.style.top = Math.round(top) + 'px';
+      menu.style.visibility = 'visible';
+    }
+
+    function openMenu(){
+      ensurePortal();
+      menu.classList.remove('hidden');
+      requestAnimationFrame(place);
+    }
+    function closeMenu(){
+      menu.classList.add('hidden');
+      menu.style.visibility = '';
+    }
+    function toggleMenu(ev){
+      if(ev){ ev.preventDefault(); ev.stopPropagation(); if(typeof ev.stopImmediatePropagation === 'function') ev.stopImmediatePropagation(); }
+      if(menu.classList.contains('hidden')) openMenu();
+      else closeMenu();
+      return false;
+    }
+
+    window.toggleNoteMenu = toggleMenu;
+    window.openNoteActionsMenu = openMenu;
+    window.closeNoteActionsMenu = closeMenu;
+
+    const freshBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(freshBtn, btn);
+    freshBtn.setAttribute('type','button');
+    freshBtn.setAttribute('onclick','return window.toggleNoteMenu(event)');
+    freshBtn.addEventListener('click', toggleMenu, true);
+    freshBtn.addEventListener('pointerdown', toggleMenu, true);
+    freshBtn.addEventListener('touchstart', toggleMenu, {capture:true, passive:false});
+
+    menu.addEventListener('click', function(e){
+      e.stopPropagation();
+      const b = e.target.closest('button');
+      if(b){ setTimeout(closeMenu, 0); }
+    }, true);
+
+    document.addEventListener('click', function(e){
+      const trigger = e.target.closest('#noteMenuBtn');
+      if(trigger) return;
+      if(menu.contains(e.target)) return;
+      closeMenu();
+    }, true);
+
+    window.addEventListener('resize', place, {passive:true});
+    window.addEventListener('scroll', place, true);
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeMenu(); });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
+  else init();
+})();
+</script>
+
 </body>
 </html>
