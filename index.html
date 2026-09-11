@@ -1,12 +1,5 @@
 <!doctype html>
-<!--
-ARQUIVO ÚNICO DO APP
-HTML, CSS, configuração e JavaScript estão reunidos neste arquivo.
-A biblioteca Supabase é carregada por CDN.
-Preencha SUPABASE_URL e SUPABASE_ANON_KEY em APP_CONFIG.
-O schema SQL está incorporado no final como referência e precisa ser aplicado no Supabase uma única vez.
--->
-
+<!-- AGHU Notes LOCAL v21: funcionamento 100% local, sem Supabase. -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -14,22 +7,19 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
   <meta name="color-scheme" content="light" />
   <title>AGHU Notes</title>
   <meta name="theme-color" content="#ffffff" />
-  <link rel="manifest" href="/aghu/manifest.webmanifest?v=16" />
-  <link rel="shortcut icon" href="/aghu/favicon.ico?v=16" />
-  <link rel="icon" href="/aghu/favicon.ico?v=16" sizes="any" />
-  <link rel="icon" type="image/png" sizes="96x96" href="/aghu/favicon-96-v16.png?v=16" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/aghu/icon-192-v16.png?v=16" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/aghu/apple-touch-icon-v16.png?v=16" />
+  <link rel="manifest" href="./manifest.webmanifest?v=21" />
+  <link rel="shortcut icon" href="./favicon.ico?v=21" />
+  <link rel="icon" href="./favicon.ico?v=21" sizes="any" />
+  <link rel="icon" type="image/png" sizes="96x96" href="./favicon-96-v16.png?v=21" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192-v16.png?v=21" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-v16.png?v=21" />
   <meta name="application-name" content="AGHU Notes" />
   <meta name="apple-mobile-web-app-title" content="AGHU Notes" />
 
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
+<style>
 :root{
   --sidebar:220px; --red:#b9252f; --mint:#1fb7a5; --blue:#4f7fbe; --line:#d7d7d7;
   --soft:#f4f4f4; --text:#2f2f2f; --muted:#777; --bg:#ededed;
@@ -1210,22 +1200,7 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
       .patient-meta-actions .btn{flex:1 1 150px}
     }
   </style>
-
-  <style id="app-global-counters-style">
-    .app-counters{
-      position:fixed;left:7px;bottom:5px;z-index:1400;
-      display:flex;align-items:center;gap:5px;
-      padding:2px 5px;border:1px solid rgba(160,160,160,.18);
-      border-radius:2px;background:rgba(255,255,255,.74);
-      color:#a3a3a3;font:9px/1.2 Arial,Helvetica,sans-serif;
-      white-space:nowrap;pointer-events:none;backdrop-filter:blur(2px)
-    }
-    .app-counters strong{color:#7d7d7d;font-weight:600}
-    .counter-sep{color:#c5c5c5}
-    @media(max-width:520px){.app-counters{left:4px;bottom:3px;font-size:8px;padding:2px 4px}}
-  </style>
-
-  <style id="mobile-name-only-v17">
+<style id="mobile-name-only-v17">
     @media(max-width:620px){
       #keepPage .notes-list-layout,
       body.keep-focus-mode #keepPage .notes-list-layout{
@@ -1310,15 +1285,6 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
 
   <style id="aghu-v18-editor-mobile-calculator">
     /* Texto clínico colado: espaçamento simples e previsível. */
-    .note-body{
-      line-height:1.28!important;
-    }
-    .note-body p,
-    .note-body div{
-      margin-top:0!important;
-      margin-bottom:0!important;
-      line-height:inherit!important;
-    }
 
     /* A barra H1/H2/Aa/B/... acompanha a rolagem. */
     .formatbar{
@@ -1473,58 +1439,354 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
       }
     }
   </style>
+<style id="aghu-v22">
+    .notes-table th[data-sort="title"]{width:auto!important}.notes-table th[data-sort="synthetic_age"]{width:90px!important}.notes-table th[data-sort="synthetic_record"]{width:130px!important}.notes-table th.icon-col{width:38px!important}.patient-source-badge{display:none!important}
+    .notes-table td[data-label="Nome"],.notes-table td[data-label="Nome"] strong{color:#111!important;-webkit-text-fill-color:#111!important;opacity:1!important}
+    .notes-group-row td{display:table-cell!important;height:30px!important;padding:6px 10px!important;background:#edf2f7!important;border-top:1px solid #bfc6cc!important;border-bottom:1px solid #c9ced3!important;color:#4d5963!important;font-weight:700!important;font-size:11px!important}.notes-group-row.pinned-group td{background:#e8f2fb!important;color:#355f88!important}
+    .word-toolbar{position:sticky!important;top:0!important;z-index:35!important;display:flex!important;align-items:center;gap:5px;flex-wrap:wrap;padding:5px!important;background:#f7f8f9!important;border:1px solid #cfd4d9!important;box-shadow:0 1px 2px rgba(0,0,0,.07)}body.keep-focus-mode #editorPage .word-toolbar{top:51px!important}.word-group{display:flex;align-items:center;gap:3px;padding-right:5px;margin-right:2px;border-right:1px solid #d7dadd}.word-group:last-child{border-right:0}.word-group select{height:29px;border:1px solid #c8cdd2;background:#fff;color:#222;font:11px Arial,Helvetica,sans-serif;padding:0 5px}#paragraphStyleSelect{width:105px}#fontNameSelect{width:135px}#fontSizeSelect{width:55px}#lineSpacingSelect{width:72px}.word-toolbar button{min-width:30px!important;height:29px!important;padding:0 6px!important;border:1px solid #cfd3d7!important;border-radius:2px!important;background:#fff!important;color:#222!important;font:12px Arial,Helvetica,sans-serif!important}.word-toolbar button:hover{background:#eaf1f8!important}.word-color-tool{position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:29px;border:1px solid #cfd3d7;background:#fff;cursor:pointer;font:700 13px Arial}.word-color-tool input{position:absolute;left:3px;bottom:2px;width:28px;height:5px;padding:0;border:0}.word-highlight-tool span{padding:1px 3px;background:#fff59d;font-weight:400;font-size:10px}.note-body{line-height:normal!important}
+    .admin-access-link{display:block;margin:8px auto 0;padding:2px 6px;border:0;background:transparent;color:#aaa;font-size:9px;cursor:pointer}.admin-access-link:hover{color:#777;text-decoration:underline}.admin-shell{min-height:100vh;display:grid;grid-template-columns:220px minmax(0,1fr);background:#f1f1f1}.admin-shell.hidden{display:none!important}.admin-main{min-width:0}.admin-top-title{display:flex!important;align-items:center;color:#555;font-size:12px}.admin-page{margin:0;min-height:calc(100vh - 145px);background:#fff}.admin-create-form{display:grid;grid-template-columns:minmax(230px,1fr) minmax(180px,280px) auto;gap:10px;align-items:end;padding:15px 14px 18px;border:1px solid #c9ced3;border-top:0;background:#fff}.admin-create-form label{display:flex;flex-direction:column;gap:5px;color:#555;font-size:11px}.admin-create-form input{height:34px;padding:0 9px;border:1px solid #c7cbd0;background:#fff;color:#222;font:12px Arial}.admin-inline-status{grid-column:1/-1;min-height:14px;color:#6c7a86;font-size:10px}.admin-users-title{margin-top:16px}.admin-users-wrap{min-height:260px;background:#fff}.admin-users-table{min-width:720px!important}.admin-users-table td{height:40px!important;color:#222!important;background:#fff!important}.admin-password{font-family:Consolas,monospace;font-size:11px}.admin-user-actions{display:flex;gap:5px;justify-content:center}.admin-user-actions button{height:26px;padding:0 7px;border:1px solid #c8ccd0;background:#fff;color:#444;font-size:10px;cursor:pointer}.admin-user-actions .danger{color:#a3262e;border-color:#d6b1b4}.admin-local-warning{margin-top:12px;color:#999;font-size:9px}.admin-login-dialog{width:min(430px,calc(100vw - 24px))}.admin-login-form{padding:14px}.admin-login-form label{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;color:#555;font-size:11px}.admin-login-form input{height:34px;padding:0 9px;border:1px solid #c7cbd0;font:12px Arial}.admin-setup-help{margin-bottom:12px;color:#777;font-size:10px;line-height:1.45}@media(max-width:900px){.word-group-selects{width:100%;border-right:0}.admin-shell{grid-template-columns:180px minmax(0,1fr)}.admin-create-form{grid-template-columns:1fr 1fr}}@media(max-width:700px){.word-group{max-width:100%;overflow-x:auto}.word-group-selects{display:grid;grid-template-columns:1fr 1fr 70px}.admin-shell{display:block}.admin-sidebar{display:none}.admin-create-form{grid-template-columns:1fr}}
+  </style>
+
+  <style id="aghu-v23-menu-google-security">
+    .note-menu-host{position:relative}
+    .note-menu-button{min-width:88px}
+    .note-actions-menu{
+      position:absolute;
+      top:calc(100% + 4px);
+      right:0;
+      z-index:80;
+      width:205px;
+      padding:4px 0;
+      border:1px solid #bfc5ca;
+      background:#fff;
+      box-shadow:0 3px 12px rgba(0,0,0,.16);
+    }
+    .note-actions-menu.hidden{display:none!important}
+    .note-menu-item{
+      display:block;
+      width:100%;
+      min-height:32px;
+      padding:6px 11px;
+      border:0;
+      border-bottom:1px solid #eceff1;
+      background:#fff;
+      color:#222;
+      text-align:left;
+      font:11px Arial,Helvetica,sans-serif;
+      cursor:pointer;
+    }
+    .note-menu-item:last-child{border-bottom:0}
+    .note-menu-item:hover{background:#edf4fb}
+    .danger-menu-item{color:#a32931!important}
+    .google-docs-dialog{width:min(590px,calc(100vw - 26px))}
+    .google-docs-body{padding:15px}
+    .google-docs-help{
+      margin:0 0 13px;
+      color:#666;
+      font-size:10.5px;
+      line-height:1.5;
+    }
+    .google-docs-body>label:not(.google-toggle-row){
+      display:flex;
+      flex-direction:column;
+      gap:5px;
+      color:#555;
+      font-size:11px;
+    }
+    .google-docs-body input[type="text"]{
+      height:34px;
+      padding:0 9px;
+      border:1px solid #c7cbd0;
+      background:#fff;
+      color:#222;
+      font:11px Arial,Helvetica,sans-serif;
+    }
+    .google-toggle-row{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      margin:12px 0;
+      color:#555;
+      font-size:10.5px;
+    }
+    .google-docs-status{
+      min-height:30px;
+      padding:8px 9px;
+      border:1px solid #d8dde1;
+      background:#f7f9fb;
+      color:#66717a;
+      font-size:10px;
+      line-height:1.4;
+    }
+    .google-docs-status.ok{color:#356948;border-color:#b8d2c0;background:#f3faf5}
+    .google-docs-status.error{color:#9b2b32;border-color:#ddb9bd;background:#fff7f7}
+
+    /* O código-fonte do site precisa ser legível pelo navegador.
+       O conteúdo do usuário, porém, é criptografado no armazenamento local. */
+    .security-storage-marker{display:none}
+  </style>
 
 
-  <style id="aghu-v19-final-visibility">
-    /* Nome do paciente sempre com o mesmo contraste das demais informações. */
-    #keepPage .notes-table td[data-label="Nome"],
-    #keepPage .notes-table td[data-label="Nome"] strong,
-    body.keep-focus-mode #keepPage .notes-table td[data-label="Nome"],
-    body.keep-focus-mode #keepPage .notes-table td[data-label="Nome"] strong{
-      color:#111!important;
-      opacity:1!important;
-      text-shadow:none!important;
-      -webkit-text-fill-color:#111!important;
+  <style id="campaign-jk-style">
+    :root{--campaign-jk-space:48px}
+    body{padding-bottom:var(--campaign-jk-space)!important}
+    .campaign-jk{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:9500;
+      box-sizing:border-box;
+      min-height:var(--campaign-jk-space);
+      padding:8px 12px;
+      border-top:1px solid #c9cdd1;
+      background:rgba(250,250,250,.98);
+      color:#555;
+      font:10px/1.35 Arial,Helvetica,sans-serif;
+      text-align:center;
+      box-shadow:0 -1px 4px rgba(0,0,0,.08);
+    }
+    .campaign-jk-label{
+      display:inline-block;
+      margin-right:5px;
+      padding:2px 6px;
+      border:1px solid #b51f2c;
+      border-radius:2px;
+      background:#fff;
+      color:#b51f2c;
+      font-weight:700;
+    }
+    .campaign-jk strong{color:#333}
+    .campaign-jk a{
+      color:#2b6f62;
+      text-decoration:underline;
+      text-underline-offset:2px;
+    }
+    .campaign-jk a:hover{color:#174f46}
+    @media(max-width:700px){
+      :root{--campaign-jk-space:76px}
+      .campaign-jk{padding:7px 8px;font-size:9px;line-height:1.4}
+    }
+    @media(max-width:430px){
+      :root{--campaign-jk-space:96px}
+      .campaign-jk{font-size:8.5px}
+    }
+  </style>
+
+
+  <style id="quick-reference-images-v25">
+    .patient-name-cell{
+      position:relative;
+      min-width:0;
+    }
+    .patient-name-main{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      min-width:0;
+    }
+    .patient-name-main strong{
+      min-width:0;
+      overflow-wrap:anywhere;
+    }
+    .quick-ref-add{
+      flex:0 0 auto;
+      border:0;
+      background:transparent;
+      color:#56728d;
+      padding:1px 4px;
+      font:10px Arial,Helvetica,sans-serif;
+      cursor:pointer;
+      opacity:.72;
+    }
+    .quick-ref-add:hover{
+      opacity:1;
+      text-decoration:underline;
+    }
+    .quick-ref-zone{
+      margin-top:5px;
+      min-height:0;
+      outline:none;
+    }
+    .quick-ref-zone.quick-ref-active{
+      padding:5px;
+      border:1px dashed #b9c4cd;
+      background:#fafcfe;
+    }
+    .quick-ref-paste-hint{
+      display:none;
+      color:#8b949c;
+      font-size:9px;
+      line-height:1.25;
+    }
+    tr.selected .quick-ref-zone:not(:has(.quick-ref-thumb)){
+      display:block;
+      padding:5px;
+      border:1px dashed #b9c4cd;
+      background:#fafcfe;
+    }
+    tr.selected .quick-ref-zone:not(:has(.quick-ref-thumb)) .quick-ref-paste-hint{
+      display:block;
+    }
+    .quick-ref-strip{
+      display:flex;
+      align-items:center;
+      gap:5px;
+      flex-wrap:wrap;
+    }
+    .quick-ref-thumb{
+      position:relative;
+      width:54px;
+      height:54px;
+      border:1px solid #bfc7ce;
+      background:#fff;
+      overflow:hidden;
+      cursor:pointer;
+    }
+    .quick-ref-thumb img{
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .quick-ref-thumb-loading{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      height:100%;
+      color:#999;
+      font-size:8px;
+      text-align:center;
+    }
+    .quick-ref-remove{
+      position:absolute;
+      top:1px;
+      right:1px;
+      width:17px;
+      height:17px;
+      padding:0;
+      border:1px solid rgba(120,120,120,.45);
+      border-radius:2px;
+      background:rgba(255,255,255,.92);
+      color:#a3222c;
+      font:700 11px/15px Arial,Helvetica,sans-serif;
+      cursor:pointer;
+    }
+    .quick-ref-count{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:24px;
+      height:20px;
+      padding:0 5px;
+      border:1px solid #c8d0d7;
+      background:#f5f8fb;
+      color:#64717d;
+      font-size:9px;
+    }
+    .quick-ref-more{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:54px;
+      height:54px;
+      border:1px solid #c8d0d7;
+      background:#f5f8fb;
+      color:#64717d;
+      font-size:10px;
+      cursor:pointer;
     }
 
-    /* O contador deve permanecer visível em qualquer tela do site/PWA,
-       inclusive quando a janela "Primeiro plano" estiver aberta. */
-    .app-counters{
-      position:fixed!important;
-      left:10px!important;
-      bottom:9px!important;
-      z-index:99999!important;
-      display:flex!important;
-      visibility:visible!important;
-      opacity:1!important;
-      align-items:center!important;
-      gap:6px!important;
-      padding:4px 7px!important;
-      min-height:22px!important;
-      border:1px solid #c8cdd2!important;
-      border-radius:3px!important;
-      background:rgba(255,255,255,.96)!important;
-      color:#555!important;
-      font:10px/1.2 Arial,Helvetica,sans-serif!important;
-      box-shadow:0 1px 4px rgba(0,0,0,.12)!important;
-      pointer-events:none!important;
-      white-space:nowrap!important;
+    .quick-image-viewer-dialog{
+      width:min(980px,calc(100vw - 20px));
+      max-height:94vh;
+      padding:0;
+      border:1px solid #aeb6bd;
     }
-    .app-counters strong{
-      color:#222!important;
-      font-weight:700!important;
+    .quick-image-viewer-body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:220px;
+      max-height:calc(94vh - 48px);
+      padding:10px;
+      overflow:auto;
+      background:#1d1f21;
     }
-    .app-counters .counter-sep{
-      color:#aaa!important;
+    .quick-image-viewer-body img{
+      display:block;
+      max-width:100%;
+      max-height:calc(94vh - 70px);
+      object-fit:contain;
+      background:#fff;
     }
 
-    @media(max-width:620px){
-      .app-counters{
-        left:6px!important;
-        bottom:6px!important;
-        padding:3px 6px!important;
-        font-size:9px!important;
+    /* No modo compacto do celular continua aparecendo SOMENTE a área Nome,
+       mas as imagens de consulta rápida permanecem dentro dela. */
+    #keepPage.compact-name-only .quick-ref-add{
+      font-size:9px;
+    }
+    #keepPage.compact-name-only .quick-ref-thumb{
+      width:48px;
+      height:48px;
+    }
+    #keepPage.compact-name-only .quick-ref-paste-hint{
+      font-size:8.5px;
+    }
+
+    @media(max-width:600px){
+      .quick-ref-add{
+        padding:3px 5px;
       }
+      .quick-ref-strip{
+        gap:4px;
+      }
+      .quick-ref-thumb{
+        width:46px;
+        height:46px;
+      }
+      .quick-ref-more{
+        width:46px;
+        height:46px;
+      }
+    }
+  </style>
+
+
+  <style id="first-access-confetti-v26">
+    .first-access-confetti{
+      position:fixed;
+      inset:0;
+      z-index:20000;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .first-access-confetti-piece{
+      position:absolute;
+      top:-12vh;
+      left:var(--x);
+      width:var(--w);
+      height:var(--h);
+      border-radius:var(--radius);
+      opacity:.96;
+      transform:translate3d(0,0,0) rotate(var(--rot));
+      animation:firstAccessConfettiFall var(--dur) cubic-bezier(.12,.52,.24,.99) var(--delay) forwards;
+      will-change:transform,opacity;
+    }
+    @keyframes firstAccessConfettiFall{
+      0%{
+        transform:translate3d(0,-8vh,0) rotate(var(--rot)) scale(var(--scale));
+        opacity:0;
+      }
+      8%{opacity:1}
+      100%{
+        transform:translate3d(var(--drift),118vh,0) rotate(calc(var(--rot) + 1080deg)) scale(var(--scale));
+        opacity:.9;
+      }
+    }
+    @media(prefers-reduced-motion:reduce){
+      .first-access-confetti-piece{animation-duration:.01ms!important;animation-delay:0ms!important}
     }
   </style>
 
@@ -1550,9 +1812,10 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
         <label for="loginPassword">Senha</label>
         <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Senha" required />
         <button type="submit" class="btn btn-primary">Entrar</button>
-        <div class="login-memory-hint">Este aparelho permanecerá conectado após o primeiro login.</div>
+        <div class="login-memory-hint">Contas locais são cadastradas pelo Administrador. Após o login, a sessão permanece salva neste aparelho.</div>
         <div id="loginError" class="form-error"></div>
       </form>
+      <button id="adminAccessBtn" class="admin-access-link" type="button">Administrador</button>
 
       <div class="auth-privacy">
         Aplicativo particular para anotações pessoais. Não integra, consulta ou altera dados do sistema AGHU/EBSERH.
@@ -1560,8 +1823,17 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
     </div>
 
     <div class="auth-disclaimer">
-      Bloco de notas particular • não oficial • sem vínculo com AGHU/EBSERH
+      Bloco de notas particular • dados criptografados e sincronizados por usuário
     </div>
+  </div>
+
+
+  <div id="adminPanel" class="admin-shell hidden">
+    <aside class="sidebar admin-sidebar"><div class="sidebar-brand"><div class="aghu-notes-logo sidebar-aghu-logo"><div class="aghu-cross"></div><div class="aghu-word"><strong>AGHU<em>Notes</em></strong><small>Aplicativo particular de anotações</small></div></div></div><nav class="side-menu"><button class="menu-item active" type="button"><span>♟</span>Usuários e acessos</button><button id="adminExitBtn" class="menu-item" type="button"><span>↪</span>Sair</button></nav></aside>
+    <div class="admin-main"><header class="topbar"><div class="search-menu admin-top-title">Administrador</div><div class="top-actions"><span class="session-box">Gestão sincronizada de contas</span></div></header><main class="workspace"><div class="tabs"><button class="tab active" type="button">♟ Usuários e acessos</button></div><section class="page admin-page">
+      <div class="panel-title">Criar novo acesso</div><form id="adminCreateUserForm" class="admin-create-form" autocomplete="off"><label>Login / e-mail<input id="adminNewEmail" type="email" required></label><label>Senha<input id="adminNewPassword" type="text" minlength="4" required></label><button class="btn btn-primary" type="submit">Criar acesso</button><div id="adminCreateUserStatus" class="admin-inline-status"></div></form>
+      <div class="panel-title admin-users-title">Contas cadastradas</div><div class="table-wrap admin-users-wrap"><table class="notes-table admin-users-table"><thead><tr><th>Login</th><th>Senha</th><th>Criado em</th><th>Status</th><th>Ações</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div><div class="admin-local-warning">Gestão local: as contas existem somente neste navegador/aparelho nesta versão sem Supabase.</div>
+    </section></main></div>
   </div>
 
   <div id="appShell" class="app-shell hidden">
@@ -1648,7 +1920,7 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
           <input id="menuSearch" type="search" placeholder="Pesquisar menu" />
         </div>
         <div class="topbar-right">
-          <span id="syncStatus" class="sync-status">● Sincronizado</span>
+          <span id="syncStatus" class="sync-status">● Local</span>
           <button id="installAppBtn" class="install-app-btn hidden" type="button" title="Instalar neste dispositivo">⬇ Instalar</button>
           <button id="logoutBtn" class="logout-btn">↪ Sair</button>
         </div>
@@ -1719,17 +1991,14 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
                 <table class="notes-table">
                   <thead>
                     <tr>
-                      <th data-sort="synthetic_local">Local <span class="sort-glyph">↕</span></th>
                       <th data-sort="title">Nome <span class="sort-glyph">↕</span></th>
                       <th data-sort="synthetic_age">Idade <span class="sort-glyph">↕</span></th>
                       <th data-sort="synthetic_record">Prontuário <span class="sort-glyph">↕</span></th>
-                      <th data-sort="updated_at">Dt. Atend. <span class="sort-glyph">↕</span></th>
-                      <th class="icon-col"><span class="sort-glyph">↕</span></th>
-                      <th class="icon-col"><span class="sort-glyph">↕</span></th>
-                      <th class="icon-col"><span class="sort-glyph">↕</span></th>
-                      <th class="icon-col"><span class="sort-glyph">↕</span></th>
-                      <th class="icon-col"><span class="sort-glyph">↕</span></th>
-                      <th class="icon-col blue-cap"></th>
+                      <th class="icon-col" title="Abrir"></th>
+                      <th class="icon-col" title="Fixar"></th>
+                      <th class="icon-col" title="Arquivar"></th>
+                      <th class="icon-col" title="Excluir"></th>
+                      <th class="icon-col blue-cap" title="Editar identificação"></th>
                     </tr>
                   </thead>
                   <tbody id="notesTbody"></tbody>
@@ -1753,37 +2022,42 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
               <button id="backBtn" class="btn btn-light">← Lista</button>
               <span id="autosaveState" class="autosave-state">Salvo</span>
             </div>
-            <div class="editor-actions">
-              <button id="pinBtn" class="btn btn-light">☆ Fixar</button>
-              <button id="archiveBtn" class="btn btn-light">▣ Arquivar</button>
-              <button id="duplicateBtn" class="btn btn-light">⧉ Duplicar</button>
-              <button id="shareBtn" class="btn btn-light">↗ Compartilhar</button>
-              <button id="drawBtn" class="btn btn-light">✎ Desenho</button>
-              <button id="copyDocsBtn" class="btn btn-light">▤ Google Docs</button>
-              <button id="calculatorEditorBtn" class="btn btn-light" type="button">▦ Calculadora</button>
-              <button id="historyBtn" class="btn btn-light">↶ Histórico</button>
-              <button id="trashBtn" class="btn btn-danger">🗑 Excluir</button>
-              <button id="permanentDeleteBtn" class="btn btn-danger hidden">Excluir definitivamente</button>
+            <div class="editor-actions note-menu-host">
+              <button id="noteMenuBtn" class="btn btn-light note-menu-button" type="button">☰ Menu</button>
+              <div id="noteActionsMenu" class="note-actions-menu hidden" role="menu">
+                <button id="pinBtn" class="note-menu-item" type="button">☆ Fixar</button>
+                <button id="archiveBtn" class="note-menu-item" type="button">▣ Arquivar</button>
+                <button id="duplicateBtn" class="note-menu-item" type="button">⧉ Duplicar</button>
+                <button id="shareBtn" class="note-menu-item" type="button">↗ Compartilhar</button>
+                <button id="drawBtn" class="note-menu-item" type="button">✎ Desenho</button>
+                <button id="copyDocsBtn" class="note-menu-item" type="button">▤ Google Docs</button>
+                <button id="calculatorEditorBtn" class="note-menu-item" type="button">▦ Calculadora</button>
+                <button id="historyBtn" class="note-menu-item" type="button">↶ Histórico</button>
+                <button id="trashBtn" class="note-menu-item danger-menu-item" type="button">🗑 Excluir</button>
+                <button id="permanentDeleteBtn" class="note-menu-item danger-menu-item hidden" type="button">Excluir definitivamente</button>
+              </div>
             </div>
           </div>
 
           <div class="editor-shell">
             <input id="noteTitle" class="note-title" type="text" placeholder="Título da nota" />
 
-            <div class="formatbar">
-              <button data-cmd="formatBlock" data-value="H1">H1</button>
-              <button data-cmd="formatBlock" data-value="H2">H2</button>
-              <button data-cmd="formatBlock" data-value="P">Aa</button>
-              <button data-cmd="bold"><b>B</b></button>
-              <button data-cmd="italic"><i>I</i></button>
-              <button data-cmd="underline"><u>U</u></button>
-              <button data-cmd="strikeThrough"><s>S</s></button>
-              <button data-cmd="removeFormat">Tx</button>
-              <button data-cmd="insertUnorderedList">• Lista</button>
-              <button data-cmd="insertOrderedList">1. Lista</button>
-              <button id="checklistBtn">☑ Checklist</button>
-              <button data-cmd="undo">↶</button>
-              <button data-cmd="redo">↷</button>
+            <div id="wordToolbar" class="formatbar word-toolbar" aria-label="Barra de formatação">
+              <div class="word-group word-group-selects">
+                <select id="paragraphStyleSelect" title="Estilo"><option value="P">Normal</option><option value="H1">Título 1</option><option value="H2">Título 2</option><option value="H3">Título 3</option><option value="BLOCKQUOTE">Citação</option></select>
+                <select id="fontNameSelect" title="Fonte"><option>Arial</option><option>Calibri</option><option>Aptos</option><option>Times New Roman</option><option>Georgia</option><option>Verdana</option><option>Courier New</option></select>
+                <select id="fontSizeSelect" title="Tamanho"><option value="1">8</option><option value="2">10</option><option value="3" selected>12</option><option value="4">14</option><option value="5">18</option><option value="6">24</option><option value="7">36</option></select>
+              </div>
+              <div class="word-group">
+                <button type="button" data-cmd="bold" title="Negrito"><b>N</b></button><button type="button" data-cmd="italic" title="Itálico"><i>I</i></button><button type="button" data-cmd="underline" title="Sublinhado"><u>S</u></button><button type="button" data-cmd="strikeThrough" title="Tachado"><s>abc</s></button><button type="button" data-cmd="subscript" title="Subscrito">x₂</button><button type="button" data-cmd="superscript" title="Sobrescrito">x²</button>
+                <label class="word-color-tool" title="Cor da fonte"><span>A</span><input id="fontColorInput" type="color" value="#000000"></label><label class="word-color-tool word-highlight-tool" title="Realce"><span>ab</span><input id="highlightColorInput" type="color" value="#fff59d"></label>
+              </div>
+              <div class="word-group">
+                <button type="button" data-cmd="justifyLeft" title="Alinhar à esquerda">≡</button><button type="button" data-cmd="justifyCenter" title="Centralizar">≣</button><button type="button" data-cmd="justifyRight" title="Alinhar à direita">≡</button><button type="button" data-cmd="justifyFull" title="Justificar">☰</button><button type="button" data-cmd="insertUnorderedList" title="Marcadores">•≡</button><button type="button" data-cmd="insertOrderedList" title="Numeração">1≡</button><button type="button" data-cmd="outdent" title="Diminuir recuo">←≡</button><button type="button" data-cmd="indent" title="Aumentar recuo">≡→</button>
+              </div>
+              <div class="word-group">
+                <select id="lineSpacingSelect" title="Espaçamento entre linhas"><option value="">Linhas</option><option value="1">1,0</option><option value="1.15">1,15</option><option value="1.5">1,5</option><option value="2">2,0</option></select><button type="button" data-cmd="removeFormat" title="Limpar formatação">Tx</button><button type="button" data-cmd="undo" title="Desfazer">↶</button><button type="button" data-cmd="redo" title="Refazer">↷</button>
+              </div>
             </div>
 
             <div id="noteBody" class="note-body" contenteditable="true" data-placeholder="Digite sua nota..."></div>
@@ -1825,20 +2099,10 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
     </div>
   </div>
 
-
-  <dialog id="firstSyncDialog" class="utility-dialog">
-    <div class="dialog-head"><h3>Primeiro acesso neste dispositivo</h3></div>
-    <div class="utility-body">
-      <p>Este navegador foi autenticado pela primeira vez. Confirme para carregar e manter suas notas sincronizadas neste aparelho.</p>
-      <div class="dialog-actions">
-        <button id="confirmFirstSyncBtn" class="btn btn-primary">Confirmar sincronização</button>
-        <button id="cancelFirstSyncBtn" class="btn btn-light">Sair</button>
-      </div>
-    </div>
-  </dialog>
-
-
-  <dialog id="patientMetaDialog" class="utility-dialog patient-meta-dialog">
+  <dialog id="adminLoginDialog" class="utility-dialog admin-login-dialog"><div class="dialog-head"><h3 id="adminLoginTitle">Administrador</h3><button id="adminLoginCloseBtn" class="icon-btn" type="button">×</button></div><form id="adminLoginForm" class="admin-login-form" autocomplete="off"><div id="adminSetupHelp" class="admin-setup-help"></div>
+      <label>E-mail do Administrador<input id="adminEmailInput" type="email" autocomplete="username" required></label>
+      <label>Senha do Administrador<input id="adminPasswordInput" type="password" minlength="6" required></label><label id="adminConfirmWrap" class="hidden">Confirmar senha<input id="adminPasswordConfirm" type="password" minlength="6"></label><div id="adminLoginError" class="form-error"></div><div class="dialog-actions"><button id="adminLoginSubmitBtn" class="btn btn-primary" type="submit">Entrar</button><button id="adminLoginCancelBtn" class="btn btn-light" type="button">Cancelar</button></div></form></dialog>
+<dialog id="patientMetaDialog" class="utility-dialog patient-meta-dialog">
     <div class="dialog-head">
       <h3>Identificação exibida na lista</h3>
       <button id="closePatientMetaBtn" class="icon-btn" type="button" aria-label="Fechar">×</button>
@@ -1897,7 +2161,50 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
   <div id="toast" class="app-toast hidden" role="status" aria-live="polite"></div>
 
 
-  <dialog id="calculatorDialog" class="utility-dialog calculator-dialog">
+  
+  
+  <dialog id="quickImageViewerDialog" class="utility-dialog quick-image-viewer-dialog">
+    <div class="dialog-head">
+      <h3 id="quickImageViewerTitle">Consulta rápida</h3>
+      <button id="quickImageViewerCloseBtn" class="icon-btn" type="button" aria-label="Fechar">×</button>
+    </div>
+    <div class="quick-image-viewer-body">
+      <img id="quickImageViewerImg" alt="Imagem de consulta rápida">
+    </div>
+  </dialog>
+
+<dialog id="googleDocsDialog" class="utility-dialog google-docs-dialog">
+    <div class="dialog-head">
+      <h3>Google Docs</h3>
+      <button id="googleDocsCloseBtn" class="icon-btn" type="button" aria-label="Fechar">×</button>
+    </div>
+    <div class="google-docs-body">
+      <p class="google-docs-help">
+        Conecte uma conta Google uma vez por sessão. Depois disso, as alterações desta nota
+        são copiadas automaticamente para um documento no Google Drive, sem abrir uma nova aba.
+      </p>
+
+      <label>
+        Google OAuth Client ID
+        <input id="googleClientIdInput" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+      </label>
+
+      <label class="google-toggle-row">
+        <input id="googleAutoBackupToggle" type="checkbox" checked>
+        <span>Criar/atualizar cópia automaticamente ao salvar</span>
+      </label>
+
+      <div id="googleDocsStatus" class="google-docs-status">Google não conectado.</div>
+
+      <div class="dialog-actions">
+        <button id="googleConnectBtn" class="btn btn-primary" type="button">Conectar Google</button>
+        <button id="googleSyncNowBtn" class="btn btn-light" type="button">Copiar nota agora</button>
+        <button id="googleDocsCancelBtn" class="btn btn-light" type="button">Fechar</button>
+      </div>
+    </div>
+  </dialog>
+
+<dialog id="calculatorDialog" class="utility-dialog calculator-dialog">
     <div class="dialog-head">
       <h3>Calculadora</h3>
       <button id="calculatorCloseBtn" class="icon-btn" type="button" aria-label="Fechar">×</button>
@@ -1943,112 +2250,587 @@ O schema SQL está incorporado no final como referência e precisa ser aplicado 
     <div id="historyList" class="history-list"></div>
   </dialog>
 
-  <script type="text/plain" id="supabase-schema" hidden>
--- Execute no SQL Editor do Supabase.
-create extension if not exists pgcrypto;
-
-create table if not exists public.notes (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  title text not null default 'Nova nota',
-  content_html text not null default '',
-  pinned boolean not null default false,
-  archived boolean not null default false,
-  deleted boolean not null default false,
-  color text not null default '#ffffff',
-  reminder_at timestamptz,
-  synthetic_local text not null,
-  synthetic_age integer not null check (synthetic_age between 0 and 120),
-  synthetic_record integer not null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-
-alter table public.notes
-  add column if not exists patient_meta jsonb not null default '{}'::jsonb;
-
-create table if not exists public.labels (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  name text not null,
-  created_at timestamptz not null default now(),
-  unique(user_id,name)
-);
-
-create table if not exists public.note_labels (
-  note_id uuid not null references public.notes(id) on delete cascade,
-  label_id uuid not null references public.labels(id) on delete cascade,
-  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  primary key(note_id,label_id)
-);
-
-create table if not exists public.note_versions (
-  id uuid primary key default gen_random_uuid(),
-  note_id uuid not null references public.notes(id) on delete cascade,
-  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  title text not null default '',
-  content_html text not null default '',
-  created_at timestamptz not null default now()
-);
-
-create table if not exists public.attachments (
-  id uuid primary key default gen_random_uuid(),
-  note_id uuid not null references public.notes(id) on delete cascade,
-  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  storage_path text not null,
-  public_url text not null,
-  file_name text,
-  created_at timestamptz not null default now()
-);
-
-alter table public.notes enable row level security;
-alter table public.labels enable row level security;
-alter table public.note_labels enable row level security;
-alter table public.note_versions enable row level security;
-alter table public.attachments enable row level security;
-
-create policy "notes_own" on public.notes for all using (auth.uid()=user_id) with check (auth.uid()=user_id);
-create policy "labels_own" on public.labels for all using (auth.uid()=user_id) with check (auth.uid()=user_id);
-create policy "note_labels_own" on public.note_labels for all using (auth.uid()=user_id) with check (auth.uid()=user_id);
-create policy "versions_own" on public.note_versions for all using (auth.uid()=user_id) with check (auth.uid()=user_id);
-create policy "attachments_own" on public.attachments for all using (auth.uid()=user_id) with check (auth.uid()=user_id);
-
-insert into storage.buckets (id,name,public) values ('note-images','note-images',false)
-on conflict (id) do update set public=false;
-
-create policy "note_images_insert" on storage.objects for insert to authenticated with check (bucket_id='note-images' and (storage.foldername(name))[1]=auth.uid()::text);
-create policy "note_images_update" on storage.objects for update to authenticated using (bucket_id='note-images' and (storage.foldername(name))[1]=auth.uid()::text);
-create policy "note_images_delete" on storage.objects for delete to authenticated using (bucket_id='note-images' and (storage.foldername(name))[1]=auth.uid()::text);
-create policy "note_images_select" on storage.objects for select to authenticated using (bucket_id='note-images' and (storage.foldername(name))[1]=auth.uid()::text);
-
-  </script>
-
-  <script>
-// Preencha com os dados públicos do seu projeto Supabase.
-// A anon key é própria para uso no navegador; a senha do usuário nunca deve ser escrita aqui.
-window.APP_CONFIG = {
-  SUPABASE_URL: "https://aufujiafalafuncsbjzu.supabase.co",
-  SUPABASE_ANON_KEY: "sb_publishable_u0p7ZsvaBivvZwOgqVowcw_opxxFTOO"
-};
-
-  </script>
-
-    <div id="appCounters" class="app-counters" aria-live="polite">
-    <span>Acessos: <strong id="accessCount">0</strong></span>
-    <span class="counter-sep">•</span>
-    <span>Notas: <strong id="notesCreatedCount">0</strong></span>
+  <div class="security-storage-marker">
+    Dados locais protegidos por AES-GCM com chave derivada da senha do usuário.
   </div>
+
+
+  <div id="campaignJK" class="campaign-jk" role="note" aria-label="Campanha JK">
+    <span class="campaign-jk-label">Campanha JK:</span>
+    Garanta <strong>5 anos de acesso ilimitado</strong> por apenas <strong>R$ 50,00</strong>!
+    Para ativar sua conta, faça o Pix no valor de R$ 50,00 para <strong>79 99863-5602</strong>
+    e envie para o WhatsApp
+    <a href="https://wa.me/5579998635602?text=Ol%C3%A1%21%20Quero%20ativar%20minha%20conta%20do%20AGHU%20Notes%20pela%20Campanha%20JK.%20Vou%20enviar%20o%20comprovante%20de%20pagamento%2C%20o%20e-mail%20para%20Login%20e%20uma%20sugest%C3%A3o%20de%20Senha." target="_blank" rel="noopener noreferrer"><strong>(79) 99863-5602</strong></a>
+    o seu comprovante de pagamento, o e-mail que deseja utilizar como Login e uma sugestão de Senha.
+  </div>
+
+
+  <input id="quickImageInput" type="file" accept="image/*" multiple hidden>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.APP_CONFIG={
+  SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",
+  SUPABASE_PUBLISHABLE_KEY:"sb_publishable_5-96i6Atx7piLOhmQujUlQ___-9fLwW",
+  PROJECT_REF:"imwwqdgovfxhntsdkxlz"
+};
+</script>
+<script id="aghu-cloud-adapter">
+(()=>{
+  const cfg=window.APP_CONFIG||{};
+  const raw=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_PUBLISHABLE_KEY,{
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true,
+      storageKey:'aghu-notes-auth'
+    }
+  });
+
+  const VAULT='vault_records', PROFILE='profiles', BUCKET='note-images';
+  const KINDS=new Set(['notes','labels','note_labels','note_versions','attachments']);
+
+  let currentKey=null, currentUserId=null;
+  const listeners=new Set();
+  const te=new TextEncoder(), td=new TextDecoder();
+  const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+  const unb64=s=>Uint8Array.from(atob(String(s||'')),c=>c.charCodeAt(0));
+  const clone=v=>{try{return structuredClone(v)}catch{return JSON.parse(JSON.stringify(v))}};
+
+  async function deriveKey(password,saltB64){
+    const material=await crypto.subtle.importKey('raw',te.encode(String(password)),'PBKDF2',false,['deriveKey']);
+    return crypto.subtle.deriveKey(
+      {name:'PBKDF2',salt:unb64(saltB64),iterations:210000,hash:'SHA-256'},
+      material,
+      {name:'AES-GCM',length:256},
+      false,
+      ['encrypt','decrypt']
+    );
+  }
+
+  async function encryptJson(value,key=currentKey){
+    if(!key)throw new Error('Chave de criptografia indisponível.');
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,te.encode(JSON.stringify(value)));
+    return {v:1,alg:'AES-GCM',iv:b64(iv),cipher:b64(cipher)};
+  }
+
+  async function decryptJson(payload,key=currentKey){
+    if(!payload)return {};
+    if(!key)throw new Error('Chave de criptografia indisponível.');
+    const plain=await crypto.subtle.decrypt(
+      {name:'AES-GCM',iv:unb64(payload.iv)},
+      key,
+      unb64(payload.cipher)
+    );
+    return JSON.parse(td.decode(plain));
+  }
+
+  async function encryptStorageBlob(blob,key=currentKey){
+    if(!key)throw new Error('Chave de criptografia indisponível.');
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,await blob.arrayBuffer()));
+    const header=te.encode(JSON.stringify({v:1,iv:b64(iv),type:blob.type||'application/octet-stream'}));
+    const out=new Uint8Array(4+header.length+cipher.length);
+    new DataView(out.buffer).setUint32(0,header.length,false);
+    out.set(header,4);
+    out.set(cipher,4+header.length);
+    return new Blob([out],{type:'application/octet-stream'});
+  }
+
+  async function decryptStorageBlob(blob,key=currentKey){
+    if(!key)throw new Error('Chave de criptografia indisponível.');
+    const bytes=new Uint8Array(await blob.arrayBuffer());
+    if(bytes.length<5)throw new Error('Arquivo criptografado inválido.');
+    const headerLen=new DataView(bytes.buffer,bytes.byteOffset,4).getUint32(0,false);
+    const header=JSON.parse(td.decode(bytes.slice(4,4+headerLen)));
+    const cipher=bytes.slice(4+headerLen);
+    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(header.iv)},key,cipher);
+    return new Blob([plain],{type:header.type||'application/octet-stream'});
+  }
+
+  async function encryptCacheBlob(blob,key=currentKey){
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,await blob.arrayBuffer());
+    return {v:1,iv:b64(iv),cipher:b64(cipher),type:blob.type||'application/octet-stream'};
+  }
+  async function decryptCacheBlob(payload,key=currentKey){
+    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(payload.iv)},key,unb64(payload.cipher));
+    return new Blob([plain],{type:payload.type||'application/octet-stream'});
+  }
+
+  // Device remembers a non-exportable CryptoKey after first successful login.
+  let keyDbPromise=null;
+  function keyDb(){
+    if(keyDbPromise)return keyDbPromise;
+    keyDbPromise=new Promise((resolve,reject)=>{
+      const req=indexedDB.open('AGHUNotesCloudDevice',1);
+      req.onupgradeneeded=()=>{
+        const db=req.result;
+        if(!db.objectStoreNames.contains('keys'))db.createObjectStore('keys',{keyPath:'userId'});
+      };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+    return keyDbPromise;
+  }
+  async function rememberKey(userId,key){
+    try{
+      const db=await keyDb();
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction('keys','readwrite');
+        tx.objectStore('keys').put({userId,key,updatedAt:Date.now()});
+        tx.oncomplete=resolve; tx.onerror=()=>reject(tx.error);
+      });
+    }catch(err){console.warn('Chave do aparelho:',err)}
+  }
+  async function recalledKey(userId){
+    try{
+      const db=await keyDb();
+      return await new Promise((resolve,reject)=>{
+        const tx=db.transaction('keys','readonly');
+        const req=tx.objectStore('keys').get(userId);
+        req.onsuccess=()=>resolve(req.result?.key||null);
+        req.onerror=()=>reject(req.error);
+      });
+    }catch{return null}
+  }
+
+  async function getProfile(userId){
+    const {data,error}=await raw.from(PROFILE)
+      .select('id,email,role,active,first_access_done,encryption_salt')
+      .eq('id',userId).maybeSingle();
+    if(error)throw error;
+    if(!data)throw new Error('Perfil do usuário não encontrado.');
+    return data;
+  }
+
+  function metaFor(table,row){
+    return {
+      user_id:currentUserId,
+      kind:table,
+      record_id:row.id,
+      note_id:table==='notes'?row.id:(row.note_id||null),
+      ref_id:table==='note_labels'?(row.label_id||null):null,
+      created_at:row.created_at||new Date().toISOString(),
+      updated_at:row.updated_at||row.created_at||new Date().toISOString()
+    };
+  }
+
+  function privatePayload(row){
+    const p={...clone(row)};
+    delete p.id; delete p.user_id;
+    return p;
+  }
+
+  async function writeLogical(table,row,upsert=false){
+    if(!currentUserId||!currentKey)throw new Error('Sessão criptográfica indisponível.');
+    const logical={...clone(row),id:row.id||crypto.randomUUID(),user_id:currentUserId};
+    const vault={...metaFor(table,logical),payload:await encryptJson(privatePayload(logical))};
+    const q=upsert
+      ? raw.from(VAULT).upsert(vault,{onConflict:'user_id,kind,record_id'})
+      : raw.from(VAULT).insert(vault);
+    const {error}=await q;
+    if(error)throw error;
+    return logical;
+  }
+
+  async function fetchLogical(table,filters=[]){
+    if(!currentUserId||!currentKey)return [];
+    let q=raw.from(VAULT).select('*').eq('user_id',currentUserId).eq('kind',table);
+
+    for(const f of filters){
+      if(f.type==='eq'&&f.field==='id')q=q.eq('record_id',f.value);
+      else if(f.type==='eq'&&f.field==='note_id')q=q.eq('note_id',f.value);
+      else if(f.type==='eq'&&f.field==='label_id'&&table==='note_labels')q=q.eq('ref_id',f.value);
+      else if(f.type==='in'&&f.field==='id')q=q.in('record_id',f.values);
+    }
+
+    const {data,error}=await q;
+    if(error)throw error;
+    const out=[];
+    for(const vr of (data||[])){
+      const p=await decryptJson(vr.payload);
+      const row={...p,id:vr.record_id,user_id:vr.user_id};
+      if(vr.note_id)row.note_id=vr.note_id;
+      if(table==='note_labels'&&vr.ref_id)row.label_id=vr.ref_id;
+      if(!row.created_at)row.created_at=vr.created_at;
+      if(!row.updated_at)row.updated_at=vr.updated_at;
+      out.push(row);
+    }
+    return out;
+  }
+
+  function matches(row,filters){
+    return filters.every(f=>{
+      if(f.type==='eq')return row?.[f.field]===f.value;
+      if(f.type==='in')return f.values.includes(row?.[f.field]);
+      return true;
+    });
+  }
+
+  async function enrichNotes(notes){
+    const [links,labels,attachments]=await Promise.all([
+      fetchLogical('note_labels'),fetchLogical('labels'),fetchLogical('attachments')
+    ]);
+    const lm=new Map(labels.map(l=>[l.id,l]));
+    return notes.map(n=>({
+      ...n,
+      note_labels:links.filter(x=>x.note_id===n.id).map(x=>({...x,labels:lm.get(x.label_id)||null})),
+      attachments:attachments.filter(a=>a.note_id===n.id)
+    }));
+  }
+
+  async function cascadeNote(noteId){
+    const atts=await fetchLogical('attachments',[{type:'eq',field:'note_id',value:noteId}]);
+    const paths=atts.map(a=>a.storage_path).filter(Boolean);
+    if(paths.length)await raw.storage.from(BUCKET).remove(paths).catch(()=>{});
+    const {error}=await raw.from(VAULT)
+      .delete()
+      .eq('user_id',currentUserId)
+      .eq('note_id',noteId)
+      .in('kind',['note_labels','note_versions','attachments']);
+    if(error)throw error;
+  }
+
+  class Query{
+    constructor(table){
+      this.table=table;this.op=null;this.payload=null;this.filters=[];
+      this.orderSpec=null;this.limitValue=null;this.selectCols='*';this.returning=false;
+    }
+    select(cols='*'){this.selectCols=cols||'*';if(!this.op)this.op='select';else this.returning=true;return this}
+    insert(p){this.op='insert';this.payload=p;return this}
+    update(p){this.op='update';this.payload=p;return this}
+    delete(){this.op='delete';return this}
+    eq(field,value){this.filters.push({type:'eq',field,value});return this}
+    in(field,values){this.filters.push({type:'in',field,values:[...(values||[])]});return this}
+    order(field,opts={}){this.orderSpec={field,ascending:opts.ascending!==false};return this}
+    limit(n){this.limitValue=Number(n);return this}
+
+    project(row){
+      if(!this.selectCols||this.selectCols==='*'||this.selectCols.includes('note_labels')||this.selectCols.includes('attachments'))return row;
+      const fields=this.selectCols.split(',').map(x=>x.trim()).filter(x=>/^[A-Za-z_][A-Za-z0-9_]*$/.test(x));
+      const out={};for(const f of fields)if(f in row)out[f]=row[f];
+      return Object.keys(out).length?out:row;
+    }
+
+    async execute(){
+      try{
+        if(!KINDS.has(this.table))return{data:[],error:null};
+
+        if(!this.op||this.op==='select'){
+          let rows=await fetchLogical(this.table,this.filters);
+          rows=rows.filter(r=>matches(r,this.filters));
+          if(this.table==='notes')rows=await enrichNotes(rows);
+          if(this.orderSpec){
+            const {field,ascending}=this.orderSpec;
+            rows.sort((a,b)=>{
+              let av=a?.[field],bv=b?.[field];
+              if(field.endsWith('_at')){av=new Date(av||0).getTime();bv=new Date(bv||0).getTime()}
+              if(av===bv)return 0;
+              return (av>bv?1:-1)*(ascending?1:-1);
+            });
+          }
+          if(Number.isFinite(this.limitValue))rows=rows.slice(0,this.limitValue);
+          return{data:rows.map(r=>this.project(r)),error:null};
+        }
+
+        if(this.op==='insert'){
+          const arr=Array.isArray(this.payload)?this.payload:[this.payload], made=[];
+          for(const item of arr){
+            const logical={...clone(item||{})};
+            logical.id=logical.id||crypto.randomUUID();
+            logical.user_id=currentUserId;
+            if(this.table==='notes'){
+              const now=new Date().toISOString();
+              logical.created_at=logical.created_at||now;
+              logical.updated_at=logical.updated_at||now;
+              logical.title=logical.title||'Nova nota';
+              logical.content_html=logical.content_html||'';
+              logical.color=logical.color||'#ffffff';
+              logical.reminder_at=logical.reminder_at||null;
+              logical.pinned=!!logical.pinned;
+              logical.archived=!!logical.archived;
+              logical.deleted=!!logical.deleted;
+              logical.patient_meta=logical.patient_meta||{};
+            }
+            made.push(await writeLogical(this.table,logical,false));
+          }
+          const out=this.table==='notes'?await enrichNotes(made):made;
+          return{data:Array.isArray(this.payload)?out:out[0],error:null};
+        }
+
+        if(this.op==='update'){
+          let rows=(await fetchLogical(this.table,this.filters)).filter(r=>matches(r,this.filters));
+          const out=[];
+          for(const row of rows){
+            const next={...row,...clone(this.payload),id:row.id,user_id:currentUserId};
+            if(this.table==='notes'&&!('updated_at' in (this.payload||{})))next.updated_at=new Date().toISOString();
+            await writeLogical(this.table,next,true);out.push(next);
+          }
+          const finalRows=this.table==='notes'?await enrichNotes(out):out;
+          return{data:this.returning?(finalRows.length===1?this.project(finalRows[0]):finalRows.map(r=>this.project(r))):null,error:null};
+        }
+
+        if(this.op==='delete'){
+          let rows=(await fetchLogical(this.table,this.filters)).filter(r=>matches(r,this.filters));
+          for(const row of rows){
+            if(this.table==='notes')await cascadeNote(row.id);
+            if(this.table==='labels'){
+              await raw.from(VAULT).delete().eq('user_id',currentUserId).eq('kind','note_labels').eq('ref_id',row.id);
+            }
+          }
+          const ids=rows.map(r=>r.id);
+          if(ids.length){
+            const {error}=await raw.from(VAULT).delete()
+              .eq('user_id',currentUserId).eq('kind',this.table).in('record_id',ids);
+            if(error)throw error;
+          }
+          return{data:null,error:null};
+        }
+        return{data:null,error:null};
+      }catch(err){
+        console.error('AGHU Cloud:',err);
+        return{data:null,error:{message:err?.message||String(err),code:err?.code}};
+      }
+    }
+
+    then(a,b){return this.execute().then(a,b)}
+    async single(){
+      const x=await this.execute();if(x.error)return x;
+      const r=Array.isArray(x.data)?x.data[0]:x.data;
+      return r?{data:r,error:null}:{data:null,error:{message:'Nenhum registro encontrado'}};
+    }
+    async maybeSingle(){
+      const x=await this.execute();if(x.error)return x;
+      return{data:Array.isArray(x.data)?(x.data[0]||null):x.data||null,error:null};
+    }
+  }
+
+  const storage={
+    from(bucket){
+      return{
+        async upload(path,blob,opts={}){
+          try{
+            if(!currentUserId||!currentKey)throw new Error('Sessão criptográfica indisponível.');
+            const parts=String(path).split('/');
+            if(parts[0]!==currentUserId)parts[0]=currentUserId;
+            path=parts.join('/');
+            const encrypted=await encryptStorageBlob(blob);
+            const {data,error}=await raw.storage.from(bucket).upload(path,encrypted,{
+              upsert:!!opts.upsert,
+              contentType:'application/octet-stream',
+              cacheControl:'3600'
+            });
+            return{data,error};
+          }catch(err){return{data:null,error:{message:err.message||String(err)}}}
+        },
+        async download(path){
+          try{
+            const {data,error}=await raw.storage.from(bucket).download(path);
+            if(error)throw error;
+            return{data:await decryptStorageBlob(data),error:null};
+          }catch(err){return{data:null,error:{message:err.message||String(err)}}}
+        },
+        async remove(paths){return raw.storage.from(bucket).remove(paths||[])},
+        async createSignedUrl(path){
+          const {data,error}=await this.download(path);
+          if(error||!data)return{data:null,error:error||{message:'Arquivo indisponível'}};
+          return{data:{signedUrl:URL.createObjectURL(data)},error:null};
+        }
+      };
+    }
+  };
+
+  // Optional one-time migration of v26 local data from the same browser.
+  async function legacyHash(password,salt){
+    const x=await crypto.subtle.digest('SHA-256',te.encode(`${salt}:${password}`));
+    return [...new Uint8Array(x)].map(v=>v.toString(16).padStart(2,'0')).join('');
+  }
+  async function openLegacyDb(){
+    return new Promise((resolve,reject)=>{
+      const req=indexedDB.open('AGHUNotesStandalone');
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+      req.onupgradeneeded=()=>{try{req.transaction.abort()}catch{}};
+    });
+  }
+  async function legacyAll(db,store){
+    if(!db.objectStoreNames.contains(store))return[];
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction(store,'readonly');
+      const req=tx.objectStore(store).getAll();
+      req.onsuccess=()=>resolve(req.result||[]);
+      req.onerror=()=>reject(req.error);
+    });
+  }
+  async function migrateLegacy(email,password,cloudUid){
+    const marker='aghuNotes.cloudMigrated:'+cloudUid;
+    if(localStorage.getItem(marker)==='1')return;
+
+    let users=[];
+    try{users=JSON.parse(localStorage.getItem('aghuNotes.localUsers.v2')||'[]')}catch{}
+    const lu=(users||[]).find(u=>String(u.email||'').toLowerCase()===String(email||'').toLowerCase());
+    if(!lu?.salt||!lu?.dataSalt){localStorage.setItem(marker,'1');return}
+    if(await legacyHash(password,lu.salt)!==lu.hash)return;
+
+    try{
+      const oldKey=await deriveKey(password,lu.dataSalt);
+      const db=await openLegacyDb();
+      const pathMap=new Map();
+
+      for(const br of await legacyAll(db,'blobs')){
+        if(br.user_id!==lu.id)continue;
+        let blob=null;
+        if(br.__blob){try{blob=await decryptCacheBlob(br.__blob,oldKey)}catch{}}
+        else if(br.blob)blob=br.blob;
+        if(!blob)continue;
+        const parts=String(br.path||'').split('/'); if(parts.length)parts[0]=cloudUid;
+        const newPath=parts.join('/');
+        const encrypted=await encryptStorageBlob(blob,currentKey);
+        const {error}=await raw.storage.from(BUCKET).upload(newPath,encrypted,{
+          upsert:true,contentType:'application/octet-stream'
+        });
+        if(!error)pathMap.set(br.path,newPath);
+      }
+
+      for(const table of ['notes','labels','note_labels','note_versions','attachments']){
+        for(const rr of await legacyAll(db,table)){
+          if(rr.user_id!==lu.id)continue;
+          let plain={...rr};
+          if(rr.__enc){
+            try{plain={...rr,...await decryptJson(rr.__enc,oldKey)};delete plain.__enc}
+            catch{continue}
+          }
+          plain.user_id=cloudUid;
+          if(table==='attachments'&&pathMap.has(plain.storage_path))plain.storage_path=pathMap.get(plain.storage_path);
+          await writeLogical(table,plain,true);
+        }
+      }
+      localStorage.setItem(marker,'1');
+    }catch(err){console.warn('Migração v26 → Supabase:',err)}
+  }
+
+  const auth={
+    async getSession(){
+      const {data,error}=await raw.auth.getSession();
+      if(error||!data?.session)return{data:{session:null},error};
+      try{
+        const p=await getProfile(data.session.user.id);
+        if(!p.active)return{data:{session:null},error:{message:'Acesso bloqueado pelo Administrador.'}};
+        const key=await recalledKey(data.session.user.id);
+        if(!key)return{data:{session:null},error:null};
+        currentKey=key;currentUserId=data.session.user.id;
+        const user={...data.session.user,first_access:false};
+        return{data:{session:{...data.session,user}},error:null};
+      }catch(err){return{data:{session:null},error:{message:err.message||String(err)}}}
+    },
+
+    async signInWithPassword({email,password}){
+      const res=await raw.auth.signInWithPassword({email,password});
+      if(res.error)return res;
+      try{
+        const p=await getProfile(res.data.user.id);
+        if(!p.active){
+          await raw.auth.signOut();
+          return{data:null,error:{message:'Acesso bloqueado pelo Administrador.'}};
+        }
+        currentKey=await deriveKey(password,p.encryption_salt);
+        currentUserId=res.data.user.id;
+        await rememberKey(currentUserId,currentKey);
+
+        const first=p.first_access_done===false;
+        if(first)await raw.rpc('mark_first_access');
+
+        await migrateLegacy(email,password,currentUserId);
+
+        const user={...res.data.user,first_access:first};
+        const data={...res.data,user,session:{...res.data.session,user}};
+        listeners.forEach(cb=>{try{cb('SIGNED_IN',data.session)}catch{}});
+        return{data,error:null};
+      }catch(err){
+        await raw.auth.signOut();
+        currentKey=null;currentUserId=null;
+        return{data:null,error:{message:err.message||String(err)}};
+      }
+    },
+
+    async signOut(){
+      const out=await raw.auth.signOut();
+      currentKey=null;currentUserId=null;
+      listeners.forEach(cb=>{try{cb('SIGNED_OUT',null)}catch{}});
+      return out;
+    },
+
+    onAuthStateChange(cb){
+      listeners.add(cb);
+      return{data:{subscription:{unsubscribe:()=>listeners.delete(cb)}}};
+    }
+  };
+
+  async function adminInvoke(action,payload={}){
+    const {data,error}=await raw.functions.invoke('admin-users',{body:{action,...payload}});
+    if(error)throw new Error(error.message||'Falha administrativa.');
+    if(data?.error)throw new Error(data.error);
+    return data;
+  }
+
+  const admin={
+    hasAdmin(){return true},
+    async setup(){throw new Error('O Administrador é configurado no Supabase.')},
+
+    async login(email,password){
+      email=String(email||'').trim().toLowerCase();
+      if(!email)throw new Error('Informe o e-mail do Administrador.');
+      const res=await raw.auth.signInWithPassword({email,password});
+      if(res.error)throw res.error;
+      const p=await getProfile(res.data.user.id);
+      if(!p.active||p.role!=='admin'){
+        await raw.auth.signOut();
+        throw new Error('Esta conta não possui perfil de Administrador.');
+      }
+      currentKey=await deriveKey(password,p.encryption_salt);
+      currentUserId=res.data.user.id;
+      await rememberKey(currentUserId,currentKey);
+      return true;
+    },
+
+    async logout(){currentKey=null;currentUserId=null;await raw.auth.signOut()},
+
+    async listUsers(){
+      const data=await adminInvoke('list');
+      return (data.users||[]).map(u=>({
+        id:u.id,email:u.email,password:'Protegida',createdAt:u.created_at,
+        active:u.active!==false,has_data:!!u.has_data
+      }));
+    },
+    async createUser(email,password){return adminInvoke('create',{email,password})},
+    async resetPassword(userId,password){return adminInvoke('reset_password',{user_id:userId,password})},
+    async toggleUser(userId){return adminInvoke('toggle_user',{user_id:userId})},
+    async deleteUser(userId){return adminInvoke('delete_user',{user_id:userId})}
+  };
+
+  window.AGhuRawSupabase=raw;
+  window.AGhuCloud={
+    createClient(){return{auth,storage,rpc:(n,a)=>raw.rpc(n,a),from:t=>new Query(t)}}
+  };
+  window.AGhuLocalAdmin=admin;
+  window.AGhuLocalCrypto={
+    ready:()=>!!currentKey,
+    userId:()=>currentUserId,
+    encryptJson:async v=>encryptJson(v),
+    decryptJson:async v=>decryptJson(v),
+    encryptBlob:async b=>encryptCacheBlob(b),
+    decryptBlob:async p=>decryptCacheBlob(p)
+  };
+})();
+</script>
 
 <script>
 (() => {
-  const cfg = window.APP_CONFIG || {};
-  const configured = cfg.SUPABASE_URL && !cfg.SUPABASE_URL.includes("SEU-PROJETO") && cfg.SUPABASE_ANON_KEY && !cfg.SUPABASE_ANON_KEY.includes("SUA-ANON-KEY");
-  const supabase = configured ? window.supabase.createClient(
-    cfg.SUPABASE_URL,
-    cfg.SUPABASE_ANON_KEY,
-    {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
-  ) : null;
+  const configured = !!window.APP_CONFIG?.SUPABASE_URL && !!window.APP_CONFIG?.SUPABASE_PUBLISHABLE_KEY && !!window.AGhuCloud;
+  const supabase = configured ? window.AGhuCloud.createClient() : null;
+  const LOCAL_ONLY = false;
 
   const $ = (id) => document.getElementById(id);
   const state = {
@@ -2068,12 +2850,20 @@ window.APP_CONFIG = {
     sortKey: 'updated_at',
     sortDir: 'desc',
     entering: false,
-    keepFocusMode: localStorage.getItem('aghuNotes.keepFocusMode')==='1'
+    keepFocusMode: localStorage.getItem('aghuNotes.keepFocusMode')==='1',
+    adminActive:false,
+    googleToken:null,
+    googleTokenExpiresAt:0,
+    googleTokenClient:null,
+    googleFolderId:null,
+    googleSyncTimers:new Map(),
+    quickImageTargetNoteId:null,
+    quickImageObjectUrls:new Map()
   };
 
   const els = {
     auth: $('authScreen'), app: $('appShell'), login: $('loginForm'), loginEmail: $('loginEmail'), loginPassword: $('loginPassword'), loginError: $('loginError'),
-    appCounters: $('appCounters'), accessCount: $('accessCount'), notesCreatedCount: $('notesCreatedCount'),
+    adminAccess:$('adminAccessBtn'), adminPanel:$('adminPanel'), adminExit:$('adminExitBtn'), adminLoginDialog:$('adminLoginDialog'), adminLoginTitle:$('adminLoginTitle'), adminSetupHelp:$('adminSetupHelp'), adminEmailInput:$('adminEmailInput'), adminLoginForm:$('adminLoginForm'), adminPasswordInput:$('adminPasswordInput'), adminPasswordConfirm:$('adminPasswordConfirm'), adminConfirmWrap:$('adminConfirmWrap'), adminLoginError:$('adminLoginError'), adminLoginSubmit:$('adminLoginSubmitBtn'), adminLoginClose:$('adminLoginCloseBtn'), adminLoginCancel:$('adminLoginCancelBtn'), adminCreateUserForm:$('adminCreateUserForm'), adminNewEmail:$('adminNewEmail'), adminNewPassword:$('adminNewPassword'), adminCreateUserStatus:$('adminCreateUserStatus'), adminUsersBody:$('adminUsersBody'),
     calculatorMenu: $('calculatorMenuBtn'), calculatorEditor: $('calculatorEditorBtn'), calculatorDialog: $('calculatorDialog'),
     calculatorClose: $('calculatorCloseBtn'), calculatorDisplay: $('calculatorDisplay'),
     calculatorExpression: $('calculatorExpression'), calculatorKeys: $('calculatorKeys'),
@@ -2086,10 +2876,32 @@ window.APP_CONFIG = {
     firstSyncDialog: $('firstSyncDialog'), confirmFirstSync: $('confirmFirstSyncBtn'), cancelFirstSync: $('cancelFirstSyncBtn'),
     keepPage: $('keepPage'), editorPage: $('editorPage'), back: $('backBtn'), title: $('noteTitle'), body: $('noteBody'), autosave: $('autosaveState'), color: $('colorSelect'), reminder: $('reminderAt'), labelsInput: $('labelsInput'),
     pin: $('pinBtn'), archive: $('archiveBtn'), trash: $('trashBtn'), permanentDelete: $('permanentDeleteBtn'), duplicate: $('duplicateBtn'), share: $('shareBtn'), draw: $('drawBtn'), copyDocs: $('copyDocsBtn'),
+    noteMenuBtn:$('noteMenuBtn'), noteActionsMenu:$('noteActionsMenu'),
+    googleDocsDialog:$('googleDocsDialog'), googleDocsClose:$('googleDocsCloseBtn'), googleDocsCancel:$('googleDocsCancelBtn'),
+    googleClientIdInput:$('googleClientIdInput'), googleAutoBackup:$('googleAutoBackupToggle'),
+    googleDocsStatus:$('googleDocsStatus'), googleConnect:$('googleConnectBtn'), googleSyncNow:$('googleSyncNowBtn'),
     history: $('historyBtn'), historyDialog: $('historyDialog'), historyList: $('historyList'), imageInput: $('imageInput'), imageGallery: $('imageGallery'),
+    quickImageInput:$('quickImageInput'), quickImageViewer:$('quickImageViewerDialog'),
+    quickImageViewerImg:$('quickImageViewerImg'), quickImageViewerTitle:$('quickImageViewerTitle'),
+    quickImageViewerClose:$('quickImageViewerCloseBtn'),
     drawDialog: $('drawDialog'), drawCanvas: $('drawCanvas'), drawSize: $('drawSize'), drawColor: $('drawColor'), clearDraw: $('clearDrawBtn'), saveDraw: $('saveDrawBtn'), closeDraw: $('closeDrawBtn'), cancelDraw: $('cancelDrawBtn'), toast: $('toast'), keepModeToggle: $('keepModeToggle'), keepModeOverlayToggle: $('keepModeOverlayToggle'), keepFocusBar: $('keepFocusBar'),
     closeFocusWindow: $('closeFocusWindowBtn'), closeKeepTab: $('closeKeepTabBtn'), keepTab: $('keepTab'), keepTabOpen: $('keepTabOpenBtn'), panelTab: $('panelTab'), panelPage: $('panelGeneralPage'), panelMenu: $('panelMenuBtn'), keepMenu: $('keepMenuBtn')
   };
+
+
+  function closeNoteActionsMenu(){
+    els.noteActionsMenu?.classList.add('hidden');
+  }
+  els.noteMenuBtn?.addEventListener('click',e=>{
+    e.stopPropagation();
+    els.noteActionsMenu?.classList.toggle('hidden');
+  });
+  els.noteActionsMenu?.addEventListener('click',e=>{
+    if(e.target.closest('button'))setTimeout(closeNoteActionsMenu,0);
+  });
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('.note-menu-host'))closeNoteActionsMenu();
+  });
 
   function fmtDate(v){
     if(!v) return '-';
@@ -2101,6 +2913,53 @@ window.APP_CONFIG = {
   function stripHtml(value=''){
     const div=document.createElement('div');div.innerHTML=value;return (div.textContent||div.innerText||'').trim();
   }
+
+  function launchFirstAccessConfetti(){
+    if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;
+    if(document.querySelector('.first-access-confetti'))return;
+
+    const layer=document.createElement('div');
+    layer.className='first-access-confetti';
+    layer.setAttribute('aria-hidden','true');
+
+    const colors=[
+      '#b51f2c', // AGHU vermelho
+      '#2f7d70', // AGHU verde
+      '#4e7fbe',
+      '#16b8b1',
+      '#f1b722',
+      '#ef7f3b',
+      '#7a5cc7',
+      '#ffffff'
+    ];
+
+    const total=Math.min(130,Math.max(86,Math.floor((window.innerWidth||900)/8)));
+
+    for(let i=0;i<total;i++){
+      const piece=document.createElement('i');
+      piece.className='first-access-confetti-piece';
+
+      const circle=Math.random()<0.22;
+      const w=5+Math.random()*7;
+      const h=circle?w:(8+Math.random()*11);
+
+      piece.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
+      piece.style.setProperty('--x',`${Math.random()*100}%`);
+      piece.style.setProperty('--w',`${w.toFixed(1)}px`);
+      piece.style.setProperty('--h',`${h.toFixed(1)}px`);
+      piece.style.setProperty('--radius',circle?'50%':`${Math.random()*2.5}px`);
+      piece.style.setProperty('--drift',`${(-110+Math.random()*220).toFixed(0)}px`);
+      piece.style.setProperty('--delay',`${(Math.random()*1.25).toFixed(2)}s`);
+      piece.style.setProperty('--dur',`${(3.1+Math.random()*2.4).toFixed(2)}s`);
+      piece.style.setProperty('--rot',`${Math.floor(Math.random()*360)}deg`);
+      piece.style.setProperty('--scale',`${(0.72+Math.random()*0.75).toFixed(2)}`);
+      layer.appendChild(piece);
+    }
+
+    document.body.appendChild(layer);
+    setTimeout(()=>layer.remove(),6500);
+  }
+
   function showToast(message,ms=2600){if(!els.toast)return;els.toast.textContent=message;els.toast.classList.remove('hidden');clearTimeout(showToast._t);showToast._t=setTimeout(()=>els.toast.classList.add('hidden'),ms);}
 
   const LEGACY_NOTES_CACHE_PREFIX='aghuNotes.notesCache:';
@@ -2115,7 +2974,7 @@ window.APP_CONFIG = {
     if(name==='QuotaExceededError'){
       showToast('O espaço reservado pelo navegador para este app está cheio. Sincronize e libere espaço.',5000);
     }else if(name==='SecurityError'||name==='InvalidStateError'){
-      showToast('O navegador bloqueou o armazenamento local deste app.',4500);
+      showToast('O navegador bloqueou o Supabase deste app.',4500);
     }else{
       showToast('Não foi possível salvar a cópia local neste aparelho.',4200);
     }
@@ -2150,19 +3009,42 @@ window.APP_CONFIG = {
 
   async function idbGet(store,key){
     const db=await openLocalDb();
-    return await new Promise((resolve,reject)=>{
+    const row=await new Promise((resolve,reject)=>{
       const tx=db.transaction(store,'readonly');
       const req=tx.objectStore(store).get(key);
       req.onsuccess=()=>resolve(req.result||null);
       req.onerror=()=>reject(req.error);
     });
+    if(!row)return null;
+    try{
+      if(store==='cache'&&row.encryptedValue){
+        return {...row,value:await window.AGhuLocalCrypto.decryptJson(row.encryptedValue)};
+      }
+      if(store==='cache'&&'value' in row&&window.AGhuLocalCrypto.ready()){
+        idbPut(store,row).catch(()=>{});
+      }
+      return row;
+    }catch(err){throw new Error('Falha ao descriptografar cache local.')}
   }
 
   async function idbPut(store,value){
+    let stored={...value};
+    if(window.AGhuLocalCrypto?.ready()){
+      if(store==='cache'&&'value' in stored){
+        stored.encryptedValue=await window.AGhuLocalCrypto.encryptJson(stored.value);
+        delete stored.value;
+      }else if(store==='drafts'&&stored.data){
+        stored.encryptedData=await window.AGhuLocalCrypto.encryptJson(stored.data);
+        delete stored.data;
+      }else if(store==='attachments'&&stored.blob){
+        stored.encryptedBlob=await window.AGhuLocalCrypto.encryptBlob(stored.blob);
+        delete stored.blob;
+      }
+    }
     const db=await openLocalDb();
     return await new Promise((resolve,reject)=>{
       const tx=db.transaction(store,'readwrite');
-      tx.objectStore(store).put(value);
+      tx.objectStore(store).put(stored);
       tx.oncomplete=()=>resolve(true);
       tx.onerror=()=>reject(tx.error);
       tx.onabort=()=>reject(tx.error||new Error('Transação abortada.'));
@@ -2181,12 +3063,29 @@ window.APP_CONFIG = {
 
   async function idbGetAllByIndex(store,indexName,value){
     const db=await openLocalDb();
-    return await new Promise((resolve,reject)=>{
+    const rows=await new Promise((resolve,reject)=>{
       const tx=db.transaction(store,'readonly');
       const req=tx.objectStore(store).index(indexName).getAll(value);
       req.onsuccess=()=>resolve(req.result||[]);
       req.onerror=()=>reject(req.error);
     });
+    const out=[];
+    for(const row of rows){
+      try{
+        if(store==='drafts'&&row.encryptedData){
+          out.push({...row,data:await window.AGhuLocalCrypto.decryptJson(row.encryptedData)});
+        }else if(store==='attachments'&&row.encryptedBlob){
+          out.push({...row,blob:await window.AGhuLocalCrypto.decryptBlob(row.encryptedBlob)});
+        }else{
+          out.push(row);
+          if(window.AGhuLocalCrypto?.ready() &&
+             ((store==='drafts'&&row.data)||(store==='attachments'&&row.blob))){
+            idbPut(store,row).catch(()=>{});
+          }
+        }
+      }catch(err){console.warn('Registro local não pôde ser descriptografado:',err)}
+    }
+    return out;
   }
 
   function notesCacheId(){return state.user?`notes:${state.user.id}`:null;}
@@ -2279,19 +3178,11 @@ window.APP_CONFIG = {
 
   function setAutosave(text,mode=''){
     els.autosave.textContent=text;
-    els.autosave.classList.remove('local-saved','cloud-saved','save-error');
+    els.autosave.classList.remove('local-saved','local-saved','save-error');
     if(mode)els.autosave.classList.add(mode);
   }
 
-  function compactHtmlForStorage(value=''){
-    return String(value||'')
-      .replace(/<!--[\s\S]*?-->/g,'')
-      .replace(/[\u200B-\u200D\uFEFF]/g,'')
-      .replace(/>\s+</g,'><')
-      .replace(/<span(?:\s[^>]*)?>\s*<\/span>/gi,'')
-      .replace(/<div>\s*<\/div>/gi,'')
-      .trim();
-  }
+  function compactHtmlForStorage(value=''){ return String(value||''); }
 
   function compactTitleForStorage(value=''){
     return String(value||'')
@@ -2317,6 +3208,7 @@ window.APP_CONFIG = {
       synthetic_age:state.current.synthetic_age,
       synthetic_record:state.current.synthetic_record,
       patient_meta:state.current.patient_meta||{},
+      google_doc_id:state.current.google_doc_id||null,
       pending_create:!!state.current.local_only
     };
   }
@@ -2330,7 +3222,7 @@ window.APP_CONFIG = {
     const idx=state.notes.findIndex(n=>n.id===d.id);
     const patch={
       title:d.title,content_html:d.content_html,color:d.color,
-      reminder_at:d.reminder_at,patient_meta:d.patient_meta||{},
+      reminder_at:d.reminder_at,patient_meta:d.patient_meta||{},google_doc_id:d.google_doc_id||state.current.google_doc_id||null,
       updated_at:d.updated_at
     };
     if(idx>=0)Object.assign(state.notes[idx],patch);
@@ -2419,126 +3311,8 @@ window.APP_CONFIG = {
     }
   }
 
-  const COUNTERS_CACHE_KEY='aghuNotes.globalCounters';
-
-  function formatCounter(value){
-    const n=Number(value);
-    return Number.isFinite(n)?n.toLocaleString('pt-BR'):'—';
-  }
-
-  function getCachedCounters(){
-    try{
-      const raw=localStorage.getItem(COUNTERS_CACHE_KEY);
-      return raw?JSON.parse(raw):null;
-    }catch{return null;}
-  }
-
-  function renderAppCounters(data){
-    if(!data)return;
-    const normalized={
-      access_count:Number(data.access_count)||0,
-      notes_created_count:Number(data.notes_created_count)||0
-    };
-
-    const box=document.getElementById('appCounters');
-    const accessEl=document.getElementById('accessCount');
-    const notesEl=document.getElementById('notesCreatedCount');
-
-    if(accessEl)accessEl.textContent=formatCounter(normalized.access_count);
-    if(notesEl)notesEl.textContent=formatCounter(normalized.notes_created_count);
-
-    if(box){
-      box.style.setProperty('display','flex','important');
-      box.style.setProperty('visibility','visible','important');
-      box.style.setProperty('opacity','1','important');
-    }
-
-    els.appCounters=box||els.appCounters;
-    els.accessCount=accessEl||els.accessCount;
-    els.notesCreatedCount=notesEl||els.notesCreatedCount;
-
-    try{localStorage.setItem(COUNTERS_CACHE_KEY,JSON.stringify(normalized));}catch{}
-  }
-
-  function loadCachedAppCounters(){
-    const cached=getCachedCounters();
-    renderAppCounters(cached||{access_count:0,notes_created_count:0});
-  }
-
-  function bumpCounterLocally(field,amount=1){
-    const cached=getCachedCounters()||{access_count:0,notes_created_count:0};
-    cached[field]=Math.max(0,(Number(cached[field])||0)+amount);
-    renderAppCounters(cached);
-  }
-
-  async function readCountersDirect(){
-    const {data,error}=await supabase
-      .from('app_counters')
-      .select('access_count,notes_created_count')
-      .eq('id',1)
-      .maybeSingle();
-    if(error)throw error;
-    return data;
-  }
-
-  async function registerPageAccess(){
-    if(!configured||!supabase||!navigator.onLine||window.__aghuAccessRegistered)return;
-    window.__aghuAccessRegistered=true;
-    bumpCounterLocally('access_count',1);
-
-    try{
-      const {data,error}=await supabase.rpc('increment_app_access');
-      if(error)throw error;
-      const row=Array.isArray(data)?data[0]:data;
-      if(row)renderAppCounters(row);
-      setTimeout(()=>refreshAppCounters(false),450);
-    }catch(err){
-      console.warn('Falha ao incrementar acesso:',err);
-      setTimeout(()=>refreshAppCounters(false),900);
-    }
-  }
-
-  async function refreshAppCounters(retry=true){
-    if(!configured||!supabase||!navigator.onLine)return;
-
-    try{
-      // A v18 permite leitura direta, que evita depender do cache RPC/PostgREST.
-      const direct=await readCountersDirect();
-      if(direct){
-        renderAppCounters(direct);
-        return;
-      }
-    }catch(directErr){
-      console.warn('Leitura direta dos contadores indisponível:',directErr);
-    }
-
-    try{
-      const {data,error}=await supabase.rpc('get_app_counters');
-      if(error)throw error;
-      const row=Array.isArray(data)?data[0]:data;
-      if(row)renderAppCounters(row);
-    }catch(err){
-      console.warn('Contadores indisponíveis:',err);
-      if(retry)setTimeout(()=>refreshAppCounters(false),1200);
-    }
-  }
-
-  function noteCreatedCounterImmediate(){
-    bumpCounterLocally('notes_created_count',1);
-    setTimeout(()=>refreshAppCounters(true),250);
-    setTimeout(()=>refreshAppCounters(false),900);
-  }
-
-
   function deviceSyncKey(userId){return `aghuNotes.syncConfirmed:${userId}`;}
-  async function confirmFirstDeviceSync(user){
-    if(localStorage.getItem(deviceSyncKey(user.id))==='1')return true;
-    if(!els.firstSyncDialog?.showModal){localStorage.setItem(deviceSyncKey(user.id),'1');return true;}
-    return await new Promise(resolve=>{
-      const finish=ok=>{els.confirmFirstSync.onclick=null;els.cancelFirstSync.onclick=null;try{els.firstSyncDialog.close();}catch{}if(ok)localStorage.setItem(deviceSyncKey(user.id),'1');resolve(ok);};
-      els.confirmFirstSync.onclick=()=>finish(true);els.cancelFirstSync.onclick=()=>finish(false);els.firstSyncDialog.showModal();
-    });
-  }
+  async function confirmFirstDeviceSync(){ return true; }
 
   function compactAge(value=''){
     const s=String(value||'')
@@ -2811,12 +3585,7 @@ window.APP_CONFIG = {
   syncKeepModeControls();
 
   async function bootstrap(){
-    loadCachedAppCounters();
-    if(!configured){els.auth.classList.remove('hidden');els.loginError.textContent='Configure o Supabase na seção APP_CONFIG deste index antes do primeiro uso.';return;}
-    registerPageAccess();
-    setTimeout(()=>refreshAppCounters(true),250);
-    setTimeout(()=>refreshAppCounters(false),900);
-    setTimeout(()=>refreshAppCounters(false),2500);
+    if(!configured){els.auth.classList.remove('hidden');els.loginError.textContent='Configuração do Supabase ausente.';return;}
     const {data}=await supabase.auth.getSession();
     if(data.session)await enterApp(data.session.user);else showAuth();
     supabase.auth.onAuthStateChange(async(_event,session)=>{
@@ -2825,7 +3594,66 @@ window.APP_CONFIG = {
     });
     if(window.matchMedia('(max-width:700px)').matches)document.querySelector('.sidebar')?.classList.add('collapsed');
   }
-  function showAuth(){stopSyncLoop();stopReminderLoop();state.user=null;document.body.classList.remove('keep-focus-mode');els.keepFocusBar?.classList.add('hidden');els.app.classList.add('hidden');els.auth.classList.remove('hidden');}
+  async function showAdminLogin(){
+    els.adminLoginError.textContent='';
+    els.adminPasswordInput.value='';
+    els.adminConfirmWrap.classList.add('hidden');
+    els.adminLoginTitle.textContent='Administrador';
+    els.adminSetupHelp.textContent='Entre com uma conta Supabase marcada como Administrador.';
+    els.adminLoginSubmit.textContent='Entrar';
+    if(els.adminEmailInput)els.adminEmailInput.value=els.loginEmail.value||localStorage.getItem('aghuNotes.lastEmail')||'';
+    els.adminLoginDialog.showModal();
+  }
+  async function renderAdminUsers(){
+    if(!state.adminActive)return;
+    const us=await AGhuLocalAdmin.listUsers();
+    els.adminUsersBody.innerHTML=us.map(u=>`<tr>
+      <td>${esc(u.email)}</td>
+      <td class="admin-password">Protegida</td>
+      <td>${u.createdAt?new Date(u.createdAt).toLocaleString('pt-BR'):'-'}</td>
+      <td>${u.active?'Ativo':'Bloqueado'}</td>
+      <td><div class="admin-user-actions">
+        <button data-reset-user="${u.id}" ${u.has_data?'disabled title="Conta com dados criptografados: redefinição direta bloqueada."':''}>Nova senha</button>
+        <button data-toggle-user="${u.id}">${u.active?'Bloquear':'Ativar'}</button>
+        <button class="danger" data-delete-user="${u.id}">Excluir</button>
+      </div></td>
+    </tr>`).join('')||'<tr><td colspan="5" style="text-align:center;padding:25px;color:#888">Nenhum login cadastrado.</td></tr>';
+
+    els.adminUsersBody.querySelectorAll('[data-reset-user]').forEach(b=>b.onclick=async()=>{
+      if(b.disabled)return;
+      const p=prompt('Nova senha:');if(p===null)return;
+      try{await AGhuLocalAdmin.resetPassword(b.dataset.resetUser,p);await renderAdminUsers()}
+      catch(e){alert(e.message||String(e))}
+    });
+    els.adminUsersBody.querySelectorAll('[data-toggle-user]').forEach(b=>b.onclick=async()=>{
+      try{await AGhuLocalAdmin.toggleUser(b.dataset.toggleUser);await renderAdminUsers()}
+      catch(e){alert(e.message||String(e))}
+    });
+    els.adminUsersBody.querySelectorAll('[data-delete-user]').forEach(b=>b.onclick=async()=>{
+      if(!confirm('Excluir esta conta e todos os dados sincronizados deste usuário?'))return;
+      try{await AGhuLocalAdmin.deleteUser(b.dataset.deleteUser);await renderAdminUsers()}
+      catch(e){alert(e.message||String(e))}
+    });
+  }
+
+  async function enterAdmin(){state.adminActive=true;els.auth.classList.add('hidden');els.app.classList.add('hidden');els.adminPanel.classList.remove('hidden');await renderAdminUsers()}
+  async function exitAdmin(){await AGhuLocalAdmin.logout();state.adminActive=false;els.adminPanel.classList.add('hidden');els.auth.classList.remove('hidden')}
+  els.adminAccess?.addEventListener('click',showAdminLogin);els.adminLoginClose?.addEventListener('click',()=>els.adminLoginDialog.close());els.adminLoginCancel?.addEventListener('click',()=>els.adminLoginDialog.close());els.adminExit?.addEventListener('click',exitAdmin);
+  els.adminLoginForm?.addEventListener('submit',async e=>{
+    e.preventDefault();
+    els.adminLoginError.textContent='';
+    try{
+      await AGhuLocalAdmin.login(els.adminEmailInput?.value||'',els.adminPasswordInput.value);
+      els.adminLoginDialog.close();
+      await enterAdmin();
+    }catch(x){
+      els.adminLoginError.textContent=x.message||String(x);
+    }
+  });
+
+  els.adminCreateUserForm?.addEventListener('submit',async e=>{e.preventDefault();els.adminCreateUserStatus.textContent='';try{await AGhuLocalAdmin.createUser(els.adminNewEmail.value,els.adminNewPassword.value);els.adminNewEmail.value='';els.adminNewPassword.value='';els.adminCreateUserStatus.textContent='Acesso criado.';await renderAdminUsers()}catch(x){els.adminCreateUserStatus.textContent=x.message}});
+
+  function showAuth(){els.adminPanel?.classList.add('hidden');stopSyncLoop();stopReminderLoop();state.user=null;document.body.classList.remove('keep-focus-mode');els.keepFocusBar?.classList.add('hidden');els.app.classList.add('hidden');els.auth.classList.remove('hidden');}
   async function enterApp(user){
     if(state.entering)return;
     state.entering=true;
@@ -2842,6 +3670,10 @@ window.APP_CONFIG = {
       if(navigator.onLine)setTimeout(pruneCompactHistory,1200);
       setSyncStatus(navigator.onLine?'ok':'offline');
       startSyncLoop();startReminderLoop();
+
+      if(user?.first_access===true){
+        setTimeout(launchFirstAccessConfetti,350);
+      }
     }finally{state.entering=false;}
   }
 
@@ -2850,10 +3682,10 @@ window.APP_CONFIG = {
 
   els.login.addEventListener('submit', async e=>{
     e.preventDefault(); els.loginError.textContent='';
-    if(!supabase){ els.loginError.textContent='Supabase ainda não configurado.'; return; }
+    if(!supabase){ els.loginError.textContent='Supabase indisponível.'; return; }
     const email=els.loginEmail.value.trim();
     const {data,error}=await supabase.auth.signInWithPassword({email,password:els.loginPassword.value});
-    if(error){ els.loginError.textContent='Falha no login. Verifique e-mail e senha.'; return; }
+    if(error){ els.loginError.textContent=error.message||'Falha no login.'; return; }
     localStorage.setItem('aghuNotes.lastEmail',email);
     els.loginPassword.value='';
     await enterApp(data.user);
@@ -2875,35 +3707,22 @@ window.APP_CONFIG = {
   });
   window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;els.installApp?.classList.add('hidden');showToast('AGHU Notes instalado neste dispositivo.');});
 
-  function setSyncStatus(mode){
-    if(!els.syncStatus) return;
-    els.syncStatus.classList.remove('syncing','offline');
-    if(mode==='syncing'){
-      els.syncStatus.classList.add('syncing');
-      els.syncStatus.textContent='● Sincronizando...';
-    } else if(mode==='offline'){
-      els.syncStatus.classList.add('offline');
-      els.syncStatus.textContent='● Sem conexão';
-    } else {
-      els.syncStatus.textContent='● Sincronizado';
-    }
+  function setSyncStatus(mode='ok'){
+    if(!els.syncStatus)return;
+    els.syncStatus.classList.toggle('syncing',mode==='syncing');
+    els.syncStatus.classList.toggle('offline',mode==='offline');
+    els.syncStatus.textContent=
+      mode==='syncing'?'● Sincronizando':
+      mode==='offline'?'● Offline':
+      '● Sincronizado';
   }
 
   async function syncFromCloud(){
-    if(!state.user||!navigator.onLine){
-      setSyncStatus('offline');
-      return;
-    }
-    if(pendingDrafts().length){
-      await syncPendingDrafts();
-      return;
-    }
+    if(!state.user)return;
     if(state.isDirty){
       await flushSave();
       return;
     }
-    setSyncStatus('syncing');
-    await syncPendingLocalAttachments();
     await Promise.all([loadNotes(),loadLabels()]);
     if(!els.keepPage.classList.contains('hidden'))renderNotes();
     setSyncStatus('ok');
@@ -2912,9 +3731,6 @@ window.APP_CONFIG = {
   function startSyncLoop(){
     stopSyncLoop();
     state.syncTimer=setInterval(syncFromCloud,10000);
-    if(!window.__aghuCountersTimer){
-      window.__aghuCountersTimer=setInterval(()=>refreshAppCounters(false),5000);
-    }
   }
   function stopSyncLoop(){if(state.syncTimer){clearInterval(state.syncTimer);state.syncTimer=null;}}
   function startReminderLoop(){stopReminderLoop();checkDueReminders();state.reminderTimer=setInterval(checkDueReminders,30000);}
@@ -2971,7 +3787,7 @@ window.APP_CONFIG = {
       const idx=state.notes.findIndex(n=>n.id===d.id);
       if(idx>=0){
         // Correções manuais de identificação nunca podem sumir enquanto
-        // houver uma cópia local pendente, mesmo que o refresh do servidor
+        // houver uma cópia local pendente, mesmo que o refresh do Supabase
         // aconteça a cada poucos segundos.
         if(d.patient_meta && Object.keys(d.patient_meta).length){
           state.notes[idx].patient_meta=d.patient_meta;
@@ -3036,19 +3852,196 @@ window.APP_CONFIG = {
   }
 
   function actionCells(n){
-    if(n.deleted){
-      return `
-        <td class="row-action"><button class="grid-icon-btn restore" title="Restaurar" data-restore-row="${n.id}">↩</button></td>
-        <td class="row-action"><button class="grid-icon-btn danger" title="Excluir definitivamente" data-delete-forever="${n.id}">×</button></td>
-        <td class="row-action"></td><td class="row-action"></td><td class="row-action"></td><td class="row-action"></td>`;
+    if(n.deleted)return `<td class="row-action"><button class="grid-icon-btn restore" title="Restaurar" data-restore-row="${n.id}">↩</button></td><td class="row-action"><button class="grid-icon-btn danger" title="Excluir definitivamente" data-delete-forever="${n.id}">×</button></td><td class="row-action"></td><td class="row-action"></td><td class="row-action"></td>`;
+    return `<td class="row-action"><button class="grid-icon-btn" title="Abrir" data-open="${n.id}">▧</button></td><td class="row-action"><button class="grid-icon-btn" title="Fixar" data-star="${n.id}">${n.pinned?'★':'☆'}</button></td><td class="row-action"><button class="grid-icon-btn" title="${n.archived?'Restaurar do arquivo':'Arquivar'}" data-archive-row="${n.id}">▣</button></td><td class="row-action"><button class="grid-icon-btn danger" title="Mover para a lixeira" data-trash-row="${n.id}">×</button></td><td class="row-action"><button class="grid-icon-btn" title="Editar nome, idade e prontuário" data-edit-meta="${n.id}">✎</button></td>`;
+  }
+
+
+  function quickReferenceAttachments(note){
+    return (note?.attachments||[]).filter(a=>a.quick_ref===true || a.quick_ref==='true');
+  }
+
+  function cleanupQuickImageUrls(){
+    for(const url of state.quickImageObjectUrls.values()){
+      try{URL.revokeObjectURL(url)}catch{}
     }
-    return `
-      <td class="row-action"><button class="grid-icon-btn" title="Abrir" data-open="${n.id}">▧</button></td>
-      <td class="row-action"><button class="grid-icon-btn" title="Fixar" data-star="${n.id}">${n.pinned?'★':'☆'}</button></td>
-      <td class="row-action"><button class="grid-icon-btn" title="${n.archived?'Restaurar do arquivo':'Arquivar'}" data-archive-row="${n.id}">▣</button></td>
-      <td class="row-action"><button class="grid-icon-btn danger" title="Mover para a lixeira" data-trash-row="${n.id}">×</button></td>
-      <td class="row-action"><button class="grid-icon-btn" title="Editar identificação" data-edit-meta="${n.id}">✎</button></td>
-      <td class="row-action"></td>`;
+    state.quickImageObjectUrls.clear();
+  }
+
+  async function uploadQuickReferenceImage(noteId,fileOrBlob,fileName){
+    if(!noteId||!fileOrBlob||!state.user)return null;
+
+    const safe=(fileName||`consulta-${Date.now()}.png`).replace(/[^a-zA-Z0-9._-]/g,'_');
+    const path=`${state.user.id}/${noteId}/quick-${Date.now()}-${Math.random().toString(36).slice(2,7)}-${safe}`;
+
+    const up=await supabase.storage.from('note-images').upload(path,fileOrBlob,{upsert:false});
+    if(up.error)throw up.error;
+
+    const {data,error}=await supabase.from('attachments').insert({
+      user_id:state.user.id,
+      note_id:noteId,
+      storage_path:path,
+      public_url:'',
+      file_name:fileName||safe,
+      quick_ref:true
+    }).select().single();
+
+    if(error){
+      await supabase.storage.from('note-images').remove([path]);
+      throw error;
+    }
+
+    const note=state.notes.find(n=>n.id===noteId);
+    if(note){
+      note.attachments=note.attachments||[];
+      note.attachments.push(data);
+    }
+    if(state.current?.id===noteId){
+      state.current.attachments=state.current.attachments||[];
+      if(!state.current.attachments.some(a=>a.id===data.id))state.current.attachments.push(data);
+    }
+
+    cacheNotes();
+    return data;
+  }
+
+  async function addQuickImagesToNote(noteId,files){
+    const list=[...(files||[])].filter(f=>f && String(f.type||'').startsWith('image/'));
+    if(!list.length)return;
+
+    const note=state.notes.find(n=>n.id===noteId);
+    const name=extractPatientMetadata(note||{}).name||'nota';
+    showToast(`Salvando ${list.length} imagem(ns) em ${name}...`,2200);
+
+    let saved=0;
+    for(const file of list){
+      try{
+        await uploadQuickReferenceImage(
+          noteId,
+          file,
+          file.name||`print-${Date.now()}-${saved+1}.png`
+        );
+        saved++;
+      }catch(err){
+        console.error('Imagem de consulta rápida:',err);
+      }
+    }
+
+    if(saved){
+      await loadNotes();
+      renderNotes();
+      showToast(saved===1?'Imagem adicionada à consulta rápida.':`${saved} imagens adicionadas à consulta rápida.`);
+    }else{
+      showToast('Não foi possível salvar a imagem.');
+    }
+  }
+
+  async function removeQuickReferenceImage(noteId,attachmentId,path){
+    if(path)await supabase.storage.from('note-images').remove([path]).catch(()=>{});
+    await supabase.from('attachments').delete().eq('id',attachmentId);
+
+    const note=state.notes.find(n=>n.id===noteId);
+    if(note)note.attachments=(note.attachments||[]).filter(a=>a.id!==attachmentId);
+    if(state.current?.id===noteId){
+      state.current.attachments=(state.current.attachments||[]).filter(a=>a.id!==attachmentId);
+    }
+    cacheNotes();
+    renderNotes();
+    showToast('Imagem removida da consulta rápida.');
+  }
+
+  async function showQuickReferenceImage(path,title='Consulta rápida'){
+    if(!path)return;
+    const url=await signedImageUrl(path);
+    if(!url){showToast('Imagem indisponível.');return}
+    els.quickImageViewerTitle.textContent=title||'Consulta rápida';
+    els.quickImageViewerImg.src=url;
+    els.quickImageViewerImg.dataset.objectUrl=url;
+    els.quickImageViewer.showModal();
+  }
+
+  async function hydrateQuickReferenceImages(){
+    cleanupQuickImageUrls();
+
+    const holders=[...els.tbody.querySelectorAll('[data-quick-strip]')];
+    for(const holder of holders){
+      const noteId=holder.dataset.quickStrip;
+      const note=state.notes.find(n=>n.id===noteId);
+      if(!note)continue;
+
+      const images=quickReferenceAttachments(note);
+      holder.innerHTML='';
+
+      const visible=images.slice(0,5);
+      for(const att of visible){
+        const thumb=document.createElement('div');
+        thumb.className='quick-ref-thumb';
+        thumb.dataset.quickAttachment=att.id;
+        thumb.innerHTML=`<div class="quick-ref-thumb-loading">Imagem</div>
+          <button class="quick-ref-remove" type="button" title="Remover imagem">×</button>`;
+        holder.appendChild(thumb);
+
+        try{
+          const url=await signedImageUrl(att.storage_path);
+          if(url){
+            state.quickImageObjectUrls.set(att.id,url);
+            const loading=thumb.querySelector('.quick-ref-thumb-loading');
+            const img=document.createElement('img');
+            img.src=url;
+            img.alt=att.file_name||'Consulta rápida';
+            img.loading='lazy';
+            loading.replaceWith(img);
+
+            img.addEventListener('click',e=>{
+              e.stopPropagation();
+              showQuickReferenceImage(att.storage_path,extractPatientMetadata(note).name);
+            });
+          }
+        }catch(err){
+          console.warn('Miniatura:',err);
+        }
+
+        thumb.querySelector('.quick-ref-remove')?.addEventListener('click',async e=>{
+          e.stopPropagation();
+          if(confirm('Remover esta imagem da consulta rápida?')){
+            await removeQuickReferenceImage(noteId,att.id,att.storage_path);
+          }
+        });
+      }
+
+      if(images.length>5){
+        const more=document.createElement('button');
+        more.type='button';
+        more.className='quick-ref-more';
+        more.textContent=`+${images.length-5}`;
+        more.title='Há mais imagens nesta nota';
+        more.addEventListener('click',e=>{
+          e.stopPropagation();
+          openNote(noteId);
+        });
+        holder.appendChild(more);
+      }
+    }
+  }
+
+  function imageFilesFromClipboard(event){
+    const files=[];
+    for(const item of [...(event.clipboardData?.items||[])]){
+      if(item.kind==='file' && item.type.startsWith('image/')){
+        const file=item.getAsFile();
+        if(file)files.push(file);
+      }
+    }
+    return files;
+  }
+
+  async function handleQuickReferencePaste(event,noteId){
+    const files=imageFilesFromClipboard(event);
+    if(!files.length)return false;
+    event.preventDefault();
+    event.stopPropagation();
+    await addQuickImagesToNote(noteId,files);
+    return true;
   }
 
   function updateCompactNameOnlyMode(){
@@ -3060,73 +4053,101 @@ window.APP_CONFIG = {
   }
 
   function renderNotes(){
-    if(navigator.onLine && (!window.__aghuLastCounterRefresh || Date.now()-window.__aghuLastCounterRefresh>4000)){
-      window.__aghuLastCounterRefresh=Date.now();
-      refreshAppCounters(false);
-    }
-    const compactNameOnly=updateCompactNameOnlyMode();
     const rows=filteredNotes();
+    updateCompactNameOnlyMode();
+
     els.empty.classList.toggle('hidden',rows.length>0);
     els.emptyTrash.classList.toggle('hidden',state.filter!=='trash');
-    if(state.selectedId && !rows.some(n=>n.id===state.selectedId)) state.selectedId=null;
+    if(state.selectedId&&!rows.some(n=>n.id===state.selectedId))state.selectedId=null;
 
-    els.tbody.innerHTML=rows.map(n=>{
+    const one=n=>{
       const meta=extractPatientMetadata(n);
-      return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}">
-      <td data-label="Local">${esc(n.synthetic_local||'-')}</td>
-      <td data-label="Nome"><strong>${esc(meta.name)}</strong>${n.pinned?' ★':''}${meta.manual.name?'<span class="patient-source-badge manual">EDIT</span>':(meta.recognized.name?'<span class="patient-source-badge">ID</span>':'')}<div class="keep-card-preview">${esc(stripHtml(n.content_html||'').slice(0,180))}</div></td>
-      <td data-label="Idade">${esc(meta.age)}</td>
-      <td data-label="Prontuário">${esc(meta.record)}</td>
-      <td data-label="Dt. Atend.">${fmtDate(n.updated_at)}</td>
-      ${actionCells(n)}
-    </tr>`;
-    }).join('');
+      const qrefs=quickReferenceAttachments(n);
+      const hint=qrefs.length
+        ? `<span class="quick-ref-count" title="Imagens para consulta rápida">${qrefs.length} img</span>`
+        : '';
 
-    els.tbody.querySelectorAll('tr').forEach(tr=>{
+      return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}">
+        <td data-label="Nome" class="patient-name-cell" data-name-cell="${n.id}">
+          <div class="patient-name-main">
+            <strong>${esc(meta.name)}</strong>
+            ${hint}
+            <button class="quick-ref-add" type="button" data-add-quick-image="${n.id}" title="Adicionar imagem para consulta rápida">＋ imagem</button>
+          </div>
+          <div class="quick-ref-zone" data-quick-zone="${n.id}" tabindex="0" aria-label="Cole uma imagem para consulta rápida">
+            <div class="quick-ref-paste-hint">Selecione esta nota e cole um print com Ctrl+V, ou use “＋ imagem”.</div>
+            <div class="quick-ref-strip" data-quick-strip="${n.id}"></div>
+          </div>
+        </td>
+        <td data-label="Idade">${esc(meta.age)}</td>
+        <td data-label="Prontuário">${esc(meta.record)}</td>
+        ${actionCells(n)}
+      </tr>`;
+    };
+
+    let h='';
+    if(state.filter==='all'){
+      const fixed=rows.filter(n=>n.pinned),normal=rows.filter(n=>!n.pinned);
+      if(fixed.length)h+=`<tr class="notes-group-row pinned-group"><td colspan="8">Fixadas</td></tr>`+fixed.map(one).join('');
+      if(normal.length)h+=`<tr class="notes-group-row"><td colspan="8">Não Fixadas</td></tr>`+normal.map(one).join('');
+    }else h=rows.map(one).join('');
+
+    els.tbody.innerHTML=h;
+
+    els.tbody.querySelectorAll('tr[data-id]').forEach(tr=>{
       tr.addEventListener('click',e=>{
-        if(e.target.closest('button')) return;
-        if(updateCompactNameOnlyMode() && e.target.closest('td[data-label="Nome"]')){
-          openNote(tr.dataset.id);
-          return;
-        }
+        if(e.target.closest('button')||e.target.closest('.quick-ref-thumb'))return;
         state.selectedId=tr.dataset.id;
         renderNotes();
       });
-      tr.addEventListener('dblclick',()=>openNote(tr.dataset.id));
+      tr.addEventListener('dblclick',e=>{
+        if(e.target.closest('.quick-ref-zone')||e.target.closest('button'))return;
+        openNote(tr.dataset.id);
+      });
     });
 
-    els.tbody.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',e=>{
-      e.stopPropagation(); openNote(b.dataset.open);
-    }));
-    els.tbody.querySelectorAll('[data-star]').forEach(b=>b.addEventListener('click',async e=>{
+    els.tbody.querySelectorAll('[data-quick-zone]').forEach(zone=>{
+      zone.addEventListener('click',e=>{
+        e.stopPropagation();
+        state.selectedId=zone.dataset.quickZone;
+      });
+      zone.addEventListener('paste',e=>handleQuickReferencePaste(e,zone.dataset.quickZone));
+      zone.addEventListener('dragover',e=>{
+        if([...(e.dataTransfer?.items||[])].some(i=>i.kind==='file')){
+          e.preventDefault();
+          zone.classList.add('quick-ref-active');
+        }
+      });
+      zone.addEventListener('dragleave',()=>zone.classList.remove('quick-ref-active'));
+      zone.addEventListener('drop',async e=>{
+        zone.classList.remove('quick-ref-active');
+        const files=[...(e.dataTransfer?.files||[])].filter(f=>f.type.startsWith('image/'));
+        if(files.length){
+          e.preventDefault();
+          e.stopPropagation();
+          await addQuickImagesToNote(zone.dataset.quickZone,files);
+        }
+      });
+    });
+
+    els.tbody.querySelectorAll('[data-add-quick-image]').forEach(b=>b.addEventListener('click',e=>{
       e.stopPropagation();
-      const n=state.notes.find(x=>x.id===b.dataset.star);
-      if(n) await quickUpdate(n.id,{pinned:!n.pinned});
-    }));
-    els.tbody.querySelectorAll('[data-archive-row]').forEach(b=>b.addEventListener('click',async e=>{
-      e.stopPropagation();
-      const n=state.notes.find(x=>x.id===b.dataset.archiveRow);
-      if(n) await quickUpdate(n.id,{archived:!n.archived});
-    }));
-    els.tbody.querySelectorAll('[data-edit-meta]').forEach(b=>b.addEventListener('click',e=>{
-      e.stopPropagation();
-      openPatientMetaEditor(b.dataset.editMeta);
-    }));
-    els.tbody.querySelectorAll('[data-trash-row]').forEach(b=>b.addEventListener('click',async e=>{
-      e.stopPropagation();
-      const n=state.notes.find(x=>x.id===b.dataset.trashRow);
-      if(n) await moveToTrash(n.id);
-    }));
-    els.tbody.querySelectorAll('[data-restore-row]').forEach(b=>b.addEventListener('click',async e=>{
-      e.stopPropagation(); await restoreNote(b.dataset.restoreRow);
-    }));
-    els.tbody.querySelectorAll('[data-delete-forever]').forEach(b=>b.addEventListener('click',async e=>{
-      e.stopPropagation();
-      const n=state.notes.find(x=>x.id===b.dataset.deleteForever);
-      if(n) await deleteNoteForever(n,true);
+      state.quickImageTargetNoteId=b.dataset.addQuickImage;
+      state.selectedId=b.dataset.addQuickImage;
+      els.quickImageInput.value='';
+      els.quickImageInput.click();
     }));
 
+    els.tbody.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openNote(b.dataset.open)}));
+    els.tbody.querySelectorAll('[data-star]').forEach(b=>b.addEventListener('click',async e=>{e.stopPropagation();const n=state.notes.find(x=>x.id===b.dataset.star);if(n)await quickUpdate(n.id,{pinned:!n.pinned})}));
+    els.tbody.querySelectorAll('[data-archive-row]').forEach(b=>b.addEventListener('click',async e=>{e.stopPropagation();const n=state.notes.find(x=>x.id===b.dataset.archiveRow);if(n)await quickUpdate(n.id,{archived:!n.archived})}));
+    els.tbody.querySelectorAll('[data-edit-meta]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openPatientMetaEditor(b.dataset.editMeta)}));
+    els.tbody.querySelectorAll('[data-trash-row]').forEach(b=>b.addEventListener('click',async e=>{e.stopPropagation();const n=state.notes.find(x=>x.id===b.dataset.trashRow);if(n)await moveToTrash(n.id)}));
+    els.tbody.querySelectorAll('[data-restore-row]').forEach(b=>b.addEventListener('click',async e=>{e.stopPropagation();await restoreNote(b.dataset.restoreRow)}));
+    els.tbody.querySelectorAll('[data-delete-forever]').forEach(b=>b.addEventListener('click',async e=>{e.stopPropagation();const n=state.notes.find(x=>x.id===b.dataset.deleteForever);if(n)await deleteNoteForever(n,true)}));
+
     updateSideActions();
+    hydrateQuickReferenceImages().catch(err=>console.warn('Consulta rápida:',err));
   }
 
   async function quickUpdate(id,patch){
@@ -3228,9 +4249,9 @@ window.APP_CONFIG = {
     renderNotes();
     els.patientMetaDialog.close();
 
-    if(!navigator.onLine||note.local_only){
+    if(!true||note.local_only){
       setSyncStatus('offline');
-      showToast('Identificação salva neste aparelho e será sincronizada depois.',3600);
+      showToast('Identificação salva neste aparelho e será salva localmente.',3600);
       return;
     }
 
@@ -3258,13 +4279,13 @@ window.APP_CONFIG = {
       return;
     }
 
-    // Só remove a cópia local quando o servidor devolver exatamente os mesmos dados.
+    // Só remove a cópia local quando o Supabase devolver exatamente os mesmos dados.
     const expected=JSON.stringify(manualMeta||{});
     const confirmed=JSON.stringify(data?.patient_meta||{});
 
     if(expected!==confirmed){
       setSyncStatus('ok');
-      showToast('Identificação preservada localmente; o servidor ainda não confirmou a alteração.',4500);
+      showToast('Identificação preservada localmente; o Supabase ainda não confirmou a alteração.',4500);
       return;
     }
 
@@ -3420,7 +4441,7 @@ window.APP_CONFIG = {
         }).catch(persistenceError);
       }
       openNote(id);
-      setAutosave('Salvo neste aparelho • aguardando internet','local-saved');
+      setAutosave('Salvo localmente','local-saved');
       setSyncStatus('offline');
     };
 
@@ -3433,7 +4454,6 @@ window.APP_CONFIG = {
     if(error){makeLocal();return;}
     state.notes.unshift({...data,note_labels:[],attachments:[]});
     cacheNotes();
-    noteCreatedCounterImmediate();
     openNote(data.id);
   });
 
@@ -3460,11 +4480,11 @@ window.APP_CONFIG = {
 
     if(useDraft){
       state.isDirty=true;
-      setAutosave(navigator.onLine?'Rascunho recuperado • sincronizando...':'Salvo neste aparelho • aguardando internet',navigator.onLine?'':'local-saved');
+      setAutosave(navigator.onLine?'Rascunho recuperado • sincronizando...':'Salvo neste aparelho',navigator.onLine?'':'local-saved');
       if(navigator.onLine){clearTimeout(state.saveTimer);state.saveTimer=setTimeout(flushSave,100);}
     }else{
       state.isDirty=false;
-      setAutosave('Salvo','cloud-saved');
+      setAutosave('Salvo','local-saved');
     }
   }
   els.back.addEventListener('click',async()=>{
@@ -3502,13 +4522,13 @@ window.APP_CONFIG = {
     persistDraftNow();
 
     if(!navigator.onLine){
-      setAutosave('Salvo neste aparelho • aguardando internet','local-saved');
+      setAutosave('Salvo localmente','local-saved');
       setSyncStatus('offline');
       return;
     }
 
     // SEGUNDO: envia ao Supabase quase imediatamente.
-    setAutosave('Salvo local • sincronizando...','local-saved');
+    setAutosave('Salvando...','local-saved');
     clearTimeout(state.saveTimer);
     state.saveTimer=setTimeout(flushSave,200);
   }
@@ -3598,7 +4618,7 @@ window.APP_CONFIG = {
       const expected=JSON.stringify(d.patient_meta||{});
       const confirmed=JSON.stringify(data?.patient_meta||{});
       if(expected!==confirmed){
-        console.warn('Identificação não confirmada pelo servidor.');
+        console.warn('Identificação não confirmada pelo Supabase.');
         return false;
       }
 
@@ -3699,14 +4719,14 @@ window.APP_CONFIG = {
 
     if(!navigator.onLine){
       state.isDirty=true;
-      setAutosave('Salvo neste aparelho • aguardando internet','local-saved');
+      setAutosave('Salvo localmente','local-saved');
       setSyncStatus('offline');
       return;
     }
 
     const d=buildDraft();
     setSyncStatus('syncing');
-    setAutosave('Sincronizando...','local-saved');
+    setAutosave('Salvando...','local-saved');
 
     if(state.current.local_only||d.pending_create){
       const ok=await syncDraftRecord({...d,pending_create:true});
@@ -3720,8 +4740,9 @@ window.APP_CONFIG = {
       await Promise.all([loadNotes(),loadLabels()]);
       const fresh=state.notes.find(n=>n.id===d.id);
       if(fresh)state.current=JSON.parse(JSON.stringify(fresh));
-      setAutosave(`Sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'cloud-saved');
+      setAutosave(`Sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'local-saved');
       setSyncStatus('ok');
+      scheduleGoogleBackup(d.id);
       return;
     }
 
@@ -3731,6 +4752,7 @@ window.APP_CONFIG = {
       title:d.title,content_html:d.content_html,color:d.color,
       reminder_at:d.reminder_at,
       patient_meta:d.patient_meta||state.current.patient_meta||{},
+      google_doc_id:d.google_doc_id||state.current.google_doc_id||null,
       updated_at:d.updated_at
     };
 
@@ -3762,9 +4784,10 @@ window.APP_CONFIG = {
 
     clearDraft(state.current.id);
     state.isDirty=false;
-    setAutosave(`Sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'cloud-saved');
+    setAutosave(`Sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'local-saved');
     await loadLabels();
     setSyncStatus('ok');
+    scheduleGoogleBackup(state.current.id);
   }
 
   els.pin.addEventListener('click',async()=>{state.current.pinned=!state.current.pinned;await quickCurrent({pinned:state.current.pinned});});
@@ -3930,11 +4953,243 @@ window.APP_CONFIG = {
     calcRender();
   });
 
+
+  const GOOGLE_CLIENT_ID_KEY='aghuNotes.googleClientId';
+  const GOOGLE_AUTO_KEY_PREFIX='aghuNotes.googleAuto:';
+  const GOOGLE_SCOPE='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/documents';
+
+  function googleAutoKey(){
+    return state.user?GOOGLE_AUTO_KEY_PREFIX+state.user.id:null;
+  }
+  function googleAutoEnabled(){
+    const key=googleAutoKey();
+    return !!key && localStorage.getItem(key)!=='0';
+  }
+  function setGoogleStatus(text,type=''){
+    if(!els.googleDocsStatus)return;
+    els.googleDocsStatus.textContent=text;
+    els.googleDocsStatus.classList.remove('ok','error');
+    if(type)els.googleDocsStatus.classList.add(type);
+  }
+  function googleConnected(){
+    return !!state.googleToken && Date.now()<state.googleTokenExpiresAt-30000;
+  }
+  async function loadGoogleIdentity(){
+    if(window.google?.accounts?.oauth2)return true;
+    if(document.querySelector('script[data-aghu-google-identity]')){
+      await new Promise((resolve,reject)=>{
+        const start=Date.now();
+        const t=setInterval(()=>{
+          if(window.google?.accounts?.oauth2){clearInterval(t);resolve()}
+          else if(Date.now()-start>10000){clearInterval(t);reject(new Error('Google Identity não carregou.'))}
+        },100);
+      });
+      return true;
+    }
+    await new Promise((resolve,reject)=>{
+      const s=document.createElement('script');
+      s.src='https://accounts.google.com/gsi/client';
+      s.async=true;s.defer=true;s.dataset.aghuGoogleIdentity='1';
+      s.onload=resolve;s.onerror=()=>reject(new Error('Não foi possível carregar a autenticação Google.'));
+      document.head.appendChild(s);
+    });
+    return true;
+  }
+  function googleClientId(){
+    return (els.googleClientIdInput?.value||localStorage.getItem(GOOGLE_CLIENT_ID_KEY)||'').trim();
+  }
+  async function requestGoogleToken(interactive=true){
+    const clientId=googleClientId();
+    if(!clientId)throw new Error('Informe primeiro o Google OAuth Client ID.');
+    localStorage.setItem(GOOGLE_CLIENT_ID_KEY,clientId);
+    await loadGoogleIdentity();
+
+    return await new Promise((resolve,reject)=>{
+      state.googleTokenClient=google.accounts.oauth2.initTokenClient({
+        client_id:clientId,
+        scope:GOOGLE_SCOPE,
+        callback:resp=>{
+          if(resp?.error){reject(new Error(resp.error_description||resp.error));return}
+          state.googleToken=resp.access_token;
+          state.googleTokenExpiresAt=Date.now()+(Number(resp.expires_in)||3600)*1000;
+          setGoogleStatus('Google conectado. As notas podem ser copiadas automaticamente.','ok');
+          resolve(resp.access_token);
+        },
+        error_callback:err=>reject(new Error(err?.message||'Autorização Google cancelada.'))
+      });
+      try{state.googleTokenClient.requestAccessToken({prompt:interactive?'consent':''})}
+      catch(err){reject(err)}
+    });
+  }
+  async function ensureGoogleToken(interactive=false){
+    if(googleConnected())return state.googleToken;
+    if(!interactive)return null;
+    return await requestGoogleToken(true);
+  }
+  async function googleFetch(url,options={}){
+    const token=await ensureGoogleToken(false);
+    if(!token)throw new Error('Google não conectado nesta sessão.');
+    const headers=new Headers(options.headers||{});
+    headers.set('Authorization',`Bearer ${token}`);
+    const response=await fetch(url,{...options,headers});
+    if(response.status===401){
+      state.googleToken=null;state.googleTokenExpiresAt=0;
+      throw new Error('A autorização Google expirou. Conecte novamente.');
+    }
+    if(!response.ok){
+      let detail='';
+      try{detail=(await response.json())?.error?.message||''}catch{}
+      throw new Error(detail||`Google API: ${response.status}`);
+    }
+    if(response.status===204)return null;
+    return await response.json();
+  }
+  async function ensureGoogleFolder(){
+    if(state.googleFolderId)return state.googleFolderId;
+    const q=encodeURIComponent("name='AGHU Notes' and mimeType='application/vnd.google-apps.folder' and trashed=false");
+    const found=await googleFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=10`);
+    if(found?.files?.length){
+      state.googleFolderId=found.files[0].id;
+      return state.googleFolderId;
+    }
+    const folder=await googleFetch('https://www.googleapis.com/drive/v3/files?fields=id,name',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name:'AGHU Notes',mimeType:'application/vnd.google-apps.folder'})
+    });
+    state.googleFolderId=folder.id;
+    return folder.id;
+  }
+  function htmlToGoogleText(html=''){
+    const box=document.createElement('div');
+    box.innerHTML=String(html)
+      .replace(/<br\s*\/?>/gi,'\n')
+      .replace(/<\/(?:p|div|h[1-6]|li|blockquote)>/gi,'\n')
+      .replace(/<li\b[^>]*>/gi,'• ');
+    return (box.textContent||box.innerText||'')
+      .replace(/\u00a0/g,' ')
+      .replace(/\n{3,}/g,'\n\n')
+      .trim();
+  }
+  async function createGoogleDoc(note){
+    const folderId=await ensureGoogleFolder();
+    const title=(note.title||'Sem título').slice(0,240);
+    const file=await googleFetch('https://www.googleapis.com/drive/v3/files?fields=id,name',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        name:title,
+        mimeType:'application/vnd.google-apps.document',
+        parents:[folderId]
+      })
+    });
+    return file.id;
+  }
+  async function replaceGoogleDocContent(docId,note){
+    const docData=await googleFetch(`https://docs.googleapis.com/v1/documents/${encodeURIComponent(docId)}`);
+    const content=docData?.body?.content||[];
+    const last=content[content.length-1];
+    const endIndex=Number(last?.endIndex)||1;
+    const bodyText=htmlToGoogleText(note.content_html||'');
+    const requests=[];
+
+    if(endIndex>2){
+      requests.push({deleteContentRange:{range:{startIndex:1,endIndex:endIndex-1}}});
+    }
+    if(bodyText){
+      requests.push({insertText:{location:{index:1},text:bodyText}});
+    }
+    if(requests.length){
+      await googleFetch(`https://docs.googleapis.com/v1/documents/${encodeURIComponent(docId)}:batchUpdate`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({requests})
+      });
+    }
+    await googleFetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(docId)}?fields=id,name`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name:(note.title||'Sem título').slice(0,240)})
+    });
+  }
+  async function syncNoteToGoogle(noteId,{interactive=false}={}){
+    if(!state.user)return false;
+    const token=await ensureGoogleToken(interactive);
+    if(!token){
+      if(interactive)throw new Error('Google não conectado.');
+      return false;
+    }
+    let note=state.notes.find(n=>n.id===noteId);
+    if(state.current?.id===noteId){
+      note={...(note||{}),...buildDraft(),google_doc_id:state.current.google_doc_id||note?.google_doc_id};
+    }
+    if(!note)return false;
+
+    setGoogleStatus('Copiando nota para o Google Docs...');
+    let docId=note.google_doc_id;
+    if(!docId)docId=await createGoogleDoc(note);
+    await replaceGoogleDocContent(docId,note);
+
+    if(note.google_doc_id!==docId){
+      await supabase.from('notes').update({google_doc_id:docId}).eq('id',noteId);
+      const cached=state.notes.find(n=>n.id===noteId);
+      if(cached)cached.google_doc_id=docId;
+      if(state.current?.id===noteId)state.current.google_doc_id=docId;
+    }
+    setGoogleStatus('Cópia Google Docs atualizada automaticamente.','ok');
+    return true;
+  }
+  function scheduleGoogleBackup(noteId){
+    if(!state.user||!googleAutoEnabled()||!googleConnected())return;
+    clearTimeout(state.googleSyncTimers.get(noteId));
+    const t=setTimeout(()=>{
+      syncNoteToGoogle(noteId).catch(err=>{
+        console.warn('Google Docs:',err);
+        setGoogleStatus(err.message||'Falha ao atualizar Google Docs.','error');
+      });
+      state.googleSyncTimers.delete(noteId);
+    },900);
+    state.googleSyncTimers.set(noteId,t);
+  }
+  function openGoogleDocsSettings(){
+    if(!state.user){showToast('Faça login primeiro.');return}
+    els.googleClientIdInput.value=localStorage.getItem(GOOGLE_CLIENT_ID_KEY)||'';
+    els.googleAutoBackup.checked=googleAutoEnabled();
+    setGoogleStatus(
+      googleConnected()
+        ? 'Google conectado. Alterações serão copiadas sem abrir nova aba.'
+        : 'Google não conectado nesta sessão.'
+    ,googleConnected()?'ok':'');
+    els.googleDocsDialog.showModal();
+  }
+
+  els.copyDocs?.addEventListener('click',openGoogleDocsSettings);
+  els.googleDocsClose?.addEventListener('click',()=>els.googleDocsDialog.close());
+  els.googleDocsCancel?.addEventListener('click',()=>els.googleDocsDialog.close());
+  els.googleAutoBackup?.addEventListener('change',()=>{
+    const key=googleAutoKey();if(key)localStorage.setItem(key,els.googleAutoBackup.checked?'1':'0');
+  });
+  els.googleConnect?.addEventListener('click',async()=>{
+    setGoogleStatus('Abrindo autorização segura do Google...');
+    try{
+      await requestGoogleToken(true);
+      const key=googleAutoKey();if(key)localStorage.setItem(key,els.googleAutoBackup.checked?'1':'0');
+      if(state.current)await syncNoteToGoogle(state.current.id);
+    }catch(err){setGoogleStatus(err.message||'Não foi possível conectar ao Google.','error')}
+  });
+  els.googleSyncNow?.addEventListener('click',async()=>{
+    if(!state.current){setGoogleStatus('Abra uma nota antes de copiar.','error');return}
+    try{
+      if(!googleConnected())await requestGoogleToken(true);
+      await syncNoteToGoogle(state.current.id);
+    }catch(err){setGoogleStatus(err.message||'Não foi possível copiar a nota.','error')}
+  });
+
   function notePlainText(){return `${els.title.value.trim()||'Sem título'}
 
 ${stripHtml(els.body.innerHTML)}`.trim();}
   els.share.addEventListener('click',async()=>{const payload={title:els.title.value.trim()||'Nota',text:notePlainText()};try{if(navigator.share)await navigator.share(payload);else{await navigator.clipboard.writeText(payload.text);showToast('Nota copiada para a área de transferência.');}}catch(err){if(err?.name!=='AbortError')showToast('Não foi possível compartilhar.');}});
-  els.copyDocs.addEventListener('click',async()=>{const htmlContent=`<h1>${esc(els.title.value.trim()||'Sem título')}</h1>${els.body.innerHTML}`;try{if(window.ClipboardItem&&navigator.clipboard?.write){const item=new ClipboardItem({'text/html':new Blob([htmlContent],{type:'text/html'}),'text/plain':new Blob([notePlainText()],{type:'text/plain'})});await navigator.clipboard.write([item]);}else await navigator.clipboard.writeText(notePlainText());window.open('https://docs.new/','_blank','noopener');showToast('Conteúdo copiado. Cole no Google Docs.');}catch{showToast('Não foi possível copiar para o Google Docs.');}});
+  // Google Docs agora é gerenciado pelo backup automático acima.
 
   function initDrawing(){
     const canvas=els.drawCanvas,ctx=canvas.getContext('2d');ctx.lineCap='round';ctx.lineJoin='round';let drawing=false,last=null;
@@ -3957,7 +5212,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
           try{
             await uploadAttachment(blob,fileName);
             await renderImages();
-            setAutosave('Desenho sincronizado','cloud-saved');
+            setAutosave('Desenho salvo localmente','local-saved');
           }catch(uploadErr){
             await queueLocalAttachment(blob,fileName,state.current.id);
             await renderImages();
@@ -3979,39 +5234,15 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   });
   async function restoreVersion(v){ if(!v)return; els.title.value=v.title;els.body.innerHTML=v.content_html;markDirty();els.historyDialog.close(); }
 
-  document.querySelectorAll('.formatbar [data-cmd]').forEach(b=>b.addEventListener('click',()=>{els.body.focus();document.execCommand(b.dataset.cmd,false,b.dataset.value||null);markDirty();}));
-  els.body.addEventListener('paste',e=>{
-    const clipboard=e.clipboardData||window.clipboardData;
-    if(!clipboard)return;
-
-    const raw=clipboard.getData('text/plain');
-    if(!raw)return;
-
-    e.preventDefault();
-
-    const normalized=raw
-      .replace(/\r\n?/g,'\n')
-      .replace(/[ \t]+\n/g,'\n')
-      .replace(/\n[ \t]+/g,'\n')
-      .replace(/\n{2,}/g,'\n')
-      .replace(/[ \t]{2,}/g,' ')
-      .trim();
-
-    const safe=normalized
-      .replace(/&/g,'&amp;')
-      .replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;')
-      .replace(/'/g,'&#039;')
-      .replace(/\n/g,'<br>');
-
-    els.body.focus();
-    document.execCommand('insertHTML',false,safe);
-    markDirty();
-  });
-
-  $('checklistBtn').addEventListener('click',()=>{els.body.focus();document.execCommand('insertHTML',false,'<div class="check-item"><input type="checkbox" contenteditable="false"><span>Item</span></div>');markDirty();});
-  els.body.addEventListener('change',e=>{if(e.target.matches('input[type="checkbox"]'))markDirty();});
+  function editorCommand(cmd,value=null){els.body.focus();try{document.execCommand('styleWithCSS',false,true);document.execCommand(cmd,false,value)}catch(e){console.warn(e)}markDirty()}
+  document.querySelectorAll('#wordToolbar [data-cmd]').forEach(b=>{b.addEventListener('mousedown',e=>e.preventDefault());b.addEventListener('click',()=>editorCommand(b.dataset.cmd,b.dataset.value||null))});
+  $('paragraphStyleSelect')?.addEventListener('change',e=>editorCommand('formatBlock',e.target.value||'P'));
+  $('fontNameSelect')?.addEventListener('change',e=>editorCommand('fontName',e.target.value));
+  $('fontSizeSelect')?.addEventListener('change',e=>editorCommand('fontSize',e.target.value));
+  $('fontColorInput')?.addEventListener('input',e=>editorCommand('foreColor',e.target.value));
+  $('highlightColorInput')?.addEventListener('input',e=>{els.body.focus();try{document.execCommand('hiliteColor',false,e.target.value)}catch{document.execCommand('backColor',false,e.target.value)}markDirty()});
+  $('lineSpacingSelect')?.addEventListener('change',e=>{const v=e.target.value;if(!v)return;const s=window.getSelection();let node=s?.anchorNode;if(node?.nodeType===3)node=node.parentElement;while(node&&node.parentElement!==els.body)node=node.parentElement;if(node&&node!==els.body)node.style.lineHeight=v;else els.body.style.lineHeight=v;markDirty();e.target.value=''});
+  // Paste padrão do navegador: preserva rich text permitido, sem limpeza automática.
 
   async function uploadAttachment(fileOrBlob,fileName){
     if(!fileOrBlob||!state.current)return null;const safe=(fileName||'arquivo').replace(/[^a-zA-Z0-9._-]/g,'_');const path=`${state.user.id}/${state.current.id}/${Date.now()}-${safe}`;
@@ -4038,7 +5269,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     try{
       await uploadAttachment(file,file.name);
       await renderImages();
-      setAutosave('Imagem sincronizada','cloud-saved');
+      setAutosave('Imagem salva localmente','local-saved');
     }catch(err){
       console.error(err);
       try{
@@ -4052,7 +5283,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   });
   async function signedImageUrl(path){const{data,error}=await supabase.storage.from('note-images').createSignedUrl(path,3600);if(error)return'';return data?.signedUrl||'';}
   async function renderImages(){
-    const remote=state.current?.attachments||[];
+    const remote=(state.current?.attachments||[]).filter(a=>!(a.quick_ref===true||a.quick_ref==='true'));
     let pending=[];
     try{
       pending=state.current?await localAttachmentsForNote(state.current.id):[];
@@ -4074,7 +5305,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
       pending.map(x=>`
         <div class="image-card local-pending-image" data-local-image="${x.id}">
           <img alt="${esc(x.fileName||'Imagem local')}">
-          <small>Pendente de sincronização</small>
+          <small>Pendente de Supabase</small>
           <button data-del-local-image="${x.id}">Remover</button>
         </div>`).join('');
 
@@ -4111,6 +5342,34 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     }));
   }
 
+
+  els.quickImageInput?.addEventListener('change',async()=>{
+    const noteId=state.quickImageTargetNoteId||state.selectedId;
+    const files=[...(els.quickImageInput.files||[])];
+    if(noteId&&files.length)await addQuickImagesToNote(noteId,files);
+    els.quickImageInput.value='';
+    state.quickImageTargetNoteId=null;
+  });
+
+  // Fluxo rápido no computador: clique no paciente/modelo e pressione Ctrl+V.
+  document.addEventListener('paste',async e=>{
+    if(els.keepPage.classList.contains('hidden'))return;
+    if(els.editorPage && !els.editorPage.classList.contains('hidden'))return;
+    if(e.target.closest('input,textarea,[contenteditable="true"]'))return;
+    if(!state.selectedId)return;
+
+    const files=imageFilesFromClipboard(e);
+    if(files.length){
+      e.preventDefault();
+      await addQuickImagesToNote(state.selectedId,files);
+    }
+  });
+
+  els.quickImageViewerClose?.addEventListener('click',()=>{
+    try{els.quickImageViewer.close()}catch{}
+    els.quickImageViewerImg.removeAttribute('src');
+  });
+
   document.querySelectorAll('.group-toggle').forEach(b=>b.addEventListener('click',()=>b.nextElementSibling.classList.toggle('open')));
   document.querySelectorAll('[data-static="true"]').forEach(b=>b.addEventListener('click',()=>{}));
   document.querySelector('[data-page="keep"]')?.addEventListener('click',openKeepModule);
@@ -4123,23 +5382,22 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     await syncPendingDrafts();
     await syncPendingLocalAttachments();
     await syncFromCloud();
-    if(state.current&&!getDraft(state.current.id))setAutosave('Sincronizado','cloud-saved');
+    if(state.current&&!getDraft(state.current.id))setAutosave('Salvo localmente','local-saved');
   });
   window.addEventListener('offline',()=>{
     if(state.current&&state.isDirty)persistDraftNow();
     setSyncStatus('offline');
-    if(state.current)setAutosave('Salvo neste aparelho • aguardando internet','local-saved');
+    if(state.current)setAutosave('Salvo localmente','local-saved');
   });
   window.addEventListener('focus',()=>{refreshAppCounters(false);syncFromCloud();});
   document.addEventListener('visibilitychange',()=>{
     if(!document.hidden){
-      refreshAppCounters(false);
-      syncFromCloud();
+        syncFromCloud();
     }
   });
   window.addEventListener('pagehide',()=>{
     if(state.current&&state.isDirty)persistDraftNow();
-    if(state.isDirty&&navigator.onLine)flushSave();
+    if(state.isDirty&&true)flushSave();
   });
   window.addEventListener('beforeunload',()=>{
     if(state.current&&state.isDirty)persistDraftNow();
@@ -4147,7 +5405,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
     window.addEventListener('load', async()=>{
       try{
-        const reg = await navigator.serviceWorker.register('/aghu/sw.js', {scope:'/aghu/', updateViaCache:'none'});
+        const reg = await navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'});
         await reg.update();
       }catch(err){
         console.warn('Service Worker:',err);
@@ -4161,17 +5419,6 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   });
 
   bootstrap();
-
-  window.addEventListener('DOMContentLoaded',()=>{
-    loadCachedAppCounters();
-    setTimeout(()=>refreshAppCounters(true),100);
-    setTimeout(()=>refreshAppCounters(false),700);
-  });
-
-  window.addEventListener('load',()=>{
-    loadCachedAppCounters();
-    refreshAppCounters(true);
-  });
 })();
 
   </script>
