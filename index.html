@@ -1831,7 +1831,7 @@
   <div id="adminPanel" class="admin-shell hidden">
     <aside class="sidebar admin-sidebar"><div class="sidebar-brand"><div class="aghu-notes-logo sidebar-aghu-logo"><div class="aghu-cross"></div><div class="aghu-word"><strong>AGHU<em>Notes</em></strong><small>Aplicativo particular de anotações</small></div></div></div><nav class="side-menu"><button class="menu-item active" type="button"><span>♟</span>Usuários e acessos</button><button id="adminExitBtn" class="menu-item" type="button"><span>↪</span>Sair</button></nav></aside>
     <div class="admin-main"><header class="topbar"><div class="search-menu admin-top-title">Administrador</div><div class="top-actions"><span class="session-box">Gestão sincronizada de contas</span></div></header><main class="workspace"><div class="tabs"><button class="tab active" type="button">♟ Usuários e acessos</button></div><section class="page admin-page">
-      <div class="panel-title">Criar novo acesso</div><form id="adminCreateUserForm" class="admin-create-form" autocomplete="off"><label>Login / e-mail<input id="adminNewEmail" type="email" required></label><label>Senha<input id="adminNewPassword" type="text" minlength="4" required></label><button class="btn btn-primary" type="submit">Criar acesso</button><div id="adminCreateUserStatus" class="admin-inline-status"></div></form>
+      <div class="panel-title">Criar novo acesso</div><form id="adminCreateUserForm" class="admin-create-form" autocomplete="off"><label>Login / e-mail<input id="adminNewEmail" type="email" required></label><label>Senha<input id="adminNewPassword" type="text" minlength="6" required></label><button class="btn btn-primary" type="submit">Criar acesso</button><div id="adminCreateUserStatus" class="admin-inline-status"></div></form>
       <div class="panel-title admin-users-title">Contas cadastradas</div><div class="table-wrap admin-users-wrap"><table class="notes-table admin-users-table"><thead><tr><th>Login</th><th>Segurança</th><th>Criado em</th><th>Status</th><th>Ações</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div><div class="admin-local-warning">Gestão local: as contas existem somente neste navegador/aparelho nesta versão sem Supabase.</div>
     </section></main></div>
   </div>
@@ -2768,6 +2768,71 @@ window.APP_CONFIG={
     }
   };
 
+  function adminAccessCacheKey(){
+    return `aghuNotes.adminAccessCache.v29:${currentUserId||'admin'}`;
+  }
+
+  function readAdminAccessCache(){
+    try{
+      const raw=JSON.parse(localStorage.getItem(adminAccessCacheKey())||'[]');
+      return Array.isArray(raw)?raw:[];
+    }catch{return []}
+  }
+
+  function writeAdminAccessCache(rows){
+    try{
+      const clean=(rows||[]).map(u=>({
+        id:u.id,
+        email:u.email,
+        role:u.role||'user',
+        active:u.active!==false,
+        has_data:!!u.has_data,
+        created_at:u.created_at||u.createdAt||new Date().toISOString(),
+        synced:u.synced!==false
+      })).filter(u=>u.id&&u.email);
+      localStorage.setItem(adminAccessCacheKey(),JSON.stringify(clean));
+      return clean;
+    }catch{return []}
+  }
+
+  function mergeAdminAccessCache(remoteRows){
+    const local=readAdminAccessCache();
+    const map=new Map(local.map(u=>[u.id,u]));
+    for(const r of (remoteRows||[])){
+      if(!r?.id)continue;
+      map.set(r.id,{
+        ...map.get(r.id),
+        ...r,
+        synced:true,
+        created_at:r.created_at||map.get(r.id)?.created_at||new Date().toISOString()
+      });
+    }
+    return writeAdminAccessCache([...map.values()]);
+  }
+
+  function cacheCreatedAccess(user){
+    if(!user?.id||!user?.email)return;
+    mergeAdminAccessCache([{
+      id:user.id,
+      email:user.email,
+      role:'user',
+      active:true,
+      has_data:false,
+      created_at:user.created_at||new Date().toISOString(),
+      synced:true
+    }]);
+  }
+
+  function cacheToggleAccess(userId,active){
+    const rows=readAdminAccessCache();
+    const idx=rows.findIndex(u=>u.id===userId);
+    if(idx>=0){
+      rows[idx].active=active;
+      rows[idx].synced=true;
+      writeAdminAccessCache(rows);
+    }
+  }
+
   async function adminInvoke(action,payload={}){
     const {data:sessionData,error:sessionError}=await raw.auth.getSession();
     if(sessionError)throw sessionError;
@@ -2811,15 +2876,53 @@ window.APP_CONFIG={
     async logout(){currentKey=null;currentUserId=null;await raw.auth.signOut()},
 
     async listUsers(){
-      const data=await adminInvoke('list');
-      return (data.users||[]).map(u=>({
-        id:u.id,email:u.email,password:'Protegida',createdAt:u.created_at,
-        active:u.active!==false,has_data:!!u.has_data
-      }));
+      try{
+        const data=await adminInvoke('list');
+        const remote=(data.users||[]).map(u=>({
+          id:u.id,
+          email:u.email,
+          role:u.role||'user',
+          password:'Protegida',
+          createdAt:u.created_at,
+          created_at:u.created_at,
+          active:u.active!==false,
+          has_data:!!u.has_data,
+          local_cache:false
+        }));
+        mergeAdminAccessCache(remote);
+        return remote;
+      }catch(err){
+        const cached=readAdminAccessCache();
+        if(cached.length){
+          return cached.map(u=>({
+            ...u,
+            password:'Protegida',
+            createdAt:u.created_at,
+            local_cache:true
+          }));
+        }
+        throw err;
+      }
     },
-    async createUser(email,password){return adminInvoke('create',{email,password})},
-    async resetPassword(userId,password){return adminInvoke('reset_password',{user_id:userId,password})},
-    async toggleUser(userId){return adminInvoke('toggle_user',{user_id:userId})}
+
+    async createUser(email,password){
+      const data=await adminInvoke('create',{email,password});
+      if(!data?.user?.id||!data?.user?.email){
+        throw new Error('O Supabase não confirmou a criação do acesso.');
+      }
+      cacheCreatedAccess(data.user);
+      return data;
+    },
+
+    async resetPassword(userId,password){
+      return adminInvoke('reset_password',{user_id:userId,password});
+    },
+
+    async toggleUser(userId){
+      const data=await adminInvoke('toggle_user',{user_id:userId});
+      if(typeof data?.active==='boolean')cacheToggleAccess(userId,data.active);
+      return data;
+    }
   };
 
   window.AGhuRawSupabase=raw;
@@ -2844,6 +2947,7 @@ window.APP_CONFIG={
   const supabase = configured ? window.AGhuCloud.createClient() : null;
   const LOCAL_ONLY = false;
   const DATA_PRESERVATION_POLICY = 'remote-canonical-never-destructive-on-code-update';
+  const ADMIN_ACCESS_CACHE_POLICY = 'supabase-plus-local-mirror-v29';
 
   const $ = (id) => document.getElementById(id);
   const state = {
@@ -3625,7 +3729,7 @@ window.APP_CONFIG={
         <td>${esc(u.email)}</td>
         <td class="admin-password">Protegida</td>
         <td>${u.createdAt?new Date(u.createdAt).toLocaleString('pt-BR'):'-'}</td>
-        <td>${u.active?'Ativo':'Bloqueado'}</td>
+        <td>${u.active?'Ativo':'Bloqueado'}${u.local_cache?' • cache local':' • Supabase'}</td>
         <td><div class="admin-user-actions">
           <button data-reset-user="${u.id}" ${u.has_data?'disabled title="Conta com notas criptografadas: a troca de senha exige recriptografia."':''}>Nova senha</button>
           <button data-toggle-user="${u.id}">${u.active?'Bloquear':'Ativar'}</button>
@@ -3692,7 +3796,7 @@ window.APP_CONFIG={
       const result=await AGhuLocalAdmin.createUser(email,password);
       els.adminNewEmail.value='';
       els.adminNewPassword.value='';
-      els.adminCreateUserStatus.textContent=`Acesso criado: ${result?.user?.email||email}`;
+      els.adminCreateUserStatus.textContent=`Acesso criado e sincronizado: ${result?.user?.email||email}`;
       await renderAdminUsers();
     }catch(x){
       console.error('Criar acesso:',x);
