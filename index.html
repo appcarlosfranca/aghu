@@ -1924,7 +1924,7 @@
         <label for="loginPassword">Senha</label>
         <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Senha" required />
         <button type="submit" class="btn btn-primary">Entrar</button>
-        <div class="login-memory-hint">Contas locais são cadastradas pelo Administrador. Após o login, a sessão permanece salva neste aparelho.</div>
+        <div class="login-memory-hint">Contas online são cadastradas pelo Administrador e podem ser acessadas em qualquer dispositivo.</div>
         <div id="loginError" class="form-error"></div>
       </form>
       <button id="adminAccessBtn" class="admin-access-link" type="button">Administrador</button>
@@ -2398,6 +2398,7 @@
   const cfg=window.APP_CONFIG||{};
   if(!window.supabase?.createClient)throw new Error('Supabase JS não carregado.');
   const raw=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  const BOOTSTRAP_ADMIN_LOGIN='carlosjfranca07@gmail.com';
   const ENC='AGHUENC1:',enc=new TextEncoder(),dec=new TextDecoder(),MAGIC=enc.encode('AGHUIMG1');
   let dataKey=null,currentProfile=null;
   const accountListeners=new Set();
@@ -2442,7 +2443,50 @@
   function notify(){for(const cb of accountListeners){try{cb()}catch{}}}
   const admin={
     hasAdmin:()=>true,setup:async()=>{throw Error('Administrador é gerenciado pela nuvem.')},
-    async login(id,pw){const r=await auth.signInWithPassword({email:id,password:pw});if(r.error)throw Error(r.error.message);if(r.data.user.role!=='admin'){await auth.signOut();throw Error('Esta conta não possui permissão de Administrador.')}return true},
+    async login(id,pw){
+      id=normalizeLogin(id);pw=String(pw||'');
+
+      let r=await auth.signInWithPassword({email:id,password:pw});
+
+      if(r.error && id===BOOTSTRAP_ADMIN_LOGIN){
+        const temp=window.supabase.createClient(
+          cfg.SUPABASE_URL,
+          cfg.SUPABASE_ANON_KEY,
+          {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}
+        );
+
+        const created=await temp.auth.signUp({
+          email:id,
+          password:pw,
+          options:{
+            data:{
+              display_login:id,
+              aghu_admin_provision:'true',
+              aghu_bootstrap_admin:'true'
+            }
+          }
+        });
+
+        if(!created.error && created.data?.user?.id){
+          try{await temp.auth.signOut()}catch{}
+          r=await auth.signInWithPassword({email:id,password:pw});
+        }
+      }
+
+      if(r.error){
+        const msg=(r.error.message||'').toLowerCase();
+        if(msg.includes('invalid login credentials')){
+          throw Error('Login ou senha inválidos. Se esta é sua primeira entrada online, use o acesso Administrador com a conta principal.');
+        }
+        throw Error(r.error.message||'Não foi possível autenticar.');
+      }
+
+      if(r.data.user.role!=='admin'){
+        await auth.signOut();
+        throw Error('Esta conta não possui permissão de Administrador.');
+      }
+      return true;
+    },
     logout(){auth.signOut().catch(()=>{})},
     async listUsers(){const r=await raw.from('profiles').select('user_id,login,role,active,created_at,first_access_done').order('created_at',{ascending:true});if(r.error)throw r.error;return(r.data||[]).map(p=>({id:p.user_id,email:p.login,password:'••••••',createdAt:p.created_at,active:p.active,role:p.role,firstAccessDone:p.first_access_done}))},
     async createUser(login,password){login=normalizeLogin(login);password=String(password||'');if(!validLogin(login))throw Error('Login inválido.');if(password.length<6)throw Error('A senha deve ter pelo menos 6 caracteres.');const temp=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});const r=await temp.auth.signUp({email:authEmailFor(login),password,options:{data:{display_login:login,aghu_admin_provision:'true'}}});if(r.error)throw r.error;if(!r.data?.user?.id)throw Error('Usuário não criado.');const a=await raw.rpc('admin_activate_user',{target_user_id:r.data.user.id,desired_login:login});if(a.error)throw a.error;notify();return{id:r.data.user.id,email:login,active:true}},
@@ -3231,7 +3275,7 @@
     els.adminLoginError.textContent='';
     els.adminIdentifier.value=localStorage.getItem('aghuNotes.adminLogin')||els.loginEmail.value||'';
     els.adminPasswordInput.value='';els.adminConfirmWrap.classList.add('hidden');
-    els.adminLoginTitle.textContent='Administrador';els.adminSetupHelp.textContent='Entre com a conta Administrador online.';els.adminLoginSubmit.textContent='Entrar';
+    els.adminLoginTitle.textContent='Administrador';els.adminSetupHelp.textContent='Entre com sua conta Administrador. No primeiro acesso desta versão, a conta principal pode ser ativada automaticamente.';els.adminLoginSubmit.textContent='Entrar';
     els.adminLoginDialog.showModal();
   }
   async function renderAdminUsers(){
@@ -3246,7 +3290,24 @@
 
   function exitAdmin(){AGhuLocalAdmin.logout();state.adminActive=false;state.user=null;els.adminPanel.classList.add('hidden');els.app.classList.add('hidden');els.auth.classList.remove('hidden')}
   els.adminAccess?.addEventListener('click',showAdminLogin);els.adminLoginClose?.addEventListener('click',()=>els.adminLoginDialog.close());els.adminLoginCancel?.addEventListener('click',()=>els.adminLoginDialog.close());els.adminExit?.addEventListener('click',exitAdmin);
-  els.adminLoginForm?.addEventListener('submit',async e=>{e.preventDefault();els.adminLoginError.textContent='';const login=els.adminIdentifier.value.trim(),p=els.adminPasswordInput.value;try{await AGhuLocalAdmin.login(login,p);localStorage.setItem('aghuNotes.adminLogin',login);els.adminLoginDialog.close();await enterAdmin()}catch(x){els.adminLoginError.textContent=x.message||'Não foi possível entrar como Administrador.'}});
+  els.adminLoginForm?.addEventListener('submit',async e=>{
+    e.preventDefault();
+    els.adminLoginError.textContent='';
+    const login=els.adminIdentifier.value.trim(),p=els.adminPasswordInput.value;
+    els.adminLoginSubmit.disabled=true;
+    els.adminLoginSubmit.textContent='Conectando...';
+    try{
+      await AGhuLocalAdmin.login(login,p);
+      localStorage.setItem('aghuNotes.adminLogin',login);
+      els.adminLoginDialog.close();
+      await enterAdmin();
+    }catch(x){
+      els.adminLoginError.textContent=x.message||'Não foi possível entrar como Administrador.';
+    }finally{
+      els.adminLoginSubmit.disabled=false;
+      els.adminLoginSubmit.textContent='Entrar';
+    }
+  });
   els.adminCreateUserForm?.addEventListener('submit',async e=>{
     e.preventDefault();
     els.adminCreateUserStatus.textContent='Criando acesso...';
@@ -3294,7 +3355,13 @@
     const login=els.loginEmail.value.trim(),password=els.loginPassword.value;
     if(!login||!password){els.loginError.textContent='Informe login e senha.';return;}
     const {data,error}=await supabase.auth.signInWithPassword({email:login,password});
-    if(error){els.loginError.textContent=error.message||'Login ou senha inválidos.';return;}
+    if(error){
+      const rawMsg=error.message||'';
+      els.loginError.textContent=/invalid login credentials/i.test(rawMsg)
+        ? 'Login ou senha inválidos. Se esta conta ainda não foi criada, solicite ao Administrador.'
+        : rawMsg||'Não foi possível entrar.';
+      return;
+    }
     localStorage.setItem('aghuNotes.lastLogin',login);
     els.loginPassword.value='';
     await enterApp(data.user);

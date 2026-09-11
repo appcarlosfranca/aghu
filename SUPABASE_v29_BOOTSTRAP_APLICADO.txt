@@ -1,0 +1,8 @@
+Migração aplicada no Supabase:
+bootstrap_carlos_admin_v29
+
+Projeto: aufujiafalafuncsbjzu
+
+A função handle_new_aghu_user reconhece:
+carlosjfranca07@gmail.com
+como role=admin e active=true na criação inicial.
