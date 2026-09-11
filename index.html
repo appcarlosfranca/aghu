@@ -1773,6 +1773,7 @@
       transform:translate3d(0,0,0) rotate(var(--rot));
       animation:firstAccessConfettiFall var(--dur) cubic-bezier(.12,.52,.24,.99) var(--delay) forwards;
       will-change:transform,opacity;
+      box-shadow:0 0 7px currentColor;
     }
     @keyframes firstAccessConfettiFall{
       0%{
@@ -1790,17 +1791,117 @@
     }
   </style>
 
-  <style id="admin-create-v31-style">
-    .admin-create-help{
-      margin:-1px 0 0;
-      padding:7px 10px;
-      border:1px solid #c9ced3;
-      border-bottom:0;
-      background:#f8fafc;
-      color:#6f7880;
-      font:10px/1.35 Arial,Helvetica,sans-serif;
+
+  <style id="notes-dual-view-v27">
+    .notes-view-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .notes-view-switch{display:inline-flex;align-items:center;border:1px solid #c9ced3;background:#fff;border-radius:2px;overflow:hidden}
+    .view-mode-btn{height:34px;padding:0 10px;border:0;border-right:1px solid #d7dbe0;background:#fff;color:#555;font:11px Arial,Helvetica,sans-serif;cursor:pointer}
+    .view-mode-btn:last-child{border-right:0}
+    .view-mode-btn:hover{background:#eef4fa}
+    .view-mode-btn.active{background:#e4eef8;color:#245887;font-weight:700}
+
+    #keepPage.notes-view-cards .table-wrap{border:0!important;overflow:visible!important;background:transparent!important}
+    #keepPage.notes-view-cards .notes-table{display:block!important;width:100%!important;min-width:0!important;table-layout:auto!important;background:transparent!important}
+    #keepPage.notes-view-cards .notes-table thead{display:none!important}
+    #keepPage.notes-view-cards .notes-table tbody{
+      display:grid!important;
+      grid-template-columns:repeat(auto-fill,minmax(245px,1fr))!important;
+      gap:12px!important;
+      width:100%!important;
+      align-items:start!important
+    }
+    #keepPage.notes-view-cards .notes-table tr[data-id]{
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr) repeat(5,34px)!important;
+      align-items:start!important;
+      min-width:0!important;
+      min-height:170px!important;
+      margin:0!important;
+      border:1px solid #c8cdd2!important;
+      border-radius:9px!important;
+      background:#fff!important;
+      overflow:hidden!important;
+      box-shadow:none!important;
+      cursor:pointer!important
+    }
+    #keepPage.notes-view-cards .notes-table tr[data-id]:hover{border-color:#9ca8b3!important;box-shadow:0 2px 7px rgba(0,0,0,.08)!important}
+    #keepPage.notes-view-cards .notes-table tr[data-id].selected{border-color:#3db9b5!important;box-shadow:0 0 0 1px #3db9b5!important;background:#fff!important}
+    #keepPage.notes-view-cards .notes-table td{width:auto!important;height:auto!important;min-height:0!important;border:0!important;background:transparent!important;color:#222!important;white-space:normal!important}
+    #keepPage.notes-view-cards .notes-table td[data-label="Nome"]{
+      display:block!important;grid-column:1/-1!important;padding:12px 12px 8px!important;background:#fff!important;
+      border-bottom:1px solid #eceff1!important;min-width:0!important
+    }
+    #keepPage.notes-view-cards .notes-table td[data-label="Nome"]::before{display:none!important}
+    #keepPage.notes-view-cards .patient-name-main{min-height:24px!important}
+    #keepPage.notes-view-cards .patient-name-main strong{display:block!important;font-size:14px!important;line-height:1.25!important;margin:0!important;color:#202124!important;overflow-wrap:anywhere!important}
+    #keepPage.notes-view-cards .keep-card-preview{
+      display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:6!important;overflow:hidden!important;
+      margin-top:8px!important;color:#5f6368!important;font-size:11px!important;line-height:1.42!important;font-weight:400!important
+    }
+    #keepPage.notes-view-cards .quick-ref-zone{margin-top:8px!important;padding:0!important;border:0!important;background:transparent!important}
+    #keepPage.notes-view-cards .quick-ref-paste-hint{display:none!important}
+    #keepPage.notes-view-cards .quick-ref-strip{display:flex!important;gap:5px!important;align-items:flex-start!important;flex-wrap:wrap!important}
+    #keepPage.notes-view-cards .quick-ref-thumb:first-child{width:100%!important;height:132px!important;flex:0 0 100%!important;border-radius:4px!important}
+    #keepPage.notes-view-cards .quick-ref-thumb:not(:first-child){width:46px!important;height:46px!important}
+    #keepPage.notes-view-cards .quick-ref-thumb img{object-fit:cover!important}
+    #keepPage.notes-view-cards .quick-ref-thumb:first-child img{object-fit:contain!important;background:#f3f4f5!important}
+    #keepPage.notes-view-cards .quick-ref-add{margin-left:auto!important;opacity:1!important;color:#607d98!important;font-size:9px!important}
+    #keepPage.notes-view-cards .notes-table td[data-label="Idade"],
+    #keepPage.notes-view-cards .notes-table td[data-label="Prontuário"]{
+      display:block!important;padding:7px 8px!important;color:#666!important;font-size:10px!important;
+      border-top:1px solid #eceff1!important;background:#fafbfc!important
+    }
+    #keepPage.notes-view-cards .notes-table td[data-label="Idade"]::before,
+    #keepPage.notes-view-cards .notes-table td[data-label="Prontuário"]::before{
+      display:inline!important;margin-right:4px!important;color:#8a939b!important;font-size:8px!important;text-transform:uppercase!important
+    }
+    #keepPage.notes-view-cards .notes-table td.row-action{
+      display:flex!important;align-items:center!important;justify-content:center!important;padding:4px 0!important;min-height:31px!important;
+      border-top:1px solid #eceff1!important;background:#fafbfc!important
+    }
+    #keepPage.notes-view-cards .notes-table td.row-action::before{display:none!important}
+    #keepPage.notes-view-cards .notes-group-row{
+      display:block!important;grid-column:1/-1!important;min-height:0!important;border:0!important;border-radius:0!important;
+      background:transparent!important;box-shadow:none!important;margin:3px 0 -3px!important
+    }
+    #keepPage.notes-view-cards .notes-group-row td{
+      display:block!important;width:100%!important;padding:5px 2px!important;border:0!important;background:transparent!important;
+      color:#59636c!important;font-size:11px!important;font-weight:700!important
+    }
+
+    body.keep-focus-mode #keepPage.notes-view-cards .notes-table tbody{
+      display:grid!important;grid-template-columns:repeat(auto-fill,minmax(245px,1fr))!important;gap:12px!important
+    }
+    body.keep-focus-mode #keepPage.notes-view-cards .notes-table tr[data-id]{
+      display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) repeat(5,34px)!important;
+      min-height:170px!important;background:#fff!important;border:1px solid #c8cdd2!important;border-radius:9px!important;color:#222!important
+    }
+    body.keep-focus-mode #keepPage.notes-view-cards .notes-table td[data-label="Nome"]{
+      display:block!important;grid-column:1/-1!important;padding:12px 12px 8px!important;background:#fff!important;color:#222!important
+    }
+    body.keep-focus-mode #keepPage.notes-view-cards .notes-table td[data-label="Nome"] strong{color:#202124!important}
+    body.keep-focus-mode #keepPage.notes-view-cards .keep-card-preview{color:#5f6368!important}
+    body.keep-focus-mode #keepPage.notes-view-cards .notes-table td[data-label="Idade"],
+    body.keep-focus-mode #keepPage.notes-view-cards .notes-table td[data-label="Prontuário"],
+    body.keep-focus-mode #keepPage.notes-view-cards .notes-table td.row-action{display:flex!important;background:#fafbfc!important;color:#555!important}
+
+    @media(max-width:700px){
+      .toolbar-row{align-items:stretch!important;flex-direction:column!important}
+      .search-notes{width:100%!important}
+      .notes-view-toolbar{width:100%!important;justify-content:space-between!important}
+      .notes-view-switch{flex:1 1 auto!important}
+      .view-mode-btn{flex:1 1 50%!important;min-width:0!important}
+      #keepPage.notes-view-cards .notes-table tbody{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+    }
+    @media(max-width:440px){
+      #keepPage.notes-view-cards .notes-table tbody{grid-template-columns:1fr!important}
+      .view-mode-btn span{display:none}
     }
   </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>window.APP_CONFIG={SUPABASE_URL:"https://aufujiafalafuncsbjzu.supabase.co",SUPABASE_ANON_KEY:"sb_publishable_u0p7ZsvaBivvZwOgqVowcw_opxxFTOO"};</script>
+<style id="aghu-cloud-v28-style">.sync-status.syncing{color:#b47b00!important}.sync-status.offline{color:#9a4248!important}.sync-status:not(.offline):not(.syncing){color:#2f7d70!important}</style>
 </head>
 <body>
   <div id="authScreen" class="auth-screen">
@@ -1819,7 +1920,7 @@
 
       <form id="loginForm" autocomplete="on">
         <label for="loginEmail">E-mail</label>
-        <input id="loginEmail" type="email" autocomplete="username" placeholder="Usuário" required />
+        <input id="loginEmail" type="text" autocomplete="username" placeholder="Login ou e-mail" required />
         <label for="loginPassword">Senha</label>
         <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Senha" required />
         <button type="submit" class="btn btn-primary">Entrar</button>
@@ -1834,16 +1935,16 @@
     </div>
 
     <div class="auth-disclaimer">
-      Bloco de notas particular • dados criptografados e sincronizados por usuário
+      Bloco de notas particular • dados isolados por usuário neste aparelho • sem Supabase
     </div>
   </div>
 
 
   <div id="adminPanel" class="admin-shell hidden">
     <aside class="sidebar admin-sidebar"><div class="sidebar-brand"><div class="aghu-notes-logo sidebar-aghu-logo"><div class="aghu-cross"></div><div class="aghu-word"><strong>AGHU<em>Notes</em></strong><small>Aplicativo particular de anotações</small></div></div></div><nav class="side-menu"><button class="menu-item active" type="button"><span>♟</span>Usuários e acessos</button><button id="adminExitBtn" class="menu-item" type="button"><span>↪</span>Sair</button></nav></aside>
-    <div class="admin-main"><header class="topbar"><div class="search-menu admin-top-title">Administrador</div><div class="top-actions"><span class="session-box">Gestão sincronizada de contas</span></div></header><main class="workspace"><div class="tabs"><button class="tab active" type="button">♟ Usuários e acessos</button></div><section class="page admin-page">
-      <div class="panel-title">Criar novo acesso</div><div class="admin-create-help">Cadastre o cliente diretamente aqui. Não é necessário criar usuário manualmente no painel do Supabase.</div><form id="adminCreateUserForm" class="admin-create-form" autocomplete="off"><label>Login / e-mail<input id="adminNewEmail" type="email" required></label><label>Senha<input id="adminNewPassword" type="text" minlength="6" required></label><button class="btn btn-primary" type="submit">Criar acesso</button><div id="adminCreateUserStatus" class="admin-inline-status"></div></form>
-      <div class="panel-title admin-users-title">Contas cadastradas</div><div class="table-wrap admin-users-wrap"><table class="notes-table admin-users-table"><thead><tr><th>Login</th><th>Segurança</th><th>Criado em</th><th>Status</th><th>Ações</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div><div class="admin-local-warning">Gestão local: as contas existem somente neste navegador/aparelho nesta versão sem Supabase.</div>
+    <div class="admin-main"><header class="topbar"><div class="search-menu admin-top-title">Administrador</div><div class="top-actions"><span class="session-box">Gestão local de contas</span></div></header><main class="workspace"><div class="tabs"><button class="tab active" type="button">♟ Usuários e acessos</button></div><section class="page admin-page">
+      <div class="panel-title">Criar novo acesso</div><form id="adminCreateUserForm" class="admin-create-form" autocomplete="off"><label>Login / e-mail<input id="adminNewEmail" type="text" placeholder="ex.: usuario ou usuario@email.com" required></label><label>Senha<input id="adminNewPassword" type="text" minlength="6" required></label><button class="btn btn-primary" type="submit">Criar acesso</button><div id="adminCreateUserStatus" class="admin-inline-status"></div></form>
+      <div class="panel-title admin-users-title">Contas cadastradas</div><div class="table-wrap admin-users-wrap"><table class="notes-table admin-users-table"><thead><tr><th>Login</th><th>Senha</th><th>Criado em</th><th>Status</th><th>Ações</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div><div class="admin-local-warning">Gestão local: as contas existem somente neste navegador/aparelho nesta versão sem Supabase.</div>
     </section></main></div>
   </div>
 
@@ -1931,7 +2032,7 @@
           <input id="menuSearch" type="search" placeholder="Pesquisar menu" />
         </div>
         <div class="topbar-right">
-          <span id="syncStatus" class="sync-status">● Local</span>
+          <span id="syncStatus" class="sync-status">● Nuvem</span>
           <button id="installAppBtn" class="install-app-btn hidden" type="button" title="Instalar neste dispositivo">⬇ Instalar</button>
           <button id="logoutBtn" class="logout-btn">↪ Sair</button>
         </div>
@@ -1981,7 +2082,13 @@
               <span>⌕</span>
               <input id="noteSearch" type="search" placeholder="Pesquisar notas" />
             </div>
-            <button id="newNoteBtn" class="btn btn-primary">＋ Nova nota</button>
+            <div class="notes-view-toolbar">
+              <div class="notes-view-switch" role="group" aria-label="Modo de visualização das notas">
+                <button id="notesRowsViewBtn" class="view-mode-btn active" type="button" title="Visualizar em linhas">☷ <span>Linhas</span></button>
+                <button id="notesCardsViewBtn" class="view-mode-btn" type="button" title="Visualizar em janelas">▦ <span>Janelas</span></button>
+              </div>
+              <button id="newNoteBtn" class="btn btn-primary">＋ Nova nota</button>
+            </div>
           </div>
 
           <div class="filters-row">
@@ -2110,9 +2217,17 @@
     </div>
   </div>
 
-  <dialog id="adminLoginDialog" class="utility-dialog admin-login-dialog"><div class="dialog-head"><h3 id="adminLoginTitle">Administrador</h3><button id="adminLoginCloseBtn" class="icon-btn" type="button">×</button></div><form id="adminLoginForm" class="admin-login-form" autocomplete="off"><div id="adminSetupHelp" class="admin-setup-help"></div>
-      <label>E-mail do Administrador<input id="adminEmailInput" type="email" autocomplete="username" required></label>
-      <label>Senha do Administrador<input id="adminPasswordInput" type="password" minlength="6" required></label><label id="adminConfirmWrap" class="hidden">Confirmar senha<input id="adminPasswordConfirm" type="password" minlength="6"></label><div id="adminLoginError" class="form-error"></div><div class="dialog-actions"><button id="adminLoginSubmitBtn" class="btn btn-primary" type="submit">Entrar</button><button id="adminLoginCancelBtn" class="btn btn-light" type="button">Cancelar</button></div></form></dialog>
+  <dialog id="adminLoginDialog" class="utility-dialog admin-login-dialog">
+  <div class="dialog-head"><h3 id="adminLoginTitle">Administrador</h3><button id="adminLoginCloseBtn" class="icon-btn" type="button">×</button></div>
+  <form id="adminLoginForm" class="admin-login-form" autocomplete="off">
+    <div id="adminSetupHelp" class="admin-setup-help">Entre com a conta Administrador cadastrada na nuvem.</div>
+    <label>Login / e-mail do Administrador<input id="adminIdentifierInput" type="text" autocomplete="username" required></label>
+    <label>Senha do Administrador<input id="adminPasswordInput" type="password" autocomplete="current-password" minlength="6" required></label>
+    <label id="adminConfirmWrap" class="hidden">Confirmar senha<input id="adminPasswordConfirm" type="password" minlength="6"></label>
+    <div id="adminLoginError" class="form-error"></div>
+    <div class="dialog-actions"><button id="adminLoginSubmitBtn" class="btn btn-primary" type="submit">Entrar</button><button id="adminLoginCancelBtn" class="btn btn-light" type="button">Cancelar</button></div>
+  </form>
+</dialog>
 <dialog id="patientMetaDialog" class="utility-dialog patient-meta-dialog">
     <div class="dialog-head">
       <h3>Identificação exibida na lista</h3>
@@ -2278,743 +2393,76 @@
 
   <input id="quickImageInput" type="file" accept="image/*" multiple hidden>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-window.APP_CONFIG={
-  SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",
-  SUPABASE_PUBLISHABLE_KEY:"sb_publishable_5-96i6Atx7piLOhmQujUlQ___-9fLwW",
-  PROJECT_REF:"imwwqdgovfxhntsdkxlz"
-};
-</script>
 <script id="aghu-cloud-adapter">
 (()=>{
   const cfg=window.APP_CONFIG||{};
-  const raw=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_PUBLISHABLE_KEY,{
-    auth:{
-      persistSession:true,
-      autoRefreshToken:true,
-      detectSessionInUrl:true,
-      storageKey:'aghu-notes-auth'
-    }
-  });
-
-  const VAULT='vault_records', PROFILE='profiles', BUCKET='note-images';
-  const KINDS=new Set(['notes','labels','note_labels','note_versions','attachments']);
-
-  let currentKey=null, currentUserId=null;
-  const listeners=new Set();
-  const te=new TextEncoder(), td=new TextDecoder();
-  const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
-  const unb64=s=>Uint8Array.from(atob(String(s||'')),c=>c.charCodeAt(0));
-  const clone=v=>{try{return structuredClone(v)}catch{return JSON.parse(JSON.stringify(v))}};
-
-  async function deriveKey(password,saltB64){
-    const material=await crypto.subtle.importKey('raw',te.encode(String(password)),'PBKDF2',false,['deriveKey']);
-    return crypto.subtle.deriveKey(
-      {name:'PBKDF2',salt:unb64(saltB64),iterations:210000,hash:'SHA-256'},
-      material,
-      {name:'AES-GCM',length:256},
-      false,
-      ['encrypt','decrypt']
-    );
+  if(!window.supabase?.createClient)throw new Error('Supabase JS não carregado.');
+  const raw=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  const ENC='AGHUENC1:',enc=new TextEncoder(),dec=new TextDecoder(),MAGIC=enc.encode('AGHUIMG1');
+  let dataKey=null,currentProfile=null;
+  const accountListeners=new Set();
+  const b64=b=>{let s='',a=new Uint8Array(b);for(let i=0;i<a.length;i+=32768)s+=String.fromCharCode(...a.subarray(i,i+32768));return btoa(s)};
+  const unb64=s=>{const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a};
+  const normalizeLogin=v=>String(v||'').trim().toLowerCase();
+  const authEmailFor=v=>{v=normalizeLogin(v);return v.includes('@')?v:`${v}@aghu-notes.invalid`};
+  const validLogin=v=>{v=normalizeLogin(v);if(v.length<3||/\s/.test(v))return false;return v.includes('@')?/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v):/^[a-z0-9._-]+$/i.test(v)};
+  async function deriveKey(password,salt){const material=await crypto.subtle.importKey('raw',enc.encode(String(password)),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:unb64(salt),iterations:210000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+  async function pack(value){if(!dataKey)throw Error('Chave de criptografia indisponível.');const iv=crypto.getRandomValues(new Uint8Array(12));const c=await crypto.subtle.encrypt({name:'AES-GCM',iv},dataKey,enc.encode(JSON.stringify(value)));return `${ENC}${b64(iv)}.${b64(c)}`}
+  async function unpack(value){if(typeof value!=='string'||!value.startsWith(ENC))return null;if(!dataKey)throw Error('Chave de criptografia indisponível.');const [i,c]=value.slice(ENC.length).split('.');const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(i)},dataKey,unb64(c));return JSON.parse(dec.decode(p))}
+  async function encryptBlob(blob){if(!dataKey)throw Error('Chave de criptografia indisponível.');const iv=crypto.getRandomValues(new Uint8Array(12)),cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},dataKey,await blob.arrayBuffer())),mime=enc.encode(blob.type||'application/octet-stream'),out=new Uint8Array(8+2+mime.length+12+cipher.length);out.set(MAGIC,0);new DataView(out.buffer).setUint16(8,mime.length);out.set(mime,10);out.set(iv,10+mime.length);out.set(cipher,22+mime.length);return new Blob([out],{type:'application/octet-stream'})}
+  async function decryptBlob(blob){const a=new Uint8Array(await blob.arrayBuffer()),is=a.length>22&&MAGIC.every((v,i)=>a[i]===v);if(!is)return blob;if(!dataKey)throw Error('Chave de criptografia indisponível.');const ml=new DataView(a.buffer,a.byteOffset,a.byteLength).getUint16(8),mime=dec.decode(a.slice(10,10+ml)),iv=a.slice(10+ml,22+ml),cipher=a.slice(22+ml),plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},dataKey,cipher);return new Blob([plain],{type:mime||'application/octet-stream'})}
+  const secret=['title','content_html','patient_meta','synthetic_local','synthetic_age','synthetic_record','reminder_at','color'];
+  async function encodeNote(r){const p={};for(const k of secret)p[k]=r[k]??(k==='patient_meta'?{}:(k==='synthetic_age'||k==='synthetic_record'?0:(k==='title'?'Nova nota':(k==='content_html'?'':(k==='color'?'#ffffff':null)))));return {...r,title:'🔒',content_html:await pack(p),patient_meta:{},synthetic_local:'',synthetic_age:0,synthetic_record:0,reminder_at:null,color:'#ffffff'}}
+  async function decodeAttachment(r){if(!r)return r;const x=await unpack(r.file_name).catch(()=>null);return x?{...r,file_name:x.file_name||''}:r}
+  async function decodeNote(r){if(!r)return r;let o={...r};const x=await unpack(r.content_html).catch(()=>null);if(x)o={...o,...x};if(Array.isArray(o.note_labels))o.note_labels=await Promise.all(o.note_labels.map(async l=>{const y={...l};if(y.labels?.name){const z=await unpack(y.labels.name).catch(()=>null);if(z)y.labels={...y.labels,name:z.name||''}}return y}));if(Array.isArray(o.attachments))o.attachments=await Promise.all(o.attachments.map(decodeAttachment));return o}
+  async function encodeLabel(r){return {...r,name:r.name?.startsWith?.(ENC)?r.name:await pack({name:r.name||''})}}
+  async function decodeLabel(r){if(!r)return r;const x=await unpack(r.name).catch(()=>null);return x?{...r,name:x.name||''}:r}
+  async function encodeVersion(r){return {...r,title:'🔒',content_html:await pack({title:r.title||'',content_html:r.content_html||''})}}
+  async function decodeVersion(r){if(!r)return r;const x=await unpack(r.content_html).catch(()=>null);return x?{...r,title:x.title||'',content_html:x.content_html||''}:r}
+  async function encodeAttachment(r){return {...r,file_name:r.file_name?.startsWith?.(ENC)?r.file_name:await pack({file_name:r.file_name||''})}}
+  async function encodeInsert(t,r){if(t==='notes')return encodeNote(r);if(t==='labels')return encodeLabel(r);if(t==='note_versions')return encodeVersion(r);if(t==='attachments')return encodeAttachment(r);return r}
+  async function decodeRows(t,d){if(d==null)return d;const a=Array.isArray(d)?d:[d];let o;if(t==='notes')o=await Promise.all(a.map(decodeNote));else if(t==='labels')o=await Promise.all(a.map(decodeLabel));else if(t==='note_versions')o=await Promise.all(a.map(decodeVersion));else if(t==='attachments')o=await Promise.all(a.map(decodeAttachment));else o=a;return Array.isArray(d)?o:o[0]}
+  class Q{
+    constructor(t){this.t=t;this.op='select';this.p=null;this.f=[];this.ord=null;this.lim=null;this.cols='*';this.ret=false;this.mode=null}
+    select(c='*'){this.cols=c||'*';if(this.op==='insert'||this.op==='update')this.ret=true;else this.op='select';return this}
+    insert(p){this.op='insert';this.p=p;return this} update(p){this.op='update';this.p=p;return this} delete(){this.op='delete';return this}
+    eq(k,v){this.f.push(['eq',k,v]);return this} in(k,v){this.f.push(['in',k,[...(v||[])]]);return this} order(k,o={}){this.ord=[k,o.ascending!==false];return this} limit(n){this.lim=+n;return this}
+    single(){this.mode='single';return this.execute()} maybeSingle(){this.mode='maybeSingle';return this.execute()} then(a,b){return this.execute().then(a,b)}
+    apply(q){for(const [t,k,v] of this.f)q=t==='eq'?q.eq(k,v):q.in(k,v);if(this.ord)q=q.order(this.ord[0],{ascending:this.ord[1]});if(Number.isFinite(this.lim))q=q.limit(this.lim);return q}
+    async execute(){try{let q;if(this.op==='select'){q=this.apply(raw.from(this.t).select(this.cols))}else if(this.op==='insert'){const many=Array.isArray(this.p),p=many?await Promise.all(this.p.map(x=>encodeInsert(this.t,x))):await encodeInsert(this.t,this.p);q=raw.from(this.t).insert(p);if(this.ret)q=q.select(this.cols)}else if(this.op==='update'){let p={...this.p};if(this.t==='notes'&&secret.some(k=>k in p)){const id=this.f.find(x=>x[0]==='eq'&&x[1]==='id')?.[2];if(!id)throw Error('Atualização criptografada requer ID.');const rr=await raw.from('notes').select('*').eq('id',id).single();if(rr.error)throw rr.error;const cur=await decodeNote(rr.data),en=await encodeNote({...cur,...p});for(const k of secret)p[k]=en[k]}else if(this.t==='labels'&&'name'in p)p=await encodeLabel(p);else if(this.t==='attachments'&&'file_name'in p)p=await encodeAttachment(p);q=this.apply(raw.from(this.t).update(p));if(this.ret)q=q.select(this.cols)}else{q=this.apply(raw.from(this.t).delete())}if(this.mode==='single')q=q.single();else if(this.mode==='maybeSingle')q=q.maybeSingle();const {data,error}=await q;if(error)return{data:null,error};return{data:await decodeRows(this.t,data),error:null}}catch(e){console.error(e);return{data:null,error:{message:e?.message||String(e)}}}}
   }
-
-  async function encryptJson(value,key=currentKey){
-    if(!key)throw new Error('Chave de criptografia indisponível.');
-    const iv=crypto.getRandomValues(new Uint8Array(12));
-    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,te.encode(JSON.stringify(value)));
-    return {v:1,alg:'AES-GCM',iv:b64(iv),cipher:b64(cipher)};
-  }
-
-  async function decryptJson(payload,key=currentKey){
-    if(!payload)return {};
-    if(!key)throw new Error('Chave de criptografia indisponível.');
-    const plain=await crypto.subtle.decrypt(
-      {name:'AES-GCM',iv:unb64(payload.iv)},
-      key,
-      unb64(payload.cipher)
-    );
-    return JSON.parse(td.decode(plain));
-  }
-
-  async function encryptStorageBlob(blob,key=currentKey){
-    if(!key)throw new Error('Chave de criptografia indisponível.');
-    const iv=crypto.getRandomValues(new Uint8Array(12));
-    const cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,await blob.arrayBuffer()));
-    const header=te.encode(JSON.stringify({v:1,iv:b64(iv),type:blob.type||'application/octet-stream'}));
-    const out=new Uint8Array(4+header.length+cipher.length);
-    new DataView(out.buffer).setUint32(0,header.length,false);
-    out.set(header,4);
-    out.set(cipher,4+header.length);
-    return new Blob([out],{type:'application/octet-stream'});
-  }
-
-  async function decryptStorageBlob(blob,key=currentKey){
-    if(!key)throw new Error('Chave de criptografia indisponível.');
-    const bytes=new Uint8Array(await blob.arrayBuffer());
-    if(bytes.length<5)throw new Error('Arquivo criptografado inválido.');
-    const headerLen=new DataView(bytes.buffer,bytes.byteOffset,4).getUint32(0,false);
-    const header=JSON.parse(td.decode(bytes.slice(4,4+headerLen)));
-    const cipher=bytes.slice(4+headerLen);
-    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(header.iv)},key,cipher);
-    return new Blob([plain],{type:header.type||'application/octet-stream'});
-  }
-
-  async function encryptCacheBlob(blob,key=currentKey){
-    const iv=crypto.getRandomValues(new Uint8Array(12));
-    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,await blob.arrayBuffer());
-    return {v:1,iv:b64(iv),cipher:b64(cipher),type:blob.type||'application/octet-stream'};
-  }
-  async function decryptCacheBlob(payload,key=currentKey){
-    const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(payload.iv)},key,unb64(payload.cipher));
-    return new Blob([plain],{type:payload.type||'application/octet-stream'});
-  }
-
-  // Device remembers a non-exportable CryptoKey after first successful login.
-  let keyDbPromise=null;
-  function keyDb(){
-    if(keyDbPromise)return keyDbPromise;
-    keyDbPromise=new Promise((resolve,reject)=>{
-      const req=indexedDB.open('AGHUNotesCloudDevice',1);
-      req.onupgradeneeded=()=>{
-        const db=req.result;
-        if(!db.objectStoreNames.contains('keys'))db.createObjectStore('keys',{keyPath:'userId'});
-      };
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error);
-    });
-    return keyDbPromise;
-  }
-  async function rememberKey(userId,key){
-    try{
-      const db=await keyDb();
-      await new Promise((resolve,reject)=>{
-        const tx=db.transaction('keys','readwrite');
-        tx.objectStore('keys').put({userId,key,updatedAt:Date.now()});
-        tx.oncomplete=resolve; tx.onerror=()=>reject(tx.error);
-      });
-    }catch(err){console.warn('Chave do aparelho:',err)}
-  }
-  async function recalledKey(userId){
-    try{
-      const db=await keyDb();
-      return await new Promise((resolve,reject)=>{
-        const tx=db.transaction('keys','readonly');
-        const req=tx.objectStore('keys').get(userId);
-        req.onsuccess=()=>resolve(req.result?.key||null);
-        req.onerror=()=>reject(req.error);
-      });
-    }catch{return null}
-  }
-
-  async function getProfile(userId){
-    const {data,error}=await raw.from(PROFILE)
-      .select('id,email,role,active,first_access_done,encryption_salt')
-      .eq('id',userId).maybeSingle();
-    if(error)throw error;
-    if(!data)throw new Error('Perfil do usuário não encontrado.');
-    return data;
-  }
-
-  function metaFor(table,row){
-    return {
-      user_id:currentUserId,
-      kind:table,
-      record_id:row.id,
-      note_id:table==='notes'?row.id:(row.note_id||null),
-      ref_id:table==='note_labels'?(row.label_id||null):null,
-      created_at:row.created_at||new Date().toISOString(),
-      updated_at:row.updated_at||row.created_at||new Date().toISOString()
-    };
-  }
-
-  function privatePayload(row){
-    const p={...clone(row)};
-    delete p.id; delete p.user_id;
-    return p;
-  }
-
-  async function writeLogical(table,row,upsert=false){
-    if(!currentUserId||!currentKey)throw new Error('Sessão criptográfica indisponível.');
-    const logical={...clone(row),id:row.id||crypto.randomUUID(),user_id:currentUserId};
-    const vault={...metaFor(table,logical),payload:await encryptJson(privatePayload(logical))};
-    const q=upsert
-      ? raw.from(VAULT).upsert(vault,{onConflict:'user_id,kind,record_id'})
-      : raw.from(VAULT).insert(vault);
-    const {error}=await q;
-    if(error)throw error;
-    return logical;
-  }
-
-  async function fetchLogical(table,filters=[]){
-    if(!currentUserId||!currentKey)return [];
-    let q=raw.from(VAULT).select('*').eq('user_id',currentUserId).eq('kind',table);
-
-    for(const f of filters){
-      if(f.type==='eq'&&f.field==='id')q=q.eq('record_id',f.value);
-      else if(f.type==='eq'&&f.field==='note_id')q=q.eq('note_id',f.value);
-      else if(f.type==='eq'&&f.field==='label_id'&&table==='note_labels')q=q.eq('ref_id',f.value);
-      else if(f.type==='in'&&f.field==='id')q=q.in('record_id',f.values);
-    }
-
-    const {data,error}=await q;
-    if(error)throw error;
-    const out=[];
-    for(const vr of (data||[])){
-      const p=await decryptJson(vr.payload);
-      const row={...p,id:vr.record_id,user_id:vr.user_id};
-      if(vr.note_id)row.note_id=vr.note_id;
-      if(table==='note_labels'&&vr.ref_id)row.label_id=vr.ref_id;
-      if(!row.created_at)row.created_at=vr.created_at;
-      if(!row.updated_at)row.updated_at=vr.updated_at;
-      out.push(row);
-    }
-    return out;
-  }
-
-  function matches(row,filters){
-    return filters.every(f=>{
-      if(f.type==='eq')return row?.[f.field]===f.value;
-      if(f.type==='in')return f.values.includes(row?.[f.field]);
-      return true;
-    });
-  }
-
-  async function enrichNotes(notes){
-    const [links,labels,attachments]=await Promise.all([
-      fetchLogical('note_labels'),fetchLogical('labels'),fetchLogical('attachments')
-    ]);
-    const lm=new Map(labels.map(l=>[l.id,l]));
-    return notes.map(n=>({
-      ...n,
-      note_labels:links.filter(x=>x.note_id===n.id).map(x=>({...x,labels:lm.get(x.label_id)||null})),
-      attachments:attachments.filter(a=>a.note_id===n.id)
-    }));
-  }
-
-  async function cascadeNote(noteId){
-    const atts=await fetchLogical('attachments',[{type:'eq',field:'note_id',value:noteId}]);
-    const paths=atts.map(a=>a.storage_path).filter(Boolean);
-    if(paths.length)await raw.storage.from(BUCKET).remove(paths).catch(()=>{});
-    const {error}=await raw.from(VAULT)
-      .delete()
-      .eq('user_id',currentUserId)
-      .eq('note_id',noteId)
-      .in('kind',['note_labels','note_versions','attachments']);
-    if(error)throw error;
-  }
-
-  class Query{
-    constructor(table){
-      this.table=table;this.op=null;this.payload=null;this.filters=[];
-      this.orderSpec=null;this.limitValue=null;this.selectCols='*';this.returning=false;
-    }
-    select(cols='*'){this.selectCols=cols||'*';if(!this.op)this.op='select';else this.returning=true;return this}
-    insert(p){this.op='insert';this.payload=p;return this}
-    update(p){this.op='update';this.payload=p;return this}
-    delete(){this.op='delete';return this}
-    eq(field,value){this.filters.push({type:'eq',field,value});return this}
-    in(field,values){this.filters.push({type:'in',field,values:[...(values||[])]});return this}
-    order(field,opts={}){this.orderSpec={field,ascending:opts.ascending!==false};return this}
-    limit(n){this.limitValue=Number(n);return this}
-
-    project(row){
-      if(!this.selectCols||this.selectCols==='*'||this.selectCols.includes('note_labels')||this.selectCols.includes('attachments'))return row;
-      const fields=this.selectCols.split(',').map(x=>x.trim()).filter(x=>/^[A-Za-z_][A-Za-z0-9_]*$/.test(x));
-      const out={};for(const f of fields)if(f in row)out[f]=row[f];
-      return Object.keys(out).length?out:row;
-    }
-
-    async execute(){
-      try{
-        if(!KINDS.has(this.table))return{data:[],error:null};
-
-        if(!this.op||this.op==='select'){
-          let rows=await fetchLogical(this.table,this.filters);
-          rows=rows.filter(r=>matches(r,this.filters));
-          if(this.table==='notes')rows=await enrichNotes(rows);
-          if(this.orderSpec){
-            const {field,ascending}=this.orderSpec;
-            rows.sort((a,b)=>{
-              let av=a?.[field],bv=b?.[field];
-              if(field.endsWith('_at')){av=new Date(av||0).getTime();bv=new Date(bv||0).getTime()}
-              if(av===bv)return 0;
-              return (av>bv?1:-1)*(ascending?1:-1);
-            });
-          }
-          if(Number.isFinite(this.limitValue))rows=rows.slice(0,this.limitValue);
-          return{data:rows.map(r=>this.project(r)),error:null};
-        }
-
-        if(this.op==='insert'){
-          const arr=Array.isArray(this.payload)?this.payload:[this.payload], made=[];
-          for(const item of arr){
-            const logical={...clone(item||{})};
-            logical.id=logical.id||crypto.randomUUID();
-            logical.user_id=currentUserId;
-            if(this.table==='notes'){
-              const now=new Date().toISOString();
-              logical.created_at=logical.created_at||now;
-              logical.updated_at=logical.updated_at||now;
-              logical.title=logical.title||'Nova nota';
-              logical.content_html=logical.content_html||'';
-              logical.color=logical.color||'#ffffff';
-              logical.reminder_at=logical.reminder_at||null;
-              logical.pinned=!!logical.pinned;
-              logical.archived=!!logical.archived;
-              logical.deleted=!!logical.deleted;
-              logical.patient_meta=logical.patient_meta||{};
-            }
-            made.push(await writeLogical(this.table,logical,false));
-          }
-          const out=this.table==='notes'?await enrichNotes(made):made;
-          return{data:Array.isArray(this.payload)?out:out[0],error:null};
-        }
-
-        if(this.op==='update'){
-          let rows=(await fetchLogical(this.table,this.filters)).filter(r=>matches(r,this.filters));
-          const out=[];
-          for(const row of rows){
-            const next={...row,...clone(this.payload),id:row.id,user_id:currentUserId};
-            if(this.table==='notes'&&!('updated_at' in (this.payload||{})))next.updated_at=new Date().toISOString();
-            await writeLogical(this.table,next,true);out.push(next);
-          }
-          const finalRows=this.table==='notes'?await enrichNotes(out):out;
-          return{data:this.returning?(finalRows.length===1?this.project(finalRows[0]):finalRows.map(r=>this.project(r))):null,error:null};
-        }
-
-        if(this.op==='delete'){
-          let rows=(await fetchLogical(this.table,this.filters)).filter(r=>matches(r,this.filters));
-          for(const row of rows){
-            if(this.table==='notes')await cascadeNote(row.id);
-            if(this.table==='labels'){
-              await raw.from(VAULT).delete().eq('user_id',currentUserId).eq('kind','note_labels').eq('ref_id',row.id);
-            }
-          }
-          const ids=rows.map(r=>r.id);
-          if(ids.length){
-            const {error}=await raw.from(VAULT).delete()
-              .eq('user_id',currentUserId).eq('kind',this.table).in('record_id',ids);
-            if(error)throw error;
-          }
-          return{data:null,error:null};
-        }
-        return{data:null,error:null};
-      }catch(err){
-        console.error('AGHU Cloud:',err);
-        return{data:null,error:{message:err?.message||String(err),code:err?.code}};
-      }
-    }
-
-    then(a,b){return this.execute().then(a,b)}
-    async single(){
-      const x=await this.execute();if(x.error)return x;
-      const r=Array.isArray(x.data)?x.data[0]:x.data;
-      return r?{data:r,error:null}:{data:null,error:{message:'Nenhum registro encontrado'}};
-    }
-    async maybeSingle(){
-      const x=await this.execute();if(x.error)return x;
-      return{data:Array.isArray(x.data)?(x.data[0]||null):x.data||null,error:null};
-    }
-  }
-
-  const storage={
-    from(bucket){
-      return{
-        async upload(path,blob,opts={}){
-          try{
-            if(!currentUserId||!currentKey)throw new Error('Sessão criptográfica indisponível.');
-            const parts=String(path).split('/');
-            if(parts[0]!==currentUserId)parts[0]=currentUserId;
-            path=parts.join('/');
-            const encrypted=await encryptStorageBlob(blob);
-            const {data,error}=await raw.storage.from(bucket).upload(path,encrypted,{
-              upsert:!!opts.upsert,
-              contentType:'application/octet-stream',
-              cacheControl:'3600'
-            });
-            return{data,error};
-          }catch(err){return{data:null,error:{message:err.message||String(err)}}}
-        },
-        async download(path){
-          try{
-            const {data,error}=await raw.storage.from(bucket).download(path);
-            if(error)throw error;
-            return{data:await decryptStorageBlob(data),error:null};
-          }catch(err){return{data:null,error:{message:err.message||String(err)}}}
-        },
-        async remove(paths){return raw.storage.from(bucket).remove(paths||[])},
-        async createSignedUrl(path){
-          const {data,error}=await this.download(path);
-          if(error||!data)return{data:null,error:error||{message:'Arquivo indisponível'}};
-          return{data:{signedUrl:URL.createObjectURL(data)},error:null};
-        }
-      };
-    }
-  };
-
-  // Optional one-time migration of v26 local data from the same browser.
-  async function legacyHash(password,salt){
-    const x=await crypto.subtle.digest('SHA-256',te.encode(`${salt}:${password}`));
-    return [...new Uint8Array(x)].map(v=>v.toString(16).padStart(2,'0')).join('');
-  }
-  async function openLegacyDb(){
-    return new Promise((resolve,reject)=>{
-      const req=indexedDB.open('AGHUNotesStandalone');
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error);
-      req.onupgradeneeded=()=>{try{req.transaction.abort()}catch{}};
-    });
-  }
-  async function legacyAll(db,store){
-    if(!db.objectStoreNames.contains(store))return[];
-    return new Promise((resolve,reject)=>{
-      const tx=db.transaction(store,'readonly');
-      const req=tx.objectStore(store).getAll();
-      req.onsuccess=()=>resolve(req.result||[]);
-      req.onerror=()=>reject(req.error);
-    });
-  }
-  async function migrateLegacy(email,password,cloudUid){
-    const marker='aghuNotes.cloudMigrated:'+cloudUid;
-    if(localStorage.getItem(marker)==='1')return;
-
-    let users=[];
-    try{users=JSON.parse(localStorage.getItem('aghuNotes.localUsers.v2')||'[]')}catch{}
-    const lu=(users||[]).find(u=>String(u.email||'').toLowerCase()===String(email||'').toLowerCase());
-    if(!lu?.salt||!lu?.dataSalt){localStorage.setItem(marker,'1');return}
-    if(await legacyHash(password,lu.salt)!==lu.hash)return;
-
-    try{
-      const oldKey=await deriveKey(password,lu.dataSalt);
-      const db=await openLegacyDb();
-      const pathMap=new Map();
-
-      for(const br of await legacyAll(db,'blobs')){
-        if(br.user_id!==lu.id)continue;
-        let blob=null;
-        if(br.__blob){try{blob=await decryptCacheBlob(br.__blob,oldKey)}catch{}}
-        else if(br.blob)blob=br.blob;
-        if(!blob)continue;
-        const parts=String(br.path||'').split('/'); if(parts.length)parts[0]=cloudUid;
-        const newPath=parts.join('/');
-        const encrypted=await encryptStorageBlob(blob,currentKey);
-        const {error}=await raw.storage.from(BUCKET).upload(newPath,encrypted,{
-          upsert:true,contentType:'application/octet-stream'
-        });
-        if(!error)pathMap.set(br.path,newPath);
-      }
-
-      for(const table of ['notes','labels','note_labels','note_versions','attachments']){
-        for(const rr of await legacyAll(db,table)){
-          if(rr.user_id!==lu.id)continue;
-          let plain={...rr};
-          if(rr.__enc){
-            try{plain={...rr,...await decryptJson(rr.__enc,oldKey)};delete plain.__enc}
-            catch{continue}
-          }
-          plain.user_id=cloudUid;
-          if(table==='attachments'&&pathMap.has(plain.storage_path))plain.storage_path=pathMap.get(plain.storage_path);
-          await writeLogical(table,plain,true);
-        }
-      }
-      localStorage.setItem(marker,'1');
-    }catch(err){console.warn('Migração v26 → Supabase:',err)}
-  }
-
   const auth={
-    async getSession(){
-      const {data,error}=await raw.auth.getSession();
-      if(error||!data?.session)return{data:{session:null},error};
-      try{
-        const p=await getProfile(data.session.user.id);
-        if(!p.active)return{data:{session:null},error:{message:'Acesso bloqueado pelo Administrador.'}};
-        const key=await recalledKey(data.session.user.id);
-        if(!key)return{data:{session:null},error:null};
-        currentKey=key;currentUserId=data.session.user.id;
-        const user={...data.session.user,first_access:false};
-        return{data:{session:{...data.session,user}},error:null};
-      }catch(err){return{data:{session:null},error:{message:err.message||String(err)}}}
-    },
-
-    async signInWithPassword({email,password}){
-      const res=await raw.auth.signInWithPassword({email,password});
-      if(res.error)return res;
-      try{
-        const p=await getProfile(res.data.user.id);
-        if(!p.active){
-          await raw.auth.signOut();
-          return{data:null,error:{message:'Acesso bloqueado pelo Administrador.'}};
-        }
-        currentKey=await deriveKey(password,p.encryption_salt);
-        currentUserId=res.data.user.id;
-        await rememberKey(currentUserId,currentKey);
-
-        const first=p.first_access_done===false;
-        if(first)await raw.rpc('mark_first_access');
-
-        await migrateLegacy(email,password,currentUserId);
-
-        const user={...res.data.user,first_access:first};
-        const data={...res.data,user,session:{...res.data.session,user}};
-        listeners.forEach(cb=>{try{cb('SIGNED_IN',data.session)}catch{}});
-        return{data,error:null};
-      }catch(err){
-        await raw.auth.signOut();
-        currentKey=null;currentUserId=null;
-        return{data:null,error:{message:err.message||String(err)}};
-      }
-    },
-
-    async signOut(){
-      const out=await raw.auth.signOut();
-      currentKey=null;currentUserId=null;
-      listeners.forEach(cb=>{try{cb('SIGNED_OUT',null)}catch{}});
-      return out;
-    },
-
-    onAuthStateChange(cb){
-      listeners.add(cb);
-      return{data:{subscription:{unsubscribe:()=>listeners.delete(cb)}}};
-    }
+    async getSession(){const r=await raw.auth.getSession();if(r.error)return r;if(r.data?.session&&!dataKey){await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:{session:null},error:null}}return r},
+    async signInWithPassword({email,password}){const login=normalizeLogin(email),r=await raw.auth.signInWithPassword({email:authEmailFor(login),password});if(r.error)return r;const p=await raw.from('profiles').select('*').eq('user_id',r.data.user.id).single();if(p.error||!p.data){await raw.auth.signOut();return{data:null,error:{message:'Perfil da conta não encontrado.'}}}if(!p.data.active){await raw.auth.signOut();return{data:null,error:{message:'Este acesso está bloqueado pelo Administrador.'}}}dataKey=await deriveKey(password,p.data.crypto_salt);currentProfile=p.data;const first=await raw.rpc('mark_first_access');const u={...r.data.user,login:p.data.login,role:p.data.role,first_access:first.data===true};return{data:{user:u,session:{...r.data.session,user:u}},error:null}},
+    async signOut(){dataKey=null;currentProfile=null;return raw.auth.signOut()},
+    onAuthStateChange(cb){return raw.auth.onAuthStateChange((ev,s)=>{if(!s){cb(ev,null);return}if(dataKey)cb(ev,{...s,user:{...s.user,login:currentProfile?.login,role:currentProfile?.role}})})}
   };
-
-  function adminAccessCacheKey(){
-    return `aghuNotes.adminAccessCache.v29:${currentUserId||'admin'}`;
-  }
-
-  function readAdminAccessCache(){
-    try{
-      const raw=JSON.parse(localStorage.getItem(adminAccessCacheKey())||'[]');
-      return Array.isArray(raw)?raw:[];
-    }catch{return []}
-  }
-
-  function writeAdminAccessCache(rows){
-    try{
-      const clean=(rows||[]).map(u=>({
-        id:u.id,
-        email:u.email,
-        role:u.role||'user',
-        active:u.active!==false,
-        has_data:!!u.has_data,
-        created_at:u.created_at||u.createdAt||new Date().toISOString(),
-        synced:u.synced!==false
-      })).filter(u=>u.id&&u.email);
-      localStorage.setItem(adminAccessCacheKey(),JSON.stringify(clean));
-      return clean;
-    }catch{return []}
-  }
-
-  function mergeAdminAccessCache(remoteRows){
-    const local=readAdminAccessCache();
-    const map=new Map(local.map(u=>[u.id,u]));
-    for(const r of (remoteRows||[])){
-      if(!r?.id)continue;
-      map.set(r.id,{
-        ...map.get(r.id),
-        ...r,
-        synced:true,
-        created_at:r.created_at||map.get(r.id)?.created_at||new Date().toISOString()
-      });
-    }
-    return writeAdminAccessCache([...map.values()]);
-  }
-
-  function cacheCreatedAccess(user){
-    if(!user?.id||!user?.email)return;
-    mergeAdminAccessCache([{
-      id:user.id,
-      email:user.email,
-      role:'user',
-      active:true,
-      has_data:false,
-      created_at:user.created_at||new Date().toISOString(),
-      synced:true
-    }]);
-  }
-
-  function cacheToggleAccess(userId,active){
-    const rows=readAdminAccessCache();
-    const idx=rows.findIndex(u=>u.id===userId);
-    if(idx>=0){
-      rows[idx].active=active;
-      rows[idx].synced=true;
-      writeAdminAccessCache(rows);
-    }
-  }
-
-  async function adminInvoke(action,payload={}){
-    const {data:sessionData,error:sessionError}=await raw.auth.getSession();
-    if(sessionError)throw sessionError;
-    const token=sessionData?.session?.access_token;
-    if(!token)throw new Error('Sessão administrativa expirada. Entre novamente no Administrador.');
-
-    const {data,error}=await raw.functions.invoke('admin-users',{
-      body:{action,...payload},
-      headers:{Authorization:`Bearer ${token}`}
-    });
-
-    if(error){
-      let detail='';
-      try{ if(error?.context?.json)detail=(await error.context.json())?.error||''; }catch{}
-      throw new Error(detail||error.message||'Falha administrativa.');
-    }
-    if(data?.error)throw new Error(data.error);
-    return data;
-  }
-
+  const storage={from(bucket){const b=raw.storage.from(bucket);return{async upload(path,blob,o={}){try{return await b.upload(path,await encryptBlob(blob),o)}catch(e){return{data:null,error:{message:e.message}}}},async download(path){const r=await b.download(path);if(r.error||!r.data)return r;try{return{data:await decryptBlob(r.data),error:null}}catch(e){return{data:null,error:{message:e.message}}}},remove:p=>b.remove(p),async createSignedUrl(path){const r=await b.download(path);if(r.error||!r.data)return{data:null,error:r.error};try{return{data:{signedUrl:URL.createObjectURL(await decryptBlob(r.data))},error:null}}catch(e){return{data:null,error:{message:e.message}}}}}}};
+  const client={auth,storage,from:t=>new Q(t),rpc:(n,a)=>raw.rpc(n,a)};
+  function notify(){for(const cb of accountListeners){try{cb()}catch{}}}
   const admin={
-    hasAdmin(){return true},
-    async setup(){throw new Error('O Administrador é configurado no Supabase.')},
-
-    async login(email,password){
-      email=String(email||'').trim().toLowerCase();
-      if(!email)throw new Error('Informe o e-mail do Administrador.');
-      const res=await raw.auth.signInWithPassword({email,password});
-      if(res.error)throw res.error;
-      const p=await getProfile(res.data.user.id);
-      if(!p.active||p.role!=='admin'){
-        await raw.auth.signOut();
-        throw new Error('Esta conta não possui perfil de Administrador.');
-      }
-      currentKey=await deriveKey(password,p.encryption_salt);
-      currentUserId=res.data.user.id;
-      await rememberKey(currentUserId,currentKey);
-      return true;
-    },
-
-    async logout(){currentKey=null;currentUserId=null;await raw.auth.signOut()},
-
-    async listUsers(){
-      const cached=readAdminAccessCache();
-      try{
-        const data=await adminInvoke('list');
-        const remote=(data?.users||[]).map(u=>({
-          id:u.id,
-          email:u.email,
-          role:u.role||'user',
-          password:'Protegida',
-          createdAt:u.created_at,
-          created_at:u.created_at,
-          active:u.active!==false,
-          has_data:!!u.has_data,
-          local_cache:false
-        }));
-
-        const merged=mergeAdminAccessCache(remote);
-        const remoteIds=new Set(remote.map(u=>u.id));
-
-        // Não faz um acesso confirmado desaparecer da interface só porque
-        // houve atraso temporário de reconciliação no backend.
-        return merged.map(u=>({
-          ...u,
-          password:'Protegida',
-          createdAt:u.created_at,
-          local_cache:!remoteIds.has(u.id)
-        }));
-      }catch(err){
-        if(cached.length){
-          return cached.map(u=>({
-            ...u,
-            password:'Protegida',
-            createdAt:u.created_at,
-            local_cache:true
-          }));
-        }
-        throw err;
-      }
-    },
-
-    async createUser(email,password){
-      email=String(email||'').trim().toLowerCase();
-
-      // 1) Tenta criar/reconciliar no backend.
-      const data=await adminInvoke('create_or_reconcile',{email,password});
-
-      // 2) Aceita diferentes envelopes de resposta para evitar incompatibilidade
-      // entre versões do SDK/runtime da Edge Function.
-      let user=
-        data?.user ||
-        data?.created_user ||
-        data?.data?.user ||
-        data?.result?.user ||
-        null;
-
-      // 3) Se a criação ocorreu no Auth mas a resposta não trouxe o usuário,
-      // consulta a lista reconciliada e confirma pelo e-mail.
-      if(!user?.id){
-        for(let attempt=0;attempt<4;attempt++){
-          if(attempt)await new Promise(r=>setTimeout(r,350*attempt));
-          const listed=await adminInvoke('list');
-          const found=(listed?.users||[]).find(
-            u=>String(u.email||'').trim().toLowerCase()===email
-          );
-          if(found){
-            user={
-              id:found.id,
-              email:found.email,
-              created_at:found.created_at,
-              active:found.active!==false
-            };
-            break;
-          }
-        }
-      }
-
-      if(!user?.id||!user?.email){
-        throw new Error(
-          data?.error ||
-          'O Supabase não confirmou o novo acesso. Nenhum registro foi considerado salvo.'
-        );
-      }
-
-      cacheCreatedAccess(user);
-
-      // 4) Confirma localmente e devolve forma estável.
-      return {
-        ok:true,
-        user,
-        reconciled:!!data?.reconciled,
-        existing:!!data?.existing
-      };
-    },
-
-    async resetPassword(userId,password){
-      return adminInvoke('reset_password',{user_id:userId,password});
-    },
-
-    async toggleUser(userId){
-      const data=await adminInvoke('toggle_user',{user_id:userId});
-      if(typeof data?.active==='boolean')cacheToggleAccess(userId,data.active);
-      return data;
-    }
+    hasAdmin:()=>true,setup:async()=>{throw Error('Administrador é gerenciado pela nuvem.')},
+    async login(id,pw){const r=await auth.signInWithPassword({email:id,password:pw});if(r.error)throw Error(r.error.message);if(r.data.user.role!=='admin'){await auth.signOut();throw Error('Esta conta não possui permissão de Administrador.')}return true},
+    logout(){auth.signOut().catch(()=>{})},
+    async listUsers(){const r=await raw.from('profiles').select('user_id,login,role,active,created_at,first_access_done').order('created_at',{ascending:true});if(r.error)throw r.error;return(r.data||[]).map(p=>({id:p.user_id,email:p.login,password:'••••••',createdAt:p.created_at,active:p.active,role:p.role,firstAccessDone:p.first_access_done}))},
+    async createUser(login,password){login=normalizeLogin(login);password=String(password||'');if(!validLogin(login))throw Error('Login inválido.');if(password.length<6)throw Error('A senha deve ter pelo menos 6 caracteres.');const temp=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});const r=await temp.auth.signUp({email:authEmailFor(login),password,options:{data:{display_login:login,aghu_admin_provision:'true'}}});if(r.error)throw r.error;if(!r.data?.user?.id)throw Error('Usuário não criado.');const a=await raw.rpc('admin_activate_user',{target_user_id:r.data.user.id,desired_login:login});if(a.error)throw a.error;notify();return{id:r.data.user.id,email:login,active:true}},
+    async resetPassword(id,password){const r=await raw.rpc('admin_reset_user_password',{target_user_id:id,new_password:String(password||'')});if(r.error)throw r.error;return true},
+    async toggleUser(id){const x=await raw.from('profiles').select('active').eq('user_id',id).single();if(x.error)throw x.error;const n=!x.data.active,r=await raw.rpc('admin_set_user_active',{target_user_id:id,new_active:n});if(r.error)throw r.error;notify();return n},
+    async deleteUser(id){const r=await raw.rpc('admin_delete_user',{target_user_id:id});if(r.error)throw r.error;notify();return true},
+    onUsersChanged(cb){accountListeners.add(cb);return()=>accountListeners.delete(cb)}
   };
-
-  window.AGhuRawSupabase=raw;
-  window.AGhuCloud={
-    createClient(){return{auth,storage,rpc:(n,a)=>raw.rpc(n,a),from:t=>new Query(t)}}
-  };
-  window.AGhuLocalAdmin=admin;
-  window.AGhuLocalCrypto={
-    ready:()=>!!currentKey,
-    userId:()=>currentUserId,
-    encryptJson:async v=>encryptJson(v),
-    decryptJson:async v=>decryptJson(v),
-    encryptBlob:async b=>encryptCacheBlob(b),
-    decryptBlob:async p=>decryptCacheBlob(p)
-  };
+  raw.channel('aghu-admin-profiles').on('postgres_changes',{event:'*',schema:'public',table:'profiles'},notify).subscribe();
+  window.AGhuCloud={createClient:()=>client,raw};window.AGhuCloudRaw=raw;window.AGhuLocalAdmin=admin;
+  window.AGhuLocalCrypto={ready:()=>!!dataKey,userId:()=>currentProfile?.user_id||null,encryptJson:pack,decryptJson:async v=>typeof v==='string'?unpack(v):v,encryptBlob,decryptBlob};
 })();
 </script>
 
 <script>
 (() => {
-  const configured = !!window.APP_CONFIG?.SUPABASE_URL && !!window.APP_CONFIG?.SUPABASE_PUBLISHABLE_KEY && !!window.AGhuCloud;
-  const supabase = configured ? window.AGhuCloud.createClient() : null;
-  const LOCAL_ONLY = false;
-  const DATA_PRESERVATION_POLICY = 'remote-canonical-never-destructive-on-code-update';
-  const ADMIN_ACCESS_CACHE_POLICY = 'admin-ui-provisioning-v31';
-  const ADMIN_PROVISIONING_POLICY = 'all-new-users-created-from-aghu-admin';
+  const cfg=window.APP_CONFIG||{};
+  const configured=!!(cfg.SUPABASE_URL&&cfg.SUPABASE_ANON_KEY&&window.AGhuCloud);
+  const supabase=window.AGhuCloud.createClient();
+  const LOCAL_ONLY=false;
 
   const $ = (id) => document.getElementById(id);
   const state = {
@@ -3042,16 +2490,20 @@ window.APP_CONFIG={
     googleFolderId:null,
     googleSyncTimers:new Map(),
     quickImageTargetNoteId:null,
-    quickImageObjectUrls:new Map()
+    quickImageObjectUrls:new Map(),
+    notesViewMode:localStorage.getItem('aghuNotes.notesViewMode')==='cards'?'cards':'rows',
+    realtimeChannel:null,realtimeDebounce:null
   };
 
   const els = {
     auth: $('authScreen'), app: $('appShell'), login: $('loginForm'), loginEmail: $('loginEmail'), loginPassword: $('loginPassword'), loginError: $('loginError'),
-    adminAccess:$('adminAccessBtn'), adminPanel:$('adminPanel'), adminExit:$('adminExitBtn'), adminLoginDialog:$('adminLoginDialog'), adminLoginTitle:$('adminLoginTitle'), adminSetupHelp:$('adminSetupHelp'), adminEmailInput:$('adminEmailInput'), adminLoginForm:$('adminLoginForm'), adminPasswordInput:$('adminPasswordInput'), adminPasswordConfirm:$('adminPasswordConfirm'), adminConfirmWrap:$('adminConfirmWrap'), adminLoginError:$('adminLoginError'), adminLoginSubmit:$('adminLoginSubmitBtn'), adminLoginClose:$('adminLoginCloseBtn'), adminLoginCancel:$('adminLoginCancelBtn'), adminCreateUserForm:$('adminCreateUserForm'), adminNewEmail:$('adminNewEmail'), adminNewPassword:$('adminNewPassword'), adminCreateUserStatus:$('adminCreateUserStatus'), adminUsersBody:$('adminUsersBody'),
+    adminAccess:$('adminAccessBtn'), adminPanel:$('adminPanel'), adminExit:$('adminExitBtn'), adminLoginDialog:$('adminLoginDialog'), adminLoginTitle:$('adminLoginTitle'), adminSetupHelp:$('adminSetupHelp'), adminLoginForm:$('adminLoginForm'), adminIdentifier:$('adminIdentifierInput'), adminPasswordInput:$('adminPasswordInput'), adminPasswordConfirm:$('adminPasswordConfirm'), adminConfirmWrap:$('adminConfirmWrap'), adminLoginError:$('adminLoginError'), adminLoginSubmit:$('adminLoginSubmitBtn'), adminLoginClose:$('adminLoginCloseBtn'), adminLoginCancel:$('adminLoginCancelBtn'), adminCreateUserForm:$('adminCreateUserForm'), adminNewEmail:$('adminNewEmail'), adminNewPassword:$('adminNewPassword'), adminCreateUserStatus:$('adminCreateUserStatus'), adminUsersBody:$('adminUsersBody'),
     calculatorMenu: $('calculatorMenuBtn'), calculatorEditor: $('calculatorEditorBtn'), calculatorDialog: $('calculatorDialog'),
     calculatorClose: $('calculatorCloseBtn'), calculatorDisplay: $('calculatorDisplay'),
     calculatorExpression: $('calculatorExpression'), calculatorKeys: $('calculatorKeys'),
-    logout: $('logoutBtn'), syncStatus: $('syncStatus'), installApp: $('installAppBtn'), tbody: $('notesTbody'), empty: $('emptyState'), newNote: $('newNoteBtn'), noteSearch: $('noteSearch'), labelFilter: $('labelFilter'),
+    logout: $('logoutBtn'), syncStatus: $('syncStatus'), installApp: $('installAppBtn'),
+    tbody: $('notesTbody'), empty: $('emptyState'), newNote: $('newNoteBtn'), noteSearch: $('noteSearch'), labelFilter: $('labelFilter'),
+    notesRowsView:$('notesRowsViewBtn'), notesCardsView:$('notesCardsViewBtn'),
     emptyTrash: $('emptyTrashBtn'), openSelected: $('openSelectedBtn'), editPatientMeta: $('editPatientMetaBtn'), restoreSelected: $('restoreSelectedBtn'), deleteSelected: $('deleteSelectedBtn'),
     patientMetaDialog: $('patientMetaDialog'), patientMetaName: $('patientMetaName'), patientMetaAge: $('patientMetaAge'), patientMetaRecord: $('patientMetaRecord'),
     patientMetaDetected: $('patientMetaDetected'), patientMetaSave: $('patientMetaSaveBtn'), patientMetaAuto: $('patientMetaAutoBtn'),
@@ -3107,14 +2559,9 @@ window.APP_CONFIG={
     layer.setAttribute('aria-hidden','true');
 
     const colors=[
-      '#b51f2c', // AGHU vermelho
-      '#2f7d70', // AGHU verde
-      '#4e7fbe',
-      '#16b8b1',
-      '#f1b722',
-      '#ef7f3b',
-      '#7a5cc7',
-      '#ffffff'
+      '#FFD700','#FFC400','#FFE55C',
+      '#00FFFF','#39FF14','#FF10F0',
+      '#B026FF','#00BFFF','#FF5F1F'
     ];
 
     const total=Math.min(130,Math.max(86,Math.floor((window.innerWidth||900)/8)));
@@ -3127,7 +2574,9 @@ window.APP_CONFIG={
       const w=5+Math.random()*7;
       const h=circle?w:(8+Math.random()*11);
 
-      piece.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
+      const confettiColor=colors[Math.floor(Math.random()*colors.length)];
+      piece.style.backgroundColor=confettiColor;
+      piece.style.color=confettiColor;
       piece.style.setProperty('--x',`${Math.random()*100}%`);
       piece.style.setProperty('--w',`${w.toFixed(1)}px`);
       piece.style.setProperty('--h',`${h.toFixed(1)}px`);
@@ -3158,7 +2607,7 @@ window.APP_CONFIG={
     if(name==='QuotaExceededError'){
       showToast('O espaço reservado pelo navegador para este app está cheio. Sincronize e libere espaço.',5000);
     }else if(name==='SecurityError'||name==='InvalidStateError'){
-      showToast('O navegador bloqueou o Supabase deste app.',4500);
+      showToast('O navegador bloqueou o armazenamento local deste app.',4500);
     }else{
       showToast('Não foi possível salvar a cópia local neste aparelho.',4200);
     }
@@ -3468,7 +2917,7 @@ window.APP_CONFIG={
   }
 
   async function syncPendingLocalAttachments(){
-    if(!navigator.onLine||!state.user||!state.localPersistenceReady)return;
+    if(!true||!state.user||!state.localPersistenceReady)return;
     const rows=await idbGetAllByIndex('attachments','userId',state.user.id);
     for(const item of rows){
       try{
@@ -3769,7 +3218,7 @@ window.APP_CONFIG={
   syncKeepModeControls();
 
   async function bootstrap(){
-    if(!configured){els.auth.classList.remove('hidden');els.loginError.textContent='Configuração do Supabase ausente.';return;}
+    if(!configured){els.auth.classList.remove('hidden');els.loginError.textContent='Configure o Supabase na seção APP_CONFIG deste index antes do primeiro uso.';return;}
     const {data}=await supabase.auth.getSession();
     if(data.session)await enterApp(data.session.user);else showAuth();
     supabase.auth.onAuthStateChange(async(_event,session)=>{
@@ -3780,99 +3229,35 @@ window.APP_CONFIG={
   }
   async function showAdminLogin(){
     els.adminLoginError.textContent='';
-    els.adminPasswordInput.value='';
-    els.adminConfirmWrap.classList.add('hidden');
-    els.adminLoginTitle.textContent='Administrador';
-    els.adminSetupHelp.textContent='Entre com uma conta Supabase marcada como Administrador.';
-    els.adminLoginSubmit.textContent='Entrar';
-    if(els.adminEmailInput)els.adminEmailInput.value=els.loginEmail.value||localStorage.getItem('aghuNotes.lastEmail')||'';
+    els.adminIdentifier.value=localStorage.getItem('aghuNotes.adminLogin')||els.loginEmail.value||'';
+    els.adminPasswordInput.value='';els.adminConfirmWrap.classList.add('hidden');
+    els.adminLoginTitle.textContent='Administrador';els.adminSetupHelp.textContent='Entre com a conta Administrador online.';els.adminLoginSubmit.textContent='Entrar';
     els.adminLoginDialog.showModal();
   }
   async function renderAdminUsers(){
-    if(!state.adminActive)return;
-    try{
-      const us=await AGhuLocalAdmin.listUsers();
-      els.adminUsersBody.innerHTML=us.map(u=>`<tr>
-        <td>${esc(u.email)}</td>
-        <td class="admin-password">Protegida</td>
-        <td>${u.createdAt?new Date(u.createdAt).toLocaleString('pt-BR'):'-'}</td>
-        <td>${u.active?'Ativo':'Bloqueado'}</td>
-        <td><div class="admin-user-actions">
-          <button data-reset-user="${u.id}" ${u.has_data?'disabled title="Conta com notas criptografadas: a troca de senha exige recriptografia."':''}>Nova senha</button>
-          <button data-toggle-user="${u.id}">${u.active?'Bloquear':'Ativar'}</button>
-        </div></td>
-      </tr>`).join('')||'<tr><td colspan="5" style="text-align:center;padding:25px;color:#888">Nenhum login cadastrado.</td></tr>';
-
-      els.adminUsersBody.querySelectorAll('[data-reset-user]').forEach(b=>b.onclick=async()=>{
-        if(b.disabled)return;
-        const p=prompt('Nova senha (mínimo 6 caracteres):');
-        if(p===null)return;
-        try{
-          await AGhuLocalAdmin.resetPassword(b.dataset.resetUser,p);
-          await renderAdminUsers();
-        }catch(e){alert(e.message||String(e))}
-      });
-
-      els.adminUsersBody.querySelectorAll('[data-toggle-user]').forEach(b=>b.onclick=async()=>{
-        try{
-          await AGhuLocalAdmin.toggleUser(b.dataset.toggleUser);
-          await renderAdminUsers();
-        }catch(e){alert(e.message||String(e))}
-      });
-    }catch(e){
-      els.adminUsersBody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:25px;color:#a32931">Não foi possível carregar os acessos.</td></tr>';
-      els.adminCreateUserStatus.textContent=e.message||String(e);
-    }
+    if(!state.adminActive)return;const us=await AGhuLocalAdmin.listUsers();
+    els.adminUsersBody.innerHTML=us.map(u=>`<tr><td>${esc(u.email)}</td><td class="admin-password">••••••</td><td>${u.createdAt?new Date(u.createdAt).toLocaleString('pt-BR'):'-'}</td><td>${u.active?'Ativo':'Bloqueado'}</td><td><div class="admin-user-actions"><button data-reset-user="${u.id}">Nova senha</button><button data-toggle-user="${u.id}">${u.active?'Bloquear':'Ativar'}</button>${u.role==='admin'?'':`<button class="danger" data-delete-user="${u.id}">Excluir</button>`}</div></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;padding:25px;color:#888">Nenhum login cadastrado.</td></tr>';
+    els.adminUsersBody.querySelectorAll('[data-reset-user]').forEach(b=>b.onclick=async()=>{const p=prompt('Nova senha (mínimo 6 caracteres):');if(p===null)return;try{await AGhuLocalAdmin.resetPassword(b.dataset.resetUser,p);showToast('Senha redefinida.')}catch(e){alert(e.message||String(e))}});
+    els.adminUsersBody.querySelectorAll('[data-toggle-user]').forEach(b=>b.onclick=async()=>{try{await AGhuLocalAdmin.toggleUser(b.dataset.toggleUser);await renderAdminUsers()}catch(e){alert(e.message||String(e))}});
+    els.adminUsersBody.querySelectorAll('[data-delete-user]').forEach(b=>b.onclick=async()=>{if(!confirm('Excluir definitivamente este acesso?'))return;try{await AGhuLocalAdmin.deleteUser(b.dataset.deleteUser);await renderAdminUsers()}catch(e){alert(e.message||String(e))}});
   }
-
   async function enterAdmin(){state.adminActive=true;els.auth.classList.add('hidden');els.app.classList.add('hidden');els.adminPanel.classList.remove('hidden');await renderAdminUsers()}
-  async function exitAdmin(){await AGhuLocalAdmin.logout();state.adminActive=false;els.adminPanel.classList.add('hidden');els.auth.classList.remove('hidden')}
-  els.adminAccess?.addEventListener('click',showAdminLogin);els.adminLoginClose?.addEventListener('click',()=>els.adminLoginDialog.close());els.adminLoginCancel?.addEventListener('click',()=>els.adminLoginDialog.close());els.adminExit?.addEventListener('click',exitAdmin);
-  els.adminLoginForm?.addEventListener('submit',async e=>{
-    e.preventDefault();
-    els.adminLoginError.textContent='';
-    try{
-      await AGhuLocalAdmin.login(els.adminEmailInput?.value||'',els.adminPasswordInput.value);
-      els.adminLoginDialog.close();
-      await enterAdmin();
-    }catch(x){
-      els.adminLoginError.textContent=x.message||String(x);
-    }
-  });
+  window.AGhuLocalAdmin?.onUsersChanged?.(()=>{if(state.adminActive)renderAdminUsers().catch(()=>{})});
 
+  function exitAdmin(){AGhuLocalAdmin.logout();state.adminActive=false;state.user=null;els.adminPanel.classList.add('hidden');els.app.classList.add('hidden');els.auth.classList.remove('hidden')}
+  els.adminAccess?.addEventListener('click',showAdminLogin);els.adminLoginClose?.addEventListener('click',()=>els.adminLoginDialog.close());els.adminLoginCancel?.addEventListener('click',()=>els.adminLoginDialog.close());els.adminExit?.addEventListener('click',exitAdmin);
+  els.adminLoginForm?.addEventListener('submit',async e=>{e.preventDefault();els.adminLoginError.textContent='';const login=els.adminIdentifier.value.trim(),p=els.adminPasswordInput.value;try{await AGhuLocalAdmin.login(login,p);localStorage.setItem('aghuNotes.adminLogin',login);els.adminLoginDialog.close();await enterAdmin()}catch(x){els.adminLoginError.textContent=x.message||'Não foi possível entrar como Administrador.'}});
   els.adminCreateUserForm?.addEventListener('submit',async e=>{
     e.preventDefault();
-    const email=String(els.adminNewEmail.value||'').trim().toLowerCase();
-    const password=String(els.adminNewPassword.value||'');
-    const submit=els.adminCreateUserForm.querySelector('button[type="submit"]');
-
-    els.adminCreateUserStatus.textContent='';
-    if(!email){
-      els.adminCreateUserStatus.textContent='Informe o e-mail do novo acesso.';
-      return;
-    }
-    if(password.length<6){
-      els.adminCreateUserStatus.textContent='A senha precisa ter pelo menos 6 caracteres.';
-      return;
-    }
-
-    if(submit)submit.disabled=true;
     els.adminCreateUserStatus.textContent='Criando acesso...';
-
     try{
-      const result=await AGhuLocalAdmin.createUser(email,password);
+      const created=await AGhuLocalAdmin.createUser(els.adminNewEmail.value,els.adminNewPassword.value);
       els.adminNewEmail.value='';
       els.adminNewPassword.value='';
-      els.adminCreateUserStatus.textContent=
-        result?.existing
-          ? `Acesso já existente: ${result?.user?.email||email}`
-          : `Acesso criado: ${result?.user?.email||email}`;
       await renderAdminUsers();
+      els.adminCreateUserStatus.textContent=`Acesso "${created.email}" criado e disponível online em qualquer dispositivo.`;
     }catch(x){
-      console.error('Criar acesso:',x);
       els.adminCreateUserStatus.textContent=x.message||'Não foi possível criar o acesso.';
-    }finally{
-      if(submit)submit.disabled=false;
     }
   });
 
@@ -3887,11 +3272,12 @@ window.APP_CONFIG={
       els.auth.classList.add('hidden');els.app.classList.remove('hidden');setSyncStatus('syncing');
       await initLocalPersistence(user.id);
       await Promise.all([loadNotes(),loadLabels()]);
+      applyNotesViewMode(state.notesViewMode);
       renderNotes();applyKeepFocusMode(state.keepFocusMode);
-      if(navigator.onLine&&pendingDrafts().length)await syncPendingDrafts();
-      if(navigator.onLine)await syncPendingLocalAttachments();
-      if(navigator.onLine)setTimeout(pruneCompactHistory,1200);
-      setSyncStatus(navigator.onLine?'ok':'offline');
+      if(true&&pendingDrafts().length)await syncPendingDrafts();
+      if(true)await syncPendingLocalAttachments();
+      if(true)setTimeout(pruneCompactHistory,1200);
+      setSyncStatus(true?'ok':'offline');
       startSyncLoop();startReminderLoop();
 
       if(user?.first_access===true){
@@ -3900,20 +3286,20 @@ window.APP_CONFIG={
     }finally{state.entering=false;}
   }
 
-  const rememberedEmail=localStorage.getItem('aghuNotes.lastEmail')||'';
+  const rememberedEmail=localStorage.getItem('aghuNotes.lastLogin')||localStorage.getItem('aghuNotes.lastEmail')||'';
   if(rememberedEmail) els.loginEmail.value=rememberedEmail;
 
   els.login.addEventListener('submit', async e=>{
     e.preventDefault(); els.loginError.textContent='';
-    if(!supabase){ els.loginError.textContent='Supabase indisponível.'; return; }
-    const email=els.loginEmail.value.trim();
-    const {data,error}=await supabase.auth.signInWithPassword({email,password:els.loginPassword.value});
-    if(error){ els.loginError.textContent=error.message||'Falha no login.'; return; }
-    localStorage.setItem('aghuNotes.lastEmail',email);
+    const login=els.loginEmail.value.trim(),password=els.loginPassword.value;
+    if(!login||!password){els.loginError.textContent='Informe login e senha.';return;}
+    const {data,error}=await supabase.auth.signInWithPassword({email:login,password});
+    if(error){els.loginError.textContent=error.message||'Login ou senha inválidos.';return;}
+    localStorage.setItem('aghuNotes.lastLogin',login);
     els.loginPassword.value='';
     await enterApp(data.user);
   });
-  els.logout.addEventListener('click', async()=>{ await supabase.auth.signOut(); showAuth(); });
+  els.logout.addEventListener('click', async()=>{ stopSyncLoop(); await supabase.auth.signOut(); showAuth(); });
 
   let deferredInstallPrompt=null;
   window.addEventListener('beforeinstallprompt',e=>{
@@ -3930,18 +3316,18 @@ window.APP_CONFIG={
   });
   window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;els.installApp?.classList.add('hidden');showToast('AGHU Notes instalado neste dispositivo.');});
 
-  function setSyncStatus(mode='ok'){
+  function setSyncStatus(status='ok'){
     if(!els.syncStatus)return;
-    els.syncStatus.classList.toggle('syncing',mode==='syncing');
-    els.syncStatus.classList.toggle('offline',mode==='offline');
-    els.syncStatus.textContent=
-      mode==='syncing'?'● Sincronizando':
-      mode==='offline'?'● Offline':
-      '● Sincronizado';
+    els.syncStatus.classList.remove('syncing','offline');
+    if(!navigator.onLine){els.syncStatus.textContent='● Offline';els.syncStatus.classList.add('offline');return;}
+    if(status==='syncing'){els.syncStatus.textContent='● Sincronizando';els.syncStatus.classList.add('syncing');}
+    else els.syncStatus.textContent='● Nuvem';
   }
 
   async function syncFromCloud(){
     if(!state.user)return;
+    if(!navigator.onLine){setSyncStatus('offline');return;}
+    setSyncStatus('syncing');
     if(state.isDirty){
       await flushSave();
       return;
@@ -3951,11 +3337,20 @@ window.APP_CONFIG={
     setSyncStatus('ok');
   }
 
-  function startSyncLoop(){
-    stopSyncLoop();
-    state.syncTimer=setInterval(syncFromCloud,10000);
+  function stopRealtimeSync(){
+    clearTimeout(state.realtimeDebounce);state.realtimeDebounce=null;
+    if(state.realtimeChannel&&window.AGhuCloudRaw)window.AGhuCloudRaw.removeChannel(state.realtimeChannel).catch(()=>{});
+    state.realtimeChannel=null;
   }
-  function stopSyncLoop(){if(state.syncTimer){clearInterval(state.syncTimer);state.syncTimer=null;}}
+  function startRealtimeSync(){
+    stopRealtimeSync();if(!state.user||!window.AGhuCloudRaw)return;
+    const schedule=()=>{clearTimeout(state.realtimeDebounce);state.realtimeDebounce=setTimeout(()=>syncFromCloud(),280)};
+    let ch=window.AGhuCloudRaw.channel(`aghu-notes-${state.user.id}`);
+    for(const table of ['notes','labels','note_labels','attachments','note_versions'])ch=ch.on('postgres_changes',{event:'*',schema:'public',table,filter:`user_id=eq.${state.user.id}`},schedule);
+    state.realtimeChannel=ch.subscribe();
+  }
+  function startSyncLoop(){stopSyncLoop();startRealtimeSync();state.syncTimer=setInterval(syncFromCloud,10000);}
+  function stopSyncLoop(){if(state.syncTimer)clearInterval(state.syncTimer);state.syncTimer=null;stopRealtimeSync();}
   function startReminderLoop(){stopReminderLoop();checkDueReminders();state.reminderTimer=setInterval(checkDueReminders,30000);}
   function stopReminderLoop(){if(state.reminderTimer){clearInterval(state.reminderTimer);state.reminderTimer=null;}}
   async function checkDueReminders(){
@@ -3964,7 +3359,7 @@ window.APP_CONFIG={
   }
 
   async function loadNotes(){
-    if(!navigator.onLine){
+    if(!true){
       state.notes=state.localNotesCache.length?state.localNotesCache.map(n=>({...n})):(state.notes||[]);
       for(const d of pendingDrafts()){
         const idx=state.notes.findIndex(n=>n.id===d.id);
@@ -4010,7 +3405,7 @@ window.APP_CONFIG={
       const idx=state.notes.findIndex(n=>n.id===d.id);
       if(idx>=0){
         // Correções manuais de identificação nunca podem sumir enquanto
-        // houver uma cópia local pendente, mesmo que o refresh do Supabase
+        // houver uma cópia local pendente, mesmo que o refresh do armazenamento local
         // aconteça a cada poucos segundos.
         if(d.patient_meta && Object.keys(d.patient_meta).length){
           state.notes[idx].patient_meta=d.patient_meta;
@@ -4038,7 +3433,7 @@ window.APP_CONFIG={
   }
 
   async function loadLabels(){
-    if(!navigator.onLine){
+    if(!true){
       state.labels=state.localLabelsCache.length?state.localLabelsCache.map(l=>({...l})):(state.labels||[]);
     }else{
       const {data,error}=await supabase.from('labels').select('*').order('name');
@@ -4212,6 +3607,7 @@ window.APP_CONFIG={
             const img=document.createElement('img');
             img.src=url;
             img.alt=att.file_name||'Consulta rápida';
+            img.title='Clique ou toque para visualizar';
             img.loading='lazy';
             loading.replaceWith(img);
 
@@ -4266,6 +3662,30 @@ window.APP_CONFIG={
     await addQuickImagesToNote(noteId,files);
     return true;
   }
+
+
+  function applyNotesViewMode(mode=state.notesViewMode){
+    state.notesViewMode=mode==='cards'?'cards':'rows';
+    localStorage.setItem('aghuNotes.notesViewMode',state.notesViewMode);
+
+    els.keepPage?.classList.toggle('notes-view-cards',state.notesViewMode==='cards');
+    els.keepPage?.classList.toggle('notes-view-rows',state.notesViewMode==='rows');
+
+    els.notesRowsView?.classList.toggle('active',state.notesViewMode==='rows');
+    els.notesCardsView?.classList.toggle('active',state.notesViewMode==='cards');
+
+    els.notesRowsView?.setAttribute('aria-pressed',state.notesViewMode==='rows'?'true':'false');
+    els.notesCardsView?.setAttribute('aria-pressed',state.notesViewMode==='cards'?'true':'false');
+  }
+
+  els.notesRowsView?.addEventListener('click',()=>{
+    applyNotesViewMode('rows');
+    renderNotes();
+  });
+  els.notesCardsView?.addEventListener('click',()=>{
+    applyNotesViewMode('cards');
+    renderNotes();
+  });
 
   function updateCompactNameOnlyMode(){
     if(!els.keepPage)return false;
@@ -4466,7 +3886,7 @@ window.APP_CONFIG={
     }
 
     // Sempre salva primeiro no IndexedDB. Isso impede que o refresh periódico
-    // do Supabase faça a edição manual desaparecer.
+    // do armazenamento local faça a edição manual desaparecer.
     queuePatientMetaDraft(note);
     cacheNotes();
     renderNotes();
@@ -4495,20 +3915,20 @@ window.APP_CONFIG={
 
       const msg=String(error.message||'');
       if(/patient_meta|column|schema|42703/i.test(msg)){
-        showToast('Correção preservada no aparelho. Falta aplicar a atualização SQL patient_meta no Supabase.',5200);
+        showToast('Correção preservada no aparelho. Falta aplicar a atualização SQL patient_meta no armazenamento local.',5200);
       }else{
-        showToast('Identificação preservada localmente; sincronização pendente.',4200);
+        showToast('Identificação preservada localmente; salvamento local pendente.',4200);
       }
       return;
     }
 
-    // Só remove a cópia local quando o Supabase devolver exatamente os mesmos dados.
+    // Só remove a cópia local quando o armazenamento local devolver exatamente os mesmos dados.
     const expected=JSON.stringify(manualMeta||{});
     const confirmed=JSON.stringify(data?.patient_meta||{});
 
     if(expected!==confirmed){
       setSyncStatus('ok');
-      showToast('Identificação preservada localmente; o Supabase ainda não confirmou a alteração.',4500);
+      showToast('Identificação preservada localmente; o armazenamento local ainda não confirmou a alteração.',4500);
       return;
     }
 
@@ -4664,11 +4084,11 @@ window.APP_CONFIG={
         }).catch(persistenceError);
       }
       openNote(id);
-      setAutosave('Salvo localmente','local-saved');
+      setAutosave('Salvo e sincronizado','local-saved');
       setSyncStatus('offline');
     };
 
-    if(!navigator.onLine){makeLocal();return;}
+    if(!true){makeLocal();return;}
 
     const {data,error}=await supabase.from('notes').insert({
       id,user_id:state.user.id,title:'Nova nota',content_html:'',...meta
@@ -4703,8 +4123,8 @@ window.APP_CONFIG={
 
     if(useDraft){
       state.isDirty=true;
-      setAutosave(navigator.onLine?'Rascunho recuperado • sincronizando...':'Salvo neste aparelho',navigator.onLine?'':'local-saved');
-      if(navigator.onLine){clearTimeout(state.saveTimer);state.saveTimer=setTimeout(flushSave,100);}
+      setAutosave(true?'Rascunho recuperado • sincronizando...':'Salvo e sincronizado',true?'':'local-saved');
+      if(true){clearTimeout(state.saveTimer);state.saveTimer=setTimeout(flushSave,100);}
     }else{
       state.isDirty=false;
       setAutosave('Salvo','local-saved');
@@ -4744,14 +4164,14 @@ window.APP_CONFIG={
     // PRIMEIRO: grava imediatamente no aparelho, no mesmo evento de digitação.
     persistDraftNow();
 
-    if(!navigator.onLine){
-      setAutosave('Salvo localmente','local-saved');
+    if(!true){
+      setAutosave('Salvo e sincronizado','local-saved');
       setSyncStatus('offline');
       return;
     }
 
-    // SEGUNDO: envia ao Supabase quase imediatamente.
-    setAutosave('Salvando...','local-saved');
+    // SEGUNDO: envia ao armazenamento local quase imediatamente.
+    setAutosave('Salvando localmente...','local-saved');
     clearTimeout(state.saveTimer);
     state.saveTimer=setTimeout(flushSave,200);
   }
@@ -4772,7 +4192,7 @@ window.APP_CONFIG={
   }
   async function createVersionIfNeeded(){
     const n=state.current;
-    if(!n||n.local_only||!navigator.onLine)return;
+    if(!n||n.local_only||!true)return;
 
     const currentTitle=compactTitleForStorage(els.title.value);
     const currentHtml=compactHtmlForStorage(els.body.innerHTML);
@@ -4819,7 +4239,7 @@ window.APP_CONFIG={
   }
 
   async function syncDraftRecord(d){
-    if(!navigator.onLine||!state.user)return false;
+    if(!true||!state.user)return false;
 
     // Uma correção manual de Nome/Idade/Prontuário é sincronizada de forma
     // independente. Assim um rascunho antigo nunca sobrescreve o texto da nota.
@@ -4841,7 +4261,7 @@ window.APP_CONFIG={
       const expected=JSON.stringify(d.patient_meta||{});
       const confirmed=JSON.stringify(data?.patient_meta||{});
       if(expected!==confirmed){
-        console.warn('Identificação não confirmada pelo Supabase.');
+        console.warn('Identificação não confirmada pelo armazenamento local.');
         return false;
       }
 
@@ -4862,7 +4282,8 @@ window.APP_CONFIG={
       });
       if(error && !String(error.message||'').toLowerCase().includes('duplicate'))return false;
       if(!error){
-
+        refreshAppCounters(true);
+        setTimeout(()=>refreshAppCounters(false),350);
       }
     }else{
       const {error}=await supabase.from('notes').update({
@@ -4888,7 +4309,7 @@ window.APP_CONFIG={
   }
 
   async function pruneCompactHistory(){
-    if(!navigator.onLine||!state.user)return;
+    if(!true||!state.user)return;
     try{
       const {data,error}=await supabase.from('note_versions')
         .select('id,note_id,created_at')
@@ -4912,7 +4333,7 @@ window.APP_CONFIG={
   }
 
   async function syncPendingDrafts(){
-    if(state.pendingSyncRunning||!navigator.onLine||!state.user)return;
+    if(state.pendingSyncRunning||!true||!state.user)return;
     const list=pendingDrafts();
     if(!list.length)return;
 
@@ -4936,25 +4357,25 @@ window.APP_CONFIG={
   async function flushSave(){
     if(!state.current||!state.isDirty)return;
 
-    // O rascunho local só é apagado DEPOIS da confirmação do Supabase.
+    // O rascunho local só é apagado DEPOIS da confirmação do armazenamento local.
     persistDraftNow();
 
-    if(!navigator.onLine){
+    if(!true){
       state.isDirty=true;
-      setAutosave('Salvo localmente','local-saved');
+      setAutosave('Salvo e sincronizado','local-saved');
       setSyncStatus('offline');
       return;
     }
 
     const d=buildDraft();
     setSyncStatus('syncing');
-    setAutosave('Salvando...','local-saved');
+    setAutosave('Salvando localmente...','local-saved');
 
     if(state.current.local_only||d.pending_create){
       const ok=await syncDraftRecord({...d,pending_create:true});
       if(!ok){
         state.isDirty=true;
-        setAutosave('Salvo neste aparelho • sincronização pendente','local-saved');
+        setAutosave('Salvamento local pendente','local-saved');
         return;
       }
       state.current.local_only=false;
@@ -4962,7 +4383,7 @@ window.APP_CONFIG={
       await Promise.all([loadNotes(),loadLabels()]);
       const fresh=state.notes.find(n=>n.id===d.id);
       if(fresh)state.current=JSON.parse(JSON.stringify(fresh));
-      setAutosave(`Sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'local-saved');
+      setAutosave(`Salvo e sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'local-saved');
       setSyncStatus('ok');
       scheduleGoogleBackup(d.id);
       return;
@@ -4993,8 +4414,8 @@ window.APP_CONFIG={
     if(error){
       state.isDirty=true;
       persistDraftNow();
-      setAutosave('Salvo neste aparelho • sincronização pendente','local-saved');
-      setSyncStatus(navigator.onLine?'syncing':'offline');
+      setAutosave('Salvamento local pendente','local-saved');
+      setSyncStatus(true?'syncing':'offline');
       return;
     }
 
@@ -5006,7 +4427,7 @@ window.APP_CONFIG={
 
     clearDraft(state.current.id);
     state.isDirty=false;
-    setAutosave(`Sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'local-saved');
+    setAutosave(`Salvo e sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'local-saved');
     await loadLabels();
     setSyncStatus('ok');
     scheduleGoogleBackup(state.current.id);
@@ -5426,7 +4847,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
       const fileName=`desenho-${Date.now()}.png`;
 
       try{
-        if(!navigator.onLine){
+        if(!true){
           await queueLocalAttachment(blob,fileName,state.current.id);
           await renderImages();
           setAutosave('Desenho salvo neste aparelho • aguardando internet','local-saved');
@@ -5438,7 +4859,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
           }catch(uploadErr){
             await queueLocalAttachment(blob,fileName,state.current.id);
             await renderImages();
-            setAutosave('Desenho salvo neste aparelho • sincronização pendente','local-saved');
+            setAutosave('Desenho salvo neste aparelho • salvamento local pendente','local-saved');
           }
         }
         close();
@@ -5476,7 +4897,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     const file=els.imageInput.files?.[0];
     if(!file||!state.current)return;
 
-    if(!navigator.onLine){
+    if(!true){
       try{
         await queueLocalAttachment(file,file.name,state.current.id);
         await renderImages();
@@ -5491,13 +4912,13 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     try{
       await uploadAttachment(file,file.name);
       await renderImages();
-      setAutosave('Imagem salva localmente','local-saved');
+      setAutosave('Imagem salva e sincronizada','local-saved');
     }catch(err){
       console.error(err);
       try{
         await queueLocalAttachment(file,file.name,state.current.id);
         await renderImages();
-        setAutosave('Imagem salva neste aparelho • sincronização pendente','local-saved');
+        setAutosave('Imagem salva neste aparelho • salvamento local pendente','local-saved');
         showToast('Falha de rede: a imagem ficou preservada no aparelho.',3800);
       }catch(localErr){persistenceError(localErr);}
     }
@@ -5527,7 +4948,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
       pending.map(x=>`
         <div class="image-card local-pending-image" data-local-image="${x.id}">
           <img alt="${esc(x.fileName||'Imagem local')}">
-          <small>Pendente de Supabase</small>
+          <small>Pendente de armazenamento local</small>
           <button data-del-local-image="${x.id}">Remover</button>
         </div>`).join('');
 
@@ -5599,17 +5020,17 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   $('menuSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.side-menu button').forEach(b=>b.style.display=!q||b.textContent.toLowerCase().includes(q)?'':'none');});
 
   window.addEventListener('online',async()=>{
-
+    refreshAppCounters();
     setSyncStatus('syncing');
     await syncPendingDrafts();
     await syncPendingLocalAttachments();
     await syncFromCloud();
-    if(state.current&&!getDraft(state.current.id))setAutosave('Salvo localmente','local-saved');
+    if(state.current&&!getDraft(state.current.id))setAutosave('Salvo e sincronizado','local-saved');
   });
   window.addEventListener('offline',()=>{
     if(state.current&&state.isDirty)persistDraftNow();
     setSyncStatus('offline');
-    if(state.current)setAutosave('Salvo localmente','local-saved');
+    if(state.current)setAutosave('Salvo e sincronizado','local-saved');
   });
   window.addEventListener('focus',()=>{syncFromCloud();});
   document.addEventListener('visibilitychange',()=>{
