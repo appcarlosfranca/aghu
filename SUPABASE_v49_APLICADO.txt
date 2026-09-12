@@ -1,0 +1,1 @@
+Migrações persistent_accounts_and_encrypted_note_sharing_v49 e protect_encrypted_notes_from_admin_password_reset_v49 já aplicadas ao projeto Supabase.

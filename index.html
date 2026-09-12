@@ -3468,18 +3468,1839 @@
   }
 </style>
 
+
+<style id="aghu-v42-rebrand-neon">
+  :root{
+    --aghu-red:#00b7e8 !important;
+    --aghu-blue:#00b7e8 !important;
+    --aghu-mint:#00c8ee !important;
+    --red:#00b7e8 !important;
+    --mint:#00c8ee !important;
+    --neon-ocean:#00b7e8;
+    --neon-dark:#0f1822;
+    --neon-dark-soft:#182330;
+    --neon-line:rgba(8,14,22,.92);
+    --neon-glow:rgba(0,183,232,.18);
+  }
+  .btn-primary{background:#00b7e8!important;border-color:#0698c3!important;color:#fff!important}
+  .btn-primary:hover{filter:brightness(1.04)}
+  .aghu-cross,.sidebar-aghu-logo .aghu-cross,.focus-aghu-logo .aghu-cross{background:#00b7e8!important;box-shadow:0 0 10px rgba(0,183,232,.18)}
+  .aghu-word,.focus-aghu-logo .aghu-word strong,.sidebar-aghu-logo .aghu-word strong,.brand-title{color:#00b7e8!important}
+  .aghu-word em,.focus-aghu-logo .aghu-word em,.sidebar-aghu-logo .aghu-word em{color:#8eefff!important}
+  .auth-brand,.sidebar-brand,.keep-focus-bar,.topbar,.page,.editor-shell,.table-wrap,.search-notes,.menu-search-wrap,.sync-status,.utility-dialog,.history-dialog,.list-side-actions,#noteActionsMenu,.google-oauth-origin-box,.auth-card{
+    position:relative;
+    border-color:var(--neon-line)!important;
+    box-shadow:0 0 0 1px rgba(12,18,26,.95), 0 0 10px rgba(0,183,232,.06)!important;
+  }
+  .sidebar{border-right:1px solid rgba(10,16,24,.95)!important}
+  .menu-item,.submenu button,.tab,.filter,.filters-row select,.empty-trash-btn,.search-notes,.menu-search-wrap,.topbar,.page,.table-wrap,.list-side-actions button,.list-side-actions,.note-body,.formatbar,.editor-shell,#noteActionsMenu .note-menu-item,.utility-dialog{
+    border-color:rgba(10,16,24,.9)!important;
+  }
+  @keyframes aghuV42BeamLoop{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+  .v42-animated-beam::after{
+    content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;
+    background:linear-gradient(90deg,transparent 0%, transparent 36%, rgba(0,183,232,.04) 44%, rgba(0,183,232,.55) 49%, rgba(0,183,232,.04) 54%, transparent 62%, transparent 100%);
+    background-size:220% 100%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    pointer-events:none; opacity:.95; animation:aghuV42BeamLoop 8s linear infinite;
+  }
+  .auth-card,.sidebar-brand,.menu-search-wrap,.search-notes,.table-wrap,.editor-shell,.list-side-actions,#noteActionsMenu,.utility-dialog,.history-dialog,.sync-status{border-radius:8px!important;overflow:visible!important}
+  .auth-card::after,.sidebar-brand::after,.menu-search-wrap::after,.search-notes::after,.table-wrap::after,.editor-shell::after,.list-side-actions::after,#noteActionsMenu::after,.utility-dialog::after,.history-dialog::after,.sync-status::after{
+    content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;
+    background:linear-gradient(90deg,transparent 0%, transparent 40%, rgba(0,183,232,.08) 46%, rgba(0,183,232,.48) 50%, rgba(0,183,232,.08) 54%, transparent 60%, transparent 100%);
+    background-size:230% 100%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    pointer-events:none; animation:aghuV42BeamLoop 10s linear infinite; opacity:.8;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id]{
+    width:220px!important; min-width:220px!important; max-width:220px!important;
+    min-height:176px!important; border:1px solid rgba(11,17,25,.9)!important; border-radius:14px!important;
+    box-shadow:0 0 0 1px rgba(15,24,34,.9), 0 2px 8px rgba(0,0,0,.08), 0 0 10px rgba(0,183,232,.07)!important;
+    position:relative!important; overflow:visible!important; background:#fff!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id]::before{
+    content:"";position:absolute;inset:-1px;border-radius:14px;padding:1px;
+    background:linear-gradient(90deg,transparent 0%, transparent 40%, rgba(0,183,232,.10) 47%, rgba(0,183,232,.85) 50%, rgba(0,183,232,.10) 53%, transparent 60%, transparent 100%);
+    background-size:260% 100%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    pointer-events:none; opacity:.95; animation:aghuV42BeamLoop 8s linear infinite;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id] > *{position:relative;z-index:1!important}
+  #keepPage.notes-view-cards .note-card-idbar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;padding:10px 12px 0!important}
+  #keepPage.notes-view-cards .note-card-firstname{display:block!important;font-size:14px!important;font-weight:700!important;color:#202124!important;max-width:calc(100% - 34px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #keepPage.notes-view-cards .note-card-meta{display:flex!important;align-items:center!important;gap:6px!important}
+  #keepPage.notes-view-cards .note-card-chip{display:none!important}
+  #keepPage.notes-view-cards .note-card-accent-wrap{display:flex!important;align-items:center!important;justify-content:center!important;border:1px solid #bfc6ce!important;background:#fff!important;width:26px!important;height:26px!important;border-radius:999px!important;overflow:hidden!important}
+  #keepPage.notes-view-cards .note-card-accent-input{width:30px!important;height:30px!important;border:0!important;padding:0!important;background:transparent!important;cursor:pointer!important}
+  #keepPage.notes-view-cards .note-card-accent-dot{display:none!important}
+  #keepPage.notes-view-cards .patient-name-main{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:8px!important;margin:6px 12px 2px!important;min-height:0!important}
+  #keepPage.notes-view-cards .patient-name-main strong{font-size:18px!important;line-height:1.22!important;margin:0!important;color:#111!important;flex:1!important;overflow-wrap:anywhere!important}
+  #keepPage.notes-view-cards .keep-card-preview{margin:4px 12px 8px!important;color:#42484f!important;min-height:72px!important;max-height:84px!important;-webkit-line-clamp:5!important}
+  #keepPage.notes-view-cards .quick-ref-zone{margin:0 12px 8px!important}
+  #keepPage.notes-view-cards .quick-ref-add{margin-left:auto!important;white-space:nowrap;color:#54606b!important;font-size:10px!important}
+  #keepPage.notes-view-cards .notes-table td[data-label="Idade"],
+  #keepPage.notes-view-cards .notes-table td[data-label="Prontuário"]{display:none!important}
+  #keepPage.notes-view-cards .notes-table tr[data-id] > td.row-action{min-height:34px!important;border-top:1px solid rgba(10,16,24,.1)!important;background:#fafbfd!important}
+  #keepPage.notes-view-cards .notes-table .grid-icon-btn{font-size:12px!important;color:#5b6670!important}
+  #keepPage.notes-view-cards .notes-table .grid-icon-btn.danger{color:#a33333!important}
+  .v42-hide{display:none!important}
+  #googleDocsMenuBtn{display:flex!important}
+  #panelTab,#panelGeneralPage{display:none!important}
+  #keepTab{display:inline-flex!important}
+  .topbar{gap:12px!important}
+  .menu-search-wrap{max-width:calc(100vw - 360px)!important}
+  .notes-table th:first-child,.notes-table td:first-child{width:auto!important}
+  .notes-table th:nth-child(n+2),.notes-table td:nth-child(n+2){width:38px!important;padding:0!important;text-align:center!important}
+  .panel-title{background:#00b7e8!important}
+  .menu-item.active{border-left-color:#00b7e8!important;background:#f2fbfe!important}
+  .sync-status{color:#065c74!important;background:#eefbff!important;border-color:#8adff2!important}
+  .auth-heading{color:#0f1822!important}
+  .auth-privacy,.auth-disclaimer{color:#7b8793!important}
+  .logout-btn{color:#1d5f74!important}
+</style>
+
+
+<style id="aghu-v44-neon-image-asset">
+  :root{--neon-frame-url:url('./moldura-neon-oceano.png')}
+
+  /* Moldura neon gerada: aplicada às janelas das notas sem alterar o conteúdo. */
+  #keepPage.notes-view-cards .notes-table tr[data-id]{
+    position:relative!important;
+    isolation:isolate!important;
+    overflow:visible!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id]::after{
+    content:""!important;
+    position:absolute!important;
+    inset:-5px!important;
+    border:14px solid transparent!important;
+    border-image-source:var(--neon-frame-url)!important;
+    border-image-slice:120!important;
+    border-image-width:14px!important;
+    border-image-outset:0!important;
+    border-image-repeat:stretch!important;
+    pointer-events:none!important;
+    z-index:2!important;
+    opacity:.62!important;
+    filter:drop-shadow(0 0 5px rgba(0,183,232,.24))!important;
+    animation:aghuV43FramePulse 4.8s ease-in-out infinite alternate!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id] > *{
+    position:relative!important;
+    z-index:3!important;
+  }
+
+  /* Editor aberto: a mesma identidade neon, mais discreta. */
+  #editorPage .editor-shell{
+    position:relative!important;
+    isolation:isolate!important;
+    overflow:visible!important;
+  }
+  #editorPage .editor-shell::after{
+    content:"";
+    position:absolute;
+    inset:-6px;
+    border:16px solid transparent;
+    border-image-source:var(--neon-frame-url);
+    border-image-slice:120;
+    border-image-width:16px;
+    border-image-repeat:stretch;
+    pointer-events:none;
+    z-index:0;
+    opacity:.30;
+    filter:drop-shadow(0 0 6px rgba(0,183,232,.16));
+  }
+  #editorPage .editor-shell > *{position:relative;z-index:1}
+
+  /* Login: detalhe neon sem modificar a estrutura. */
+  .auth-card{
+    position:relative!important;
+    isolation:isolate!important;
+    overflow:visible!important;
+  }
+  .auth-card::before{
+    content:"";
+    position:absolute;
+    inset:-9px;
+    border:18px solid transparent;
+    border-image-source:var(--neon-frame-url);
+    border-image-slice:120;
+    border-image-width:18px;
+    border-image-repeat:stretch;
+    pointer-events:none;
+    z-index:-1;
+    opacity:.24;
+  }
+
+  @keyframes aghuV43FramePulse{
+    from{opacity:.48;filter:drop-shadow(0 0 3px rgba(0,183,232,.14))}
+    to{opacity:.72;filter:drop-shadow(0 0 8px rgba(0,183,232,.30))}
+  }
+  @media(prefers-reduced-motion:reduce){
+    #keepPage.notes-view-cards .notes-table tr[data-id]::after{animation:none!important}
+  }
+</style>
+
+
+<style id="aghu-v44-sidebar-and-note-menu">
+  #mainSidebar{
+    width:220px!important;
+    min-width:220px!important;
+    transition:width .24s ease,min-width .24s ease,transform .24s ease!important;
+    overflow:hidden!important;
+  }
+  #mainSidebar .sidebar-brand{transition:padding .24s ease!important}
+  #mainSidebar .menu-item{height:38px!important;min-height:38px!important;padding:0 10px!important;gap:9px!important;white-space:nowrap!important}
+  #mainSidebar .menu-icon{width:15px!important;min-width:15px!important;text-align:center!important;color:#243646!important}
+  #mainSidebar .menu-label{overflow:hidden!important;text-overflow:ellipsis!important;transition:opacity .15s ease!important}
+  #mainSidebar .menu-chevron{margin-left:auto!important;font-weight:400!important;color:#2d3e4b!important}
+  #mainSidebar .side-menu-divider{height:8px;border-top:1px solid rgba(8,14,22,.18);border-bottom:1px solid rgba(8,14,22,.08);background:#f7f8f9}
+  #mainSidebar .inert-menu-item{cursor:default!important;background:#fff!important;color:#30363b!important}
+  #mainSidebar .inert-menu-item:hover{background:#f6f8fa!important}
+  #mainSidebar.is-retracted{width:52px!important;min-width:52px!important}
+  #mainSidebar.is-retracted .sidebar-brand{padding:0!important;justify-content:center!important}
+  #mainSidebar.is-retracted .sidebar-aghu-logo .aghu-word,
+  #mainSidebar.is-retracted .menu-label,
+  #mainSidebar.is-retracted .menu-chevron,
+  #mainSidebar.is-retracted .keep-mode-switch,
+  #mainSidebar.is-retracted .independent-note{display:none!important}
+  #mainSidebar.is-retracted .sidebar-aghu-logo{transform:scale(.72)!important}
+  #mainSidebar.is-retracted .menu-item{justify-content:center!important;padding:0!important}
+  #mainSidebar.is-retracted .menu-icon{width:auto!important;min-width:0!important;font-size:15px!important}
+  #mainSidebar.is-retracted .side-menu-divider{height:5px!important}
+  .main-sidebar-toggle{width:36px!important;height:34px!important;border:1px solid rgba(10,16,24,.75)!important;border-radius:5px!important;background:#fff!important;color:#17222e!important;font-size:16px!important;cursor:pointer!important;flex:0 0 auto!important}
+  .main-sidebar-toggle:hover{background:#eef9fc!important;box-shadow:0 0 8px rgba(0,183,232,.16)!important}
+  #noteMenuBtn{pointer-events:auto!important;cursor:pointer!important;z-index:5000!important}
+  .note-menu-host{position:relative!important;overflow:visible!important;z-index:4900!important}
+  #noteActionsMenu.note-actions-menu{
+    position:absolute!important;top:calc(100% + 6px)!important;right:0!important;left:auto!important;z-index:5500!important;
+    min-width:205px!important;background:#fff!important;border:1px solid #111923!important;border-radius:7px!important;
+    box-shadow:0 10px 26px rgba(0,0,0,.16),0 0 10px rgba(0,183,232,.08)!important;overflow:hidden!important;
+  }
+  #noteActionsMenu.hidden{display:none!important}
+  #noteActionsMenu .note-menu-item{display:flex!important;width:100%!important;min-height:35px!important;align-items:center!important;padding:7px 11px!important;border:0!important;border-bottom:1px solid rgba(10,16,24,.09)!important;background:#fff!important;cursor:pointer!important;text-align:left!important}
+  #noteActionsMenu .note-menu-item:hover{background:#eef9fc!important}
+  #noteActionsMenu .note-menu-item:last-child{border-bottom:0!important}
+  @media(max-width:700px){
+    #mainSidebar{position:fixed!important;left:0!important;top:0!important;bottom:0!important;height:100dvh!important;z-index:6000!important;box-shadow:7px 0 22px rgba(0,0,0,.16)!important}
+    #mainSidebar.is-retracted{transform:translateX(-100%)!important;width:220px!important;min-width:220px!important}
+    .main-sidebar-toggle{position:relative!important;z-index:6100!important}
+  }
+</style>
+
+
+<style id="aghu-v45-navy-neon-theme">
+  :root{
+    --v45-navy:#02072b;
+    --v45-navy-2:#06114a;
+    --v45-navy-3:#091b67;
+    --v45-neon:#1597ff;
+    --v45-neon-bright:#34c5ff;
+    --v45-neon-soft:rgba(21,151,255,.22);
+    --v45-line:rgba(18,39,92,.88);
+    --aghu-red:#1597ff!important;
+    --aghu-blue:#1597ff!important;
+    --aghu-mint:#34c5ff!important;
+    --red:#1597ff!important;
+    --mint:#34c5ff!important;
+    --neon-ocean:#1597ff!important;
+  }
+
+  /* Fundo visual principal inspirado no azul-marinho neon aprovado. */
+  .auth-screen{
+    background:
+      linear-gradient(rgba(1,5,32,.18),rgba(1,5,32,.18)),
+      url('./fundo-azul-marinho-neon.png') center/cover fixed no-repeat!important;
+  }
+  .auth-card{
+    background:rgba(255,255,255,.96)!important;
+    backdrop-filter:blur(5px);
+    border:1px solid rgba(52,197,255,.7)!important;
+    box-shadow:0 0 0 1px rgba(4,12,52,.9),0 0 22px rgba(21,151,255,.22)!important;
+  }
+  .auth-heading{color:#0b1747!important}
+  .auth-card input:focus{border-color:var(--v45-neon)!important;box-shadow:0 0 0 2px rgba(21,151,255,.13)!important}
+  .auth-card .btn-primary{background:linear-gradient(180deg,#197fff,#0b55d8)!important;border-color:#0b55d8!important;box-shadow:0 0 10px rgba(21,151,255,.28)!important}
+
+  /* Branding em azul-marinho/neon. */
+  .aghu-cross,.sidebar-aghu-logo .aghu-cross,.focus-aghu-logo .aghu-cross{
+    background:var(--v45-neon)!important;
+    box-shadow:0 0 8px rgba(52,197,255,.35),0 0 16px rgba(21,151,255,.20)!important;
+  }
+  .aghu-word,.aghu-word strong,.sidebar-aghu-logo .aghu-word strong,.focus-aghu-logo .aghu-word strong,.brand-title{
+    color:#0b4fc8!important;
+    text-shadow:0 0 6px rgba(21,151,255,.15)!important;
+  }
+  .aghu-word em,.sidebar-aghu-logo .aghu-word em,.focus-aghu-logo .aghu-word em{color:#1ad7ff!important}
+
+  /* Menu lateral: azul-marinho profundo com traços neon. */
+  #mainSidebar,.sidebar:not(.admin-sidebar){
+    background:
+      linear-gradient(180deg,rgba(2,7,43,.97),rgba(3,10,54,.97)),
+      url('./fundo-azul-marinho-neon.png') 22% center/cover no-repeat!important;
+    border-right:1px solid rgba(52,197,255,.40)!important;
+    box-shadow:8px 0 24px rgba(1,6,35,.16),1px 0 0 rgba(21,151,255,.18)!important;
+  }
+  #mainSidebar .sidebar-brand{
+    background:rgba(3,9,48,.78)!important;
+    border-top-color:#0e2e89!important;
+    border-bottom:1px solid rgba(52,197,255,.26)!important;
+  }
+  #mainSidebar .aghu-word strong{color:#65caff!important;text-shadow:0 0 8px rgba(21,151,255,.36)!important}
+  #mainSidebar .aghu-word small{color:#b9daf8!important}
+  #mainSidebar .menu-item,
+  #mainSidebar .inert-menu-item{
+    background:rgba(3,11,55,.58)!important;
+    color:#e9f4ff!important;
+    border-bottom:1px solid rgba(103,168,255,.12)!important;
+  }
+  #mainSidebar .menu-item:hover,
+  #mainSidebar .inert-menu-item:hover{
+    background:rgba(10,40,110,.72)!important;
+    box-shadow:inset 3px 0 0 var(--v45-neon-bright)!important;
+  }
+  #mainSidebar .menu-item.active{
+    background:linear-gradient(90deg,rgba(17,92,205,.55),rgba(4,20,76,.65))!important;
+    border-left:3px solid #46d8ff!important;
+    box-shadow:inset 0 0 16px rgba(21,151,255,.08)!important;
+  }
+  #mainSidebar .menu-icon,#mainSidebar .menu-chevron{color:#63d6ff!important}
+  #mainSidebar .side-menu-divider{background:#02072b!important;border-color:rgba(52,197,255,.18)!important}
+  #mainSidebar .keep-mode-switch{background:rgba(2,8,42,.76)!important;color:#d7ebff!important;border-color:rgba(52,197,255,.15)!important}
+
+  /* Barra superior em marinho translúcido, área de trabalho clara. */
+  .topbar{
+    background:
+      linear-gradient(90deg,rgba(2,7,43,.98),rgba(5,17,74,.96))!important;
+    color:#eef8ff!important;
+    border-top-color:#0d2d87!important;
+    border-bottom:1px solid rgba(52,197,255,.36)!important;
+    box-shadow:0 3px 14px rgba(1,7,37,.16),0 0 12px rgba(21,151,255,.06)!important;
+  }
+  .menu-search-wrap{
+    background:rgba(255,255,255,.97)!important;
+    border-color:rgba(52,197,255,.55)!important;
+    box-shadow:0 0 10px rgba(21,151,255,.08)!important;
+  }
+  .main-sidebar-toggle{
+    background:rgba(5,20,74,.92)!important;
+    color:#bcecff!important;
+    border-color:#2aa7ff!important;
+    box-shadow:0 0 8px rgba(21,151,255,.18)!important;
+  }
+  .main-sidebar-toggle:hover{background:#0a3d99!important;color:#fff!important}
+  .logout-btn{color:#9fdfff!important}
+  .sync-status{
+    background:rgba(8,37,96,.76)!important;
+    color:#aeeeff!important;
+    border-color:rgba(52,197,255,.45)!important;
+  }
+
+  /* Área principal clara com linhas marinho-neon. */
+  .workspace{background:#f4f7fb!important}
+  .page{background:#fbfcfe!important}
+  .tab.active{border-top-color:#1597ff!important}
+  .panel-title{
+    background:linear-gradient(180deg,#0b4fc8,#07388f)!important;
+    box-shadow:0 0 9px rgba(21,151,255,.16)!important;
+  }
+  .search-notes,.table-wrap,.editor-shell,.formatbar,.note-body,.list-side-actions,.utility-dialog,.history-dialog,#noteActionsMenu{
+    border-color:#132453!important;
+    box-shadow:0 0 0 1px rgba(4,13,55,.06),0 0 10px rgba(21,151,255,.05)!important;
+  }
+  .filter.active{background:#eef7ff!important;border-color:#1597ff!important;color:#073b8d!important}
+  .notes-table th{background:#eaf2ff!important;border-color:#aebbd0!important;color:#0b1747!important}
+
+  /* Janelas de notas: base clara com perímetro marinho + pulso neon. */
+  #keepPage.notes-view-cards .notes-table tr[data-id]{
+    border:1px solid #0a1745!important;
+    box-shadow:0 0 0 1px rgba(5,18,66,.86),0 2px 9px rgba(0,0,0,.08),0 0 12px rgba(21,151,255,.10)!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id]::before{
+    background:linear-gradient(90deg,transparent 0%,transparent 39%,rgba(21,151,255,.05) 44%,rgba(52,197,255,.78) 50%,rgba(21,151,255,.05) 56%,transparent 61%,transparent 100%)!important;
+    animation-duration:8s!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id]::after{
+    opacity:.32!important;
+    filter:drop-shadow(0 0 6px rgba(21,151,255,.18))!important;
+  }
+
+  /* Editor e menu interno. */
+  #editorPage .editor-shell{
+    background:#fff!important;
+    border:1px solid #0a1745!important;
+    box-shadow:0 0 0 1px rgba(5,18,66,.76),0 0 15px rgba(21,151,255,.08)!important;
+  }
+  #noteMenuBtn{
+    border-color:#1a6fc7!important;
+    color:#0b3f94!important;
+    box-shadow:0 0 8px rgba(21,151,255,.10)!important;
+  }
+  #noteActionsMenu.note-actions-menu{
+    border-color:#0a1745!important;
+    box-shadow:0 12px 30px rgba(2,7,43,.20),0 0 13px rgba(21,151,255,.10)!important;
+  }
+  #noteActionsMenu .note-menu-item:hover{background:#edf7ff!important;color:#0a3b8c!important}
+
+  /* Primeiro plano preserva legibilidade, com moldura marinho-neon. */
+  body.keep-focus-mode::before{background:rgba(1,5,32,.68)!important}
+  body.keep-focus-mode .keep-focus-bar{
+    background:linear-gradient(90deg,#02072b,#06114a)!important;
+    color:#eef8ff!important;
+    border-color:#1b7fd8!important;
+  }
+  body.keep-focus-mode #keepPage,
+  body.keep-focus-mode #editorPage{
+    background:#f9fbfe!important;
+    border-color:#0c2f78!important;
+  }
+
+  @media(max-width:700px){
+    .topbar{background:linear-gradient(90deg,#02072b,#06114a)!important}
+  }
+</style>
+
+
+<style id="aghu-v46-sidebar-theme-options">
+  /* Azul-marinho atual: apenas garante os nomes do menu em branco. */
+  #mainSidebar:not(.sidebar-light-theme) .menu-label,
+  #mainSidebar:not(.sidebar-light-theme) .menu-item,
+  #mainSidebar:not(.sidebar-light-theme) .inert-menu-item,
+  #mainSidebar:not(.sidebar-light-theme) .keep-mode-switch span,
+  #mainSidebar:not(.sidebar-light-theme) .independent-note{
+    color:#ffffff!important;
+  }
+
+  /* Seletor discreto: nenhuma outra parte do layout é alterada. */
+  .sidebar-theme-picker{
+    display:grid;
+    grid-template-columns:1fr 54px 62px;
+    gap:5px;
+    align-items:center;
+    padding:7px 8px;
+    border-top:1px solid rgba(52,197,255,.16);
+    background:rgba(2,8,42,.72);
+  }
+  .sidebar-theme-label{
+    color:#ffffff;
+    font-size:9px;
+    opacity:.86;
+  }
+  .sidebar-theme-btn{
+    height:24px;
+    padding:0 6px;
+    border:1px solid rgba(52,197,255,.35);
+    border-radius:4px;
+    background:rgba(5,20,74,.82);
+    color:#dff7ff;
+    font-size:9px;
+    cursor:pointer;
+  }
+  .sidebar-theme-btn.active{
+    border-color:#34c5ff;
+    box-shadow:0 0 7px rgba(21,151,255,.20);
+    color:#fff;
+  }
+  #mainSidebar.is-retracted .sidebar-theme-picker{display:none!important}
+
+  /* Opção Fundo branco + nomes pretos. */
+  #mainSidebar.sidebar-light-theme{
+    background:#ffffff!important;
+    border-right:1px solid #cfd5dc!important;
+    box-shadow:6px 0 18px rgba(0,0,0,.07)!important;
+  }
+  #mainSidebar.sidebar-light-theme .sidebar-brand{
+    background:#ffffff!important;
+    border-top-color:#d5dbe2!important;
+    border-bottom-color:#dfe3e8!important;
+  }
+  #mainSidebar.sidebar-light-theme .menu-item,
+  #mainSidebar.sidebar-light-theme .inert-menu-item{
+    background:#ffffff!important;
+    color:#111111!important;
+    border-bottom-color:#e6e8eb!important;
+  }
+  #mainSidebar.sidebar-light-theme .menu-label,
+  #mainSidebar.sidebar-light-theme .menu-item,
+  #mainSidebar.sidebar-light-theme .inert-menu-item,
+  #mainSidebar.sidebar-light-theme .keep-mode-switch span,
+  #mainSidebar.sidebar-light-theme .independent-note{
+    color:#111111!important;
+  }
+  #mainSidebar.sidebar-light-theme .menu-icon,
+  #mainSidebar.sidebar-light-theme .menu-chevron{
+    color:#243646!important;
+  }
+  #mainSidebar.sidebar-light-theme .menu-item:hover,
+  #mainSidebar.sidebar-light-theme .inert-menu-item:hover{
+    background:#f5f7f9!important;
+    box-shadow:inset 3px 0 0 #1597ff!important;
+  }
+  #mainSidebar.sidebar-light-theme .menu-item.active{
+    background:#eef6ff!important;
+    color:#111!important;
+    border-left-color:#1597ff!important;
+    box-shadow:none!important;
+  }
+  #mainSidebar.sidebar-light-theme .side-menu-divider{
+    background:#f5f6f7!important;
+    border-color:#e5e7ea!important;
+  }
+  #mainSidebar.sidebar-light-theme .keep-mode-switch{
+    background:#ffffff!important;
+    color:#111!important;
+    border-color:#e5e7ea!important;
+  }
+  #mainSidebar.sidebar-light-theme .sidebar-theme-picker{
+    background:#ffffff!important;
+    border-top-color:#e5e7ea!important;
+  }
+  #mainSidebar.sidebar-light-theme .sidebar-theme-label{color:#111!important}
+  #mainSidebar.sidebar-light-theme .sidebar-theme-btn{
+    background:#ffffff!important;
+    color:#111!important;
+    border-color:#cbd2d9!important;
+  }
+  #mainSidebar.sidebar-light-theme .sidebar-theme-btn.active{
+    border-color:#1597ff!important;
+    box-shadow:0 0 0 1px rgba(21,151,255,.12)!important;
+  }
+</style>
+
+
+<style id="aghu-v47-campaign-login-sidebar-labels">
+  /* Campanha JK: somente na tela de login, em formato de etiqueta. */
+  :root{--campaign-jk-space:0px!important}
+  body{padding-bottom:0!important}
+  #campaignJK.campaign-jk{
+    display:none;
+    position:fixed!important;
+    left:50%!important;
+    right:auto!important;
+    bottom:22px!important;
+    transform:translate(-50%,18px) scale(.985);
+    width:min(760px,calc(100vw - 34px));
+    min-height:0!important;
+    padding:13px 20px 13px 48px!important;
+    border:1px solid #a85f30!important;
+    border-radius:16px 24px 24px 16px!important;
+    background:linear-gradient(180deg,#ffc078 0%,#f4a85d 100%)!important;
+    color:#52351f!important;
+    font:10px/1.45 Arial,Helvetica,sans-serif!important;
+    text-align:left!important;
+    box-shadow:0 9px 25px rgba(75,43,22,.20), inset 0 0 0 2px rgba(255,255,255,.16)!important;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .45s ease,transform .45s ease,visibility .45s ease;
+    z-index:65000!important;
+  }
+  #campaignJK.campaign-jk::before{
+    content:"";
+    position:absolute;
+    left:13px;
+    top:50%;
+    width:15px;
+    height:15px;
+    margin-top:-7.5px;
+    border:2px solid rgba(112,63,33,.72);
+    border-radius:50%;
+    background:#fff7e7;
+    box-shadow:inset 0 0 0 3px rgba(244,168,93,.45);
+  }
+  #campaignJK.campaign-jk::after{
+    content:"";
+    position:absolute;
+    left:-24px;
+    top:50%;
+    width:34px;
+    height:1px;
+    background:#a85f30;
+    transform:rotate(-7deg);
+    transform-origin:right center;
+    opacity:.8;
+  }
+  #campaignJK.campaign-jk.campaign-login-active{
+    display:block;
+  }
+  #campaignJK.campaign-jk.campaign-login-active.campaign-visible{
+    opacity:1;
+    visibility:visible;
+    transform:translate(-50%,0) scale(1);
+    pointer-events:auto;
+  }
+  #campaignJK .campaign-jk-label{
+    display:inline-block!important;
+    margin:0 5px 2px 0!important;
+    padding:2px 7px!important;
+    border:1px solid rgba(111,59,28,.55)!important;
+    border-radius:10px!important;
+    background:rgba(255,248,232,.68)!important;
+    color:#6a3b1f!important;
+    font-weight:700!important;
+  }
+  #campaignJK strong{color:#4e2e19!important}
+  #campaignJK a{color:#193d71!important;text-decoration:underline!important;text-underline-offset:2px}
+
+  /* Menu principal: rótulos visíveis no tema azul e no tema branco. */
+  #mainSidebar:not(.is-retracted){width:220px!important;min-width:220px!important;max-width:220px!important}
+  #mainSidebar:not(.is-retracted) .menu-label{
+    display:inline!important;
+    opacity:1!important;
+    visibility:visible!important;
+    width:auto!important;
+    max-width:none!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    white-space:nowrap!important;
+  }
+  #mainSidebar:not(.is-retracted):not(.sidebar-light-theme) .menu-label,
+  #mainSidebar:not(.is-retracted):not(.sidebar-light-theme) .menu-item,
+  #mainSidebar:not(.is-retracted):not(.sidebar-light-theme) .menu-chevron{
+    color:#fff!important;
+  }
+  #mainSidebar:not(.is-retracted).sidebar-light-theme .menu-label,
+  #mainSidebar:not(.is-retracted).sidebar-light-theme .menu-item,
+  #mainSidebar:not(.is-retracted).sidebar-light-theme .menu-chevron{
+    color:#111!important;
+  }
+  #mainSidebar.is-retracted .menu-label,
+  #mainSidebar.is-retracted .menu-chevron{display:none!important}
+
+  @media(max-width:700px){
+    #campaignJK.campaign-jk{
+      width:min(94vw,620px);
+      bottom:14px!important;
+      padding:11px 14px 11px 43px!important;
+      font-size:9px!important;
+      line-height:1.4!important;
+    }
+  }
+</style>
+
+
+<style id="aghu-v48-global-theme">
+  /* v48: tema Azul-marinho ou Branco aplicado a TODO o aplicativo após o login.
+     A tela inicial de login permanece exclusivamente branca. */
+
+  /* LOGIN: sempre branco, independentemente do tema salvo do aplicativo. */
+  #authScreen.auth-screen{
+    background:#ffffff!important;
+    color:#111!important;
+  }
+  #authScreen .auth-card{
+    background:#ffffff!important;
+    color:#111!important;
+    border-color:#d7dde4!important;
+    box-shadow:0 7px 24px rgba(0,0,0,.08)!important;
+    backdrop-filter:none!important;
+  }
+  #authScreen .auth-heading{color:#111!important}
+  #authScreen input{
+    background:#fff!important;
+    color:#111!important;
+    border-color:#cbd2d9!important;
+  }
+  #authScreen .auth-privacy,
+  #authScreen .auth-disclaimer,
+  #authScreen .login-memory-hint{color:#7b8793!important}
+
+  /* ===== TEMA AZUL-MARINHO: aplicativo inteiro ===== */
+  body.app-theme-navy-active,
+  body.app-theme-navy-active #appShell,
+  body.app-theme-navy-active #appShell .workspace,
+  body.app-theme-navy-active #appShell .content,
+  body.app-theme-navy-active #appShell .page,
+  body.app-theme-navy-active #appShell .tabs,
+  body.app-theme-navy-active #appShell .editor-shell,
+  body.app-theme-navy-active #appShell .table-wrap,
+  body.app-theme-navy-active #appShell .notes-grid-area,
+  body.app-theme-navy-active #appShell .notes-list-layout{
+    background:#02072b!important;
+    color:#eef8ff!important;
+  }
+
+  body.app-theme-navy-active #appShell .topbar,
+  body.app-theme-navy-active #appShell .sidebar,
+  body.app-theme-navy-active #appShell .sidebar-brand,
+  body.app-theme-navy-active #appShell .tab,
+  body.app-theme-navy-active #appShell .filters-row,
+  body.app-theme-navy-active #appShell .formatbar,
+  body.app-theme-navy-active #appShell .meta-tools,
+  body.app-theme-navy-active #appShell .list-side-actions,
+  body.app-theme-navy-active #appShell .search-notes,
+  body.app-theme-navy-active #appShell .menu-search-wrap,
+  body.app-theme-navy-active #appShell .notes-view-switch,
+  body.app-theme-navy-active #appShell .note-card-idbar{
+    background:#06114a!important;
+    color:#eef8ff!important;
+    border-color:rgba(52,197,255,.26)!important;
+  }
+
+  body.app-theme-navy-active #appShell .tab.active,
+  body.app-theme-navy-active #appShell .filter.active,
+  body.app-theme-navy-active #appShell .view-mode-btn.active{
+    background:#0a2c7b!important;
+    color:#fff!important;
+    border-color:#34c5ff!important;
+  }
+
+  body.app-theme-navy-active #appShell .filter,
+  body.app-theme-navy-active #appShell .view-mode-btn,
+  body.app-theme-navy-active #appShell .btn-light,
+  body.app-theme-navy-active #appShell .empty-trash-btn,
+  body.app-theme-navy-active #appShell select,
+  body.app-theme-navy-active #appShell input,
+  body.app-theme-navy-active #appShell .list-side-actions button,
+  body.app-theme-navy-active #appShell .grid-icon-btn{
+    background:#08133f!important;
+    color:#eef8ff!important;
+    border-color:#214f9d!important;
+  }
+
+  body.app-theme-navy-active #appShell .search-notes input,
+  body.app-theme-navy-active #appShell .menu-search-wrap input,
+  body.app-theme-navy-active #appShell .note-title,
+  body.app-theme-navy-active #appShell .note-body,
+  body.app-theme-navy-active #appShell [contenteditable="true"]{
+    background:#02072b!important;
+    color:#f4fbff!important;
+  }
+  body.app-theme-navy-active #appShell .note-title::placeholder,
+  body.app-theme-navy-active #appShell .note-body:empty::before,
+  body.app-theme-navy-active #appShell input::placeholder{color:#8fb4d6!important}
+
+  body.app-theme-navy-active #appShell .notes-table th{
+    background:#08164c!important;
+    color:#eaf7ff!important;
+    border-color:#1b3f80!important;
+  }
+  body.app-theme-navy-active #appShell .notes-table td{
+    background:#030b35!important;
+    color:#e9f5ff!important;
+    border-color:#122d65!important;
+  }
+  body.app-theme-navy-active #appShell .notes-table tbody tr:hover td{background:#07184f!important}
+  body.app-theme-navy-active #appShell .notes-table tbody tr.selected td{background:#0a3f92!important;color:#fff!important}
+
+  body.app-theme-navy-active #keepPage.notes-view-cards .notes-table tr[data-id]{
+    background:#06103a!important;
+    color:#eef8ff!important;
+    border-color:#1b6ec1!important;
+  }
+  body.app-theme-navy-active #keepPage.notes-view-cards .note-card-idbar,
+  body.app-theme-navy-active #keepPage.notes-view-cards .patient-name-main,
+  body.app-theme-navy-active #keepPage.notes-view-cards .quick-ref-zone,
+  body.app-theme-navy-active #keepPage.notes-view-cards .keep-card-preview,
+  body.app-theme-navy-active #keepPage.notes-view-cards .notes-table td.row-action{
+    background:#06103a!important;
+    color:#eef8ff!important;
+  }
+  body.app-theme-navy-active #keepPage.notes-view-cards .patient-name-main strong,
+  body.app-theme-navy-active #keepPage.notes-view-cards .note-card-firstname{color:#fff!important}
+  body.app-theme-navy-active #keepPage.notes-view-cards .keep-card-preview{color:#bdd5ea!important}
+
+  body.app-theme-navy-active #noteActionsMenu,
+  body.app-theme-navy-active dialog,
+  body.app-theme-navy-active .utility-dialog,
+  body.app-theme-navy-active .history-dialog{
+    background:#06114a!important;
+    color:#eef8ff!important;
+    border-color:#1a6fc7!important;
+  }
+  body.app-theme-navy-active #noteActionsMenu .note-menu-item,
+  body.app-theme-navy-active dialog button,
+  body.app-theme-navy-active dialog input,
+  body.app-theme-navy-active dialog select,
+  body.app-theme-navy-active dialog textarea{
+    background:#08133f!important;
+    color:#eef8ff!important;
+    border-color:#214f9d!important;
+  }
+  body.app-theme-navy-active #noteActionsMenu .note-menu-item:hover{background:#0a2c7b!important}
+
+  body.app-theme-navy-active .campaign-jk{color:#52351f!important}
+
+  /* ===== TEMA BRANCO: aplicativo inteiro ===== */
+  body.app-theme-white-active,
+  body.app-theme-white-active #appShell,
+  body.app-theme-white-active #appShell .workspace,
+  body.app-theme-white-active #appShell .content,
+  body.app-theme-white-active #appShell .page,
+  body.app-theme-white-active #appShell .tabs,
+  body.app-theme-white-active #appShell .editor-shell,
+  body.app-theme-white-active #appShell .table-wrap,
+  body.app-theme-white-active #appShell .notes-grid-area,
+  body.app-theme-white-active #appShell .notes-list-layout{
+    background:#ffffff!important;
+    color:#111!important;
+  }
+
+  body.app-theme-white-active #appShell .topbar,
+  body.app-theme-white-active #appShell .sidebar,
+  body.app-theme-white-active #appShell .sidebar-brand,
+  body.app-theme-white-active #appShell .tab,
+  body.app-theme-white-active #appShell .filters-row,
+  body.app-theme-white-active #appShell .formatbar,
+  body.app-theme-white-active #appShell .meta-tools,
+  body.app-theme-white-active #appShell .list-side-actions,
+  body.app-theme-white-active #appShell .search-notes,
+  body.app-theme-white-active #appShell .menu-search-wrap,
+  body.app-theme-white-active #appShell .notes-view-switch,
+  body.app-theme-white-active #appShell .note-card-idbar{
+    background:#ffffff!important;
+    color:#111!important;
+    border-color:#d5dbe2!important;
+  }
+
+  body.app-theme-white-active #appShell .filter,
+  body.app-theme-white-active #appShell .view-mode-btn,
+  body.app-theme-white-active #appShell .btn-light,
+  body.app-theme-white-active #appShell .empty-trash-btn,
+  body.app-theme-white-active #appShell select,
+  body.app-theme-white-active #appShell input,
+  body.app-theme-white-active #appShell .list-side-actions button,
+  body.app-theme-white-active #appShell .grid-icon-btn{
+    background:#ffffff!important;
+    color:#111!important;
+    border-color:#cbd2d9!important;
+  }
+
+  body.app-theme-white-active #appShell .tab.active,
+  body.app-theme-white-active #appShell .filter.active,
+  body.app-theme-white-active #appShell .view-mode-btn.active{
+    background:#eef6ff!important;
+    color:#111!important;
+    border-color:#1597ff!important;
+  }
+
+  body.app-theme-white-active #appShell .search-notes input,
+  body.app-theme-white-active #appShell .menu-search-wrap input,
+  body.app-theme-white-active #appShell .note-title,
+  body.app-theme-white-active #appShell .note-body,
+  body.app-theme-white-active #appShell [contenteditable="true"]{
+    background:#fff!important;
+    color:#111!important;
+  }
+
+  body.app-theme-white-active #appShell .notes-table th{
+    background:#f2f5f8!important;
+    color:#111!important;
+    border-color:#cfd5dc!important;
+  }
+  body.app-theme-white-active #appShell .notes-table td{
+    background:#fff!important;
+    color:#111!important;
+    border-color:#dfe3e8!important;
+  }
+  body.app-theme-white-active #appShell .notes-table tbody tr:hover td{background:#f7fbff!important}
+  body.app-theme-white-active #appShell .notes-table tbody tr.selected td{background:#e8f5ff!important;color:#111!important}
+
+  body.app-theme-white-active #keepPage.notes-view-cards .notes-table tr[data-id]{
+    background:#fff!important;
+    color:#111!important;
+    border-color:#c9d2db!important;
+  }
+  body.app-theme-white-active #keepPage.notes-view-cards .note-card-idbar,
+  body.app-theme-white-active #keepPage.notes-view-cards .patient-name-main,
+  body.app-theme-white-active #keepPage.notes-view-cards .quick-ref-zone,
+  body.app-theme-white-active #keepPage.notes-view-cards .keep-card-preview,
+  body.app-theme-white-active #keepPage.notes-view-cards .notes-table td.row-action{
+    background:#fff!important;
+    color:#111!important;
+  }
+  body.app-theme-white-active #keepPage.notes-view-cards .patient-name-main strong,
+  body.app-theme-white-active #keepPage.notes-view-cards .note-card-firstname{color:#111!important}
+  body.app-theme-white-active #keepPage.notes-view-cards .keep-card-preview{color:#4f5963!important}
+
+  body.app-theme-white-active #noteActionsMenu,
+  body.app-theme-white-active dialog,
+  body.app-theme-white-active .utility-dialog,
+  body.app-theme-white-active .history-dialog{
+    background:#fff!important;
+    color:#111!important;
+    border-color:#cbd2d9!important;
+  }
+  body.app-theme-white-active #noteActionsMenu .note-menu-item,
+  body.app-theme-white-active dialog button,
+  body.app-theme-white-active dialog input,
+  body.app-theme-white-active dialog select,
+  body.app-theme-white-active dialog textarea{
+    background:#fff!important;
+    color:#111!important;
+    border-color:#cbd2d9!important;
+  }
+  body.app-theme-white-active #noteActionsMenu .note-menu-item:hover{background:#f3f7fb!important}
+
+  /* O seletor continua no menu, mas agora representa o tema do app inteiro. */
+  .sidebar-theme-label::after{content:" app";opacity:.75}
+</style>
+
+<style id="aghu-v50-sharing-persistence">
+.notes-share-dialog,.received-shares-dialog,.shared-note-viewer-dialog{width:min(620px,calc(100vw - 24px))!important}.notes-share-body,.received-shares-body{padding:14px}.notes-share-help{margin:0 0 12px;color:#66717a;font-size:11px;line-height:1.45}.notes-share-body label{display:flex;flex-direction:column;gap:5px;font-size:11px}.notes-share-body input{height:35px;border:1px solid #c7cdd3;border-radius:4px;padding:0 9px;background:#fff;color:#222}.notes-share-status{min-height:18px;margin:7px 0;color:#6b7780;font-size:10px}.notes-share-status.ok{color:#2d7a56}.notes-share-status.error{color:#a22d35}.notes-share-existing-wrap{margin-top:8px;padding-top:10px;border-top:1px solid rgba(120,130,140,.25);font-size:11px}.notes-share-existing,.received-shares-list{display:grid;gap:7px;margin-top:8px}.share-chip-row,.received-share-row{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid rgba(120,130,140,.26);border-radius:6px;background:rgba(255,255,255,.04)}.share-chip-row span,.received-share-main{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis}.share-chip-row button,.received-share-row button{height:28px;padding:0 8px;border:1px solid #c7cdd3;background:transparent;color:inherit;border-radius:4px;cursor:pointer}.received-shares-list{max-height:58vh;overflow:auto}.received-share-main strong{display:block;font-size:12px;margin-bottom:2px}.received-share-main small{color:#78838c}.shared-note-viewer-meta{padding:10px 14px;border-bottom:1px solid rgba(120,130,140,.25);font-size:10px;color:#78838c}.shared-note-viewer-body{padding:16px;min-height:180px;max-height:58vh;overflow:auto;line-height:1.5;background:#fff;color:#222}.shared-note-viewer-body img{max-width:100%;height:auto}body.theme-navy .notes-share-body input,body.theme-navy .share-chip-row,body.theme-navy .received-share-row,body.theme-navy .shared-note-viewer-body{background:#07142e!important;color:#eef7ff!important;border-color:#23486e!important}
+</style>
+
+<style id="aghu-v50-share-ui">
+  .share-direct-button{
+    border-color:#82b7c8!important;
+    color:#1e6176!important;
+    background:#f5fcff!important;
+  }
+  .share-direct-button:hover{
+    background:#e9f8fd!important;
+  }
+  body.theme-navy .share-direct-button{
+    border-color:#245a77!important;
+    color:#d8f6ff!important;
+    background:#0a1c37!important;
+  }
+  #shareSelectedBtn{
+    color:#1f667a!important;
+    border-color:#a8cbd6!important;
+  }
+  body.theme-navy #shareSelectedBtn{
+    color:#d9f7ff!important;
+    border-color:#2c5870!important;
+    background:#0a1c37!important;
+  }
+  .notes-share-help strong{
+    color:#1f667a;
+  }
+  body.theme-navy .notes-share-help strong{
+    color:#8eefff;
+  }
+</style>
+
+
+<style id="aghu-v51-responsive-final">
+  /* =========================================================
+     BASE FLUIDA
+     ========================================================= */
+  html,body{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    overflow-x:hidden!important;
+  }
+  #appShell,
+  #appShell .workspace,
+  #appShell .content,
+  #appShell .page,
+  #appShell .notes-list-layout,
+  #appShell .notes-grid-area,
+  #appShell .table-wrap,
+  #editorPage,
+  #editorPage .editor-shell{
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  #appShell .workspace{
+    flex:1 1 auto!important;
+    width:auto!important;
+  }
+  #appShell .content{
+    width:100%!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+  }
+  #appShell .page{
+    width:100%!important;
+    max-width:100%!important;
+    overflow:visible!important;
+  }
+
+  /* Barra superior sempre encolhe sem quebrar a viewport. */
+  #appShell .topbar{
+    width:100%!important;
+    min-width:0!important;
+    height:auto!important;
+    min-height:68px!important;
+    display:flex!important;
+    align-items:center!important;
+    flex-wrap:wrap!important;
+    gap:8px!important;
+    padding:8px 12px!important;
+  }
+  #appShell .menu-search-wrap{
+    flex:1 1 280px!important;
+    width:auto!important;
+    min-width:140px!important;
+    max-width:none!important;
+  }
+  #appShell .topbar-right{
+    flex:0 1 auto!important;
+    min-width:0!important;
+    margin-left:auto!important;
+  }
+
+  /* Abas não empurram a página para fora. */
+  #appShell .tabs{
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    scrollbar-width:thin;
+  }
+  #appShell .tab{flex:0 0 auto!important}
+
+  /* =========================================================
+     LISTA DE NOTAS
+     ========================================================= */
+  #keepPage .toolbar-row{
+    width:100%!important;
+    min-width:0!important;
+    display:flex!important;
+    flex-wrap:wrap!important;
+    align-items:center!important;
+    gap:8px!important;
+  }
+  #keepPage .search-notes{
+    flex:1 1 300px!important;
+    width:auto!important;
+    min-width:180px!important;
+    max-width:none!important;
+  }
+  #keepPage .notes-view-toolbar{
+    flex:0 1 auto!important;
+    min-width:0!important;
+  }
+  #keepPage .filters-row{
+    width:100%!important;
+    max-width:100%!important;
+    display:flex!important;
+    flex-wrap:wrap!important;
+    gap:7px!important;
+    overflow:visible!important;
+  }
+  #keepPage .filters-row > *{
+    max-width:100%!important;
+  }
+  #keepPage .notes-list-layout{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:10px!important;
+  }
+  #keepPage .notes-grid-area,
+  #keepPage .table-wrap{
+    width:100%!important;
+    max-width:100%!important;
+  }
+  #keepPage .list-side-actions{
+    width:100%!important;
+    margin:0!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:7px!important;
+    padding:8px!important;
+  }
+  #keepPage .list-side-actions button{
+    min-width:0!important;
+    width:100%!important;
+  }
+
+  /* Modo Janelas: largura sempre proporcional ao espaço real disponível. */
+  #keepPage.notes-view-cards .table-wrap{
+    overflow:visible!important;
+  }
+  #keepPage.notes-view-cards .notes-table{
+    width:100%!important;
+    min-width:0!important;
+    display:block!important;
+  }
+  #keepPage.notes-view-cards .notes-table thead{
+    display:none!important;
+  }
+  #keepPage.notes-view-cards .notes-table tbody{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))!important;
+    gap:12px!important;
+    align-items:start!important;
+  }
+  #keepPage.notes-view-cards .notes-table .notes-group-row{
+    display:block!important;
+    grid-column:1/-1!important;
+    width:100%!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id]{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:auto!important;
+    min-height:178px!important;
+    margin:0!important;
+  }
+  #keepPage.notes-view-cards .notes-table td[data-label="Nome"]{
+    width:100%!important;
+    min-width:0!important;
+  }
+  #keepPage.notes-view-cards .patient-name-main,
+  #keepPage.notes-view-cards .note-card-idbar,
+  #keepPage.notes-view-cards .keep-card-preview,
+  #keepPage.notes-view-cards .quick-ref-zone{
+    min-width:0!important;
+    max-width:100%!important;
+  }
+  #keepPage.notes-view-cards .patient-name-main strong,
+  #keepPage.notes-view-cards .keep-card-preview{
+    overflow-wrap:anywhere!important;
+    word-break:break-word!important;
+  }
+
+  /* Modo Linhas em tablet: tabela rola apenas dentro do componente. */
+  #keepPage:not(.notes-view-cards) .table-wrap{
+    overflow-x:auto!important;
+    overflow-y:visible!important;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  #keepPage:not(.notes-view-cards) .notes-table{
+    width:100%!important;
+    min-width:620px!important;
+  }
+
+  /* =========================================================
+     EDITOR
+     ========================================================= */
+  #editorPage .editor-header{
+    width:100%!important;
+    min-width:0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    flex-wrap:wrap!important;
+    gap:8px!important;
+  }
+  #editorPage .editor-header > div:first-child{
+    min-width:0!important;
+    flex:1 1 240px!important;
+    display:flex!important;
+    align-items:center!important;
+    flex-wrap:wrap!important;
+  }
+  #editorPage .editor-actions{
+    flex:0 1 auto!important;
+    min-width:0!important;
+    max-width:100%!important;
+    display:flex!important;
+    flex-wrap:wrap!important;
+    justify-content:flex-end!important;
+    gap:6px!important;
+  }
+  #editorPage .editor-shell{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    overflow:visible!important;
+  }
+  #editorPage .note-title{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+
+  /* Toolbar rica: rolagem local horizontal, nunca da página inteira. */
+  #editorPage .word-toolbar,
+  #editorPage .formatbar{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+  }
+  #editorPage .word-group,
+  #editorPage .word-toolbar button,
+  #editorPage .word-toolbar select{
+    flex:0 0 auto!important;
+  }
+  #editorPage .note-body{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    overflow-x:auto!important;
+    overflow-wrap:anywhere!important;
+    word-break:normal!important;
+  }
+  #editorPage .note-body img,
+  #editorPage .note-body video,
+  #editorPage .note-body iframe{
+    max-width:100%!important;
+    height:auto!important;
+  }
+  #editorPage .note-body table{
+    max-width:100%!important;
+  }
+  #editorPage .note-body pre{
+    max-width:100%!important;
+    white-space:pre-wrap!important;
+    overflow-wrap:anywhere!important;
+  }
+  #editorPage .meta-tools{
+    width:100%!important;
+    max-width:100%!important;
+    grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr))!important;
+  }
+
+  /* =========================================================
+     TABLET / CELULAR: sidebar como overlay + rail compacto.
+     ========================================================= */
+  @media (max-width:1100px){
+    #appShell{
+      display:block!important;
+      width:100%!important;
+      min-width:0!important;
+    }
+
+    #mainSidebar{
+      position:fixed!important;
+      left:0!important;
+      top:0!important;
+      bottom:0!important;
+      z-index:8000!important;
+      width:min(280px,82vw)!important;
+      min-width:0!important;
+      height:100dvh!important;
+      transform:none!important;
+      box-shadow:8px 0 24px rgba(0,0,0,.18)!important;
+      overflow:hidden!important;
+    }
+
+    /* Recolhido = rail de ícones permanente. */
+    #mainSidebar.is-retracted{
+      width:58px!important;
+      min-width:58px!important;
+      transform:none!important;
+      box-shadow:2px 0 10px rgba(0,0,0,.10)!important;
+    }
+
+    #mainSidebar.is-retracted .sidebar-aghu-logo .aghu-word,
+    #mainSidebar.is-retracted .menu-label,
+    #mainSidebar.is-retracted .menu-chevron,
+    #mainSidebar.is-retracted .keep-mode-switch,
+    #mainSidebar.is-retracted .independent-note,
+    #mainSidebar.is-retracted .sidebar-theme-picker{
+      display:none!important;
+    }
+    #mainSidebar.is-retracted .menu-item{
+      justify-content:center!important;
+      padding:0!important;
+    }
+
+    #appShell .workspace{
+      margin-left:58px!important;
+      width:calc(100% - 58px)!important;
+      max-width:calc(100vw - 58px)!important;
+    }
+
+    /* Botão do menu permanece sempre acessível; expandido ele vai para a borda do drawer. */
+    #collapseSidebar{
+      position:fixed!important;
+      top:10px!important;
+      left:10px!important;
+      z-index:9100!important;
+    }
+    #appShell:not(.sidebar-retracted) #collapseSidebar{
+      left:calc(min(280px,82vw) - 46px)!important;
+    }
+
+    #appShell .topbar{
+      padding-left:54px!important;
+    }
+
+    #keepPage .list-side-actions{
+      grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    }
+  }
+
+  /* =========================================================
+     CELULAR / TABLET ESTREITO
+     ========================================================= */
+  @media (max-width:760px){
+    #appShell .workspace{
+      margin-left:54px!important;
+      width:calc(100% - 54px)!important;
+      max-width:calc(100vw - 54px)!important;
+    }
+    #mainSidebar.is-retracted{
+      width:54px!important;
+      min-width:54px!important;
+    }
+
+    #appShell .topbar{
+      min-height:108px!important;
+      padding:8px 8px 8px 52px!important;
+      align-content:flex-start!important;
+    }
+    #appShell .menu-search-wrap{
+      order:1!important;
+      flex:1 1 100%!important;
+      width:100%!important;
+      min-width:0!important;
+      height:38px!important;
+    }
+    #appShell .topbar-right{
+      order:2!important;
+      width:100%!important;
+      margin-left:0!important;
+      justify-content:flex-end!important;
+      gap:8px!important;
+    }
+    #appShell .user-badge{display:none!important}
+
+    #appShell .content{
+      padding:5px!important;
+    }
+    #appShell .page{
+      padding:7px!important;
+    }
+
+    #keepPage .toolbar-row{
+      display:grid!important;
+      grid-template-columns:1fr!important;
+      gap:7px!important;
+    }
+    #keepPage .search-notes{
+      width:100%!important;
+      min-width:0!important;
+    }
+    #keepPage .notes-view-toolbar{
+      width:100%!important;
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) auto!important;
+      gap:7px!important;
+    }
+    #keepPage .notes-view-switch{
+      min-width:0!important;
+      display:grid!important;
+      grid-template-columns:1fr 1fr!important;
+    }
+    #keepPage .view-mode-btn{
+      min-width:0!important;
+      width:100%!important;
+    }
+    #newNoteBtn{
+      width:auto!important;
+      min-width:108px!important;
+    }
+
+    #keepPage .filters-row{
+      gap:5px!important;
+    }
+    #keepPage .filter,
+    #keepPage .filters-row select{
+      min-height:38px!important;
+      padding:0 9px!important;
+    }
+
+    #keepPage .list-side-actions{
+      grid-template-columns:1fr!important;
+    }
+
+    /* Janelas: uma coluna limpa no celular. */
+    #keepPage.notes-view-cards .notes-table tbody{
+      grid-template-columns:1fr!important;
+      gap:10px!important;
+    }
+
+    /* Linhas: vira lista compacta sem estouro horizontal. */
+    #keepPage:not(.notes-view-cards) .table-wrap{
+      overflow:visible!important;
+      border:0!important;
+    }
+    #keepPage:not(.notes-view-cards) .notes-table{
+      width:100%!important;
+      min-width:0!important;
+      display:block!important;
+    }
+    #keepPage:not(.notes-view-cards) .notes-table thead{
+      display:none!important;
+    }
+    #keepPage:not(.notes-view-cards) .notes-table tbody{
+      display:block!important;
+      width:100%!important;
+    }
+    #keepPage:not(.notes-view-cards) .notes-table .notes-group-row{
+      display:block!important;
+      width:100%!important;
+      margin:8px 0 4px!important;
+      border:0!important;
+    }
+    #keepPage:not(.notes-view-cards) .notes-table .notes-group-row td{
+      display:block!important;
+      width:100%!important;
+      border:0!important;
+      padding:4px 2px!important;
+      background:transparent!important;
+      font-weight:700!important;
+    }
+    #keepPage:not(.notes-view-cards) .notes-table tr[data-id]{
+      width:100%!important;
+      display:grid!important;
+      grid-template-columns:repeat(5,minmax(0,1fr))!important;
+      margin:0 0 9px!important;
+      border:1px solid #cbd3dc!important;
+      border-radius:9px!important;
+      overflow:hidden!important;
+      background:inherit!important;
+    }
+    #keepPage:not(.notes-view-cards) .notes-table tr[data-id] > td[data-label="Nome"]{
+      grid-column:1/-1!important;
+      width:100%!important;
+      min-width:0!important;
+      min-height:56px!important;
+      padding:9px 10px!important;
+      white-space:normal!important;
+      overflow-wrap:anywhere!important;
+      border-right:0!important;
+    }
+    #keepPage:not(.notes-view-cards) .notes-table tr[data-id] > td.row-action{
+      display:flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      width:100%!important;
+      min-width:0!important;
+      min-height:40px!important;
+      padding:0!important;
+    }
+    #keepPage:not(.notes-view-cards) .notes-table td::before{
+      display:none!important;
+    }
+
+    /* Editor: controles em duas faixas e conteúdo integralmente visível. */
+    #editorPage .editor-header{
+      display:grid!important;
+      grid-template-columns:1fr!important;
+      align-items:stretch!important;
+    }
+    #editorPage .editor-actions{
+      width:100%!important;
+      justify-content:flex-end!important;
+    }
+    #editorPage .editor-actions .btn{
+      min-height:40px!important;
+      flex:1 1 130px!important;
+    }
+    #editorPage .note-title{
+      font-size:18px!important;
+      padding:11px 12px!important;
+    }
+    #editorPage .note-body{
+      min-height:52vh!important;
+      padding:12px!important;
+      font-size:15px!important;
+      line-height:1.5!important;
+    }
+    #editorPage .word-toolbar button{
+      min-width:36px!important;
+      min-height:36px!important;
+    }
+    #editorPage .word-toolbar select{
+      min-height:36px!important;
+      font-size:14px!important;
+    }
+
+    dialog,
+    .utility-dialog,
+    .history-dialog,
+    .notes-share-dialog,
+    .received-shares-dialog,
+    .shared-note-viewer-dialog{
+      width:calc(100vw - 16px)!important;
+      max-width:calc(100vw - 16px)!important;
+      margin:auto!important;
+    }
+  }
+
+  @media (max-width:480px){
+    #appShell .topbar{
+      min-height:102px!important;
+      padding-left:48px!important;
+    }
+    #appShell .workspace{
+      margin-left:50px!important;
+      width:calc(100% - 50px)!important;
+      max-width:calc(100vw - 50px)!important;
+    }
+    #mainSidebar.is-retracted{
+      width:50px!important;
+      min-width:50px!important;
+    }
+    #keepPage .notes-view-toolbar{
+      grid-template-columns:1fr!important;
+    }
+    #newNoteBtn{
+      width:100%!important;
+    }
+    #keepPage .notes-view-switch{
+      width:100%!important;
+    }
+    #keepPage .filters-row{
+      display:grid!important;
+      grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    }
+    #keepPage .filters-row > *{
+      width:100%!important;
+      min-width:0!important;
+    }
+    #keepPage #labelFilter,
+    #keepPage #manageLabelsBtn,
+    #keepPage #emptyTrashBtn{
+      grid-column:1/-1!important;
+    }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    #mainSidebar,
+    #appShell .workspace{
+      transition:none!important;
+    }
+  }
+</style>
+
+
+<style id="aghu-v52-neon-themes">
+  .sidebar-theme-picker{
+    display:block!important;
+    padding:8px!important;
+  }
+  .sidebar-theme-label{
+    display:block!important;
+    margin:0 0 6px!important;
+  }
+  .sidebar-theme-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:5px;
+  }
+  .sidebar-theme-btn{
+    position:relative;
+    min-width:0;
+    height:27px!important;
+    padding:0 5px!important;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .sidebar-theme-btn::before{
+    content:"";
+    display:inline-block;
+    width:7px;
+    height:7px;
+    margin-right:4px;
+    border-radius:50%;
+    vertical-align:1px;
+    background:var(--swatch,#34c5ff);
+    box-shadow:0 0 7px var(--swatch,#34c5ff);
+  }
+  .theme-swatch.navy{--swatch:#1597ff}
+  .theme-swatch.white{--swatch:#d8e0e8}
+  .theme-swatch.cyan{--swatch:#00f5ff}
+  .theme-swatch.violet{--swatch:#8c52ff}
+  .theme-swatch.magenta{--swatch:#ff2bd6}
+  .theme-swatch.emerald{--swatch:#00f59f}
+  .theme-swatch.gold{--swatch:#ffd84a}
+  .theme-swatch.ruby{--swatch:#ff365f}
+  .theme-swatch.turquoise{--swatch:#16e6d2}
+  .theme-swatch.silver{--swatch:#dce7f3}
+
+  /* Variáveis usadas pelos oito novos temas. */
+  body.app-theme-custom-active{
+    --custom-bg:#061322;
+    --custom-surface:#0a1c2e;
+    --custom-surface-2:#10263a;
+    --custom-surface-3:#142f45;
+    --custom-border:#1e5b70;
+    --custom-text:#eefaff;
+    --custom-muted:#9cc8d3;
+    --custom-accent:#00f5ff;
+    --custom-accent-soft:rgba(0,245,255,.16);
+    --custom-editor:#071a29;
+  }
+
+  /* Fundo e superfícies do app inteiro. A tela de login não recebe esta classe. */
+  body.app-theme-custom-active #appShell,
+  body.app-theme-custom-active #appShell .workspace,
+  body.app-theme-custom-active #appShell .content,
+  body.app-theme-custom-active #appShell .page,
+  body.app-theme-custom-active #appShell .tabs,
+  body.app-theme-custom-active #appShell .editor-shell,
+  body.app-theme-custom-active #appShell .table-wrap,
+  body.app-theme-custom-active #appShell .notes-grid-area,
+  body.app-theme-custom-active #appShell .notes-list-layout{
+    background:var(--custom-bg)!important;
+    color:var(--custom-text)!important;
+    border-color:var(--custom-border)!important;
+  }
+
+  body.app-theme-custom-active #appShell .topbar,
+  body.app-theme-custom-active #appShell .sidebar,
+  body.app-theme-custom-active #appShell .sidebar-brand,
+  body.app-theme-custom-active #appShell .tab,
+  body.app-theme-custom-active #appShell .filters-row,
+  body.app-theme-custom-active #appShell .formatbar,
+  body.app-theme-custom-active #appShell .word-toolbar,
+  body.app-theme-custom-active #appShell .meta-tools,
+  body.app-theme-custom-active #appShell .list-side-actions,
+  body.app-theme-custom-active #appShell .search-notes,
+  body.app-theme-custom-active #appShell .menu-search-wrap,
+  body.app-theme-custom-active #appShell .notes-view-switch,
+  body.app-theme-custom-active #appShell .note-card-idbar,
+  body.app-theme-custom-active #appShell .menu-item,
+  body.app-theme-custom-active #appShell .inert-menu-item,
+  body.app-theme-custom-active #appShell .keep-mode-switch{
+    background:var(--custom-surface)!important;
+    color:var(--custom-text)!important;
+    border-color:var(--custom-border)!important;
+  }
+
+  body.app-theme-custom-active #appShell .tab.active,
+  body.app-theme-custom-active #appShell .filter.active,
+  body.app-theme-custom-active #appShell .view-mode-btn.active,
+  body.app-theme-custom-active #appShell .menu-item.active{
+    background:var(--custom-surface-3)!important;
+    color:#fff!important;
+    border-color:var(--custom-accent)!important;
+    box-shadow:inset 3px 0 0 var(--custom-accent),0 0 10px var(--custom-accent-soft)!important;
+  }
+
+  body.app-theme-custom-active #appShell .filter,
+  body.app-theme-custom-active #appShell .view-mode-btn,
+  body.app-theme-custom-active #appShell .btn-light,
+  body.app-theme-custom-active #appShell .empty-trash-btn,
+  body.app-theme-custom-active #appShell select,
+  body.app-theme-custom-active #appShell input,
+  body.app-theme-custom-active #appShell textarea,
+  body.app-theme-custom-active #appShell .list-side-actions button,
+  body.app-theme-custom-active #appShell .grid-icon-btn{
+    background:var(--custom-surface-2)!important;
+    color:var(--custom-text)!important;
+    border-color:var(--custom-border)!important;
+  }
+
+  body.app-theme-custom-active #appShell .search-notes input,
+  body.app-theme-custom-active #appShell .menu-search-wrap input,
+  body.app-theme-custom-active #appShell .note-title,
+  body.app-theme-custom-active #appShell .note-body,
+  body.app-theme-custom-active #appShell [contenteditable="true"]{
+    background:var(--custom-editor)!important;
+    color:var(--custom-text)!important;
+    border-color:var(--custom-border)!important;
+  }
+
+  body.app-theme-custom-active #appShell input::placeholder,
+  body.app-theme-custom-active #appShell .note-title::placeholder{
+    color:var(--custom-muted)!important;
+  }
+
+  body.app-theme-custom-active #appShell .notes-table th{
+    background:var(--custom-surface-3)!important;
+    color:var(--custom-text)!important;
+    border-color:var(--custom-border)!important;
+  }
+  body.app-theme-custom-active #appShell .notes-table td{
+    background:var(--custom-surface)!important;
+    color:var(--custom-text)!important;
+    border-color:var(--custom-border)!important;
+  }
+  body.app-theme-custom-active #appShell .notes-table tbody tr:hover td{
+    background:var(--custom-surface-2)!important;
+  }
+
+  body.app-theme-custom-active #keepPage.notes-view-cards .notes-table tr[data-id]{
+    background:var(--custom-surface)!important;
+    border-color:var(--custom-accent)!important;
+    box-shadow:0 0 0 1px var(--custom-border),0 0 12px var(--custom-accent-soft)!important;
+  }
+  body.app-theme-custom-active #keepPage.notes-view-cards .note-card-idbar,
+  body.app-theme-custom-active #keepPage.notes-view-cards .patient-name-main,
+  body.app-theme-custom-active #keepPage.notes-view-cards .quick-ref-zone,
+  body.app-theme-custom-active #keepPage.notes-view-cards .keep-card-preview,
+  body.app-theme-custom-active #keepPage.notes-view-cards .notes-table td.row-action{
+    background:var(--custom-surface)!important;
+    color:var(--custom-text)!important;
+    border-color:var(--custom-border)!important;
+  }
+  body.app-theme-custom-active #keepPage.notes-view-cards .patient-name-main strong,
+  body.app-theme-custom-active #keepPage.notes-view-cards .note-card-firstname{
+    color:var(--custom-text)!important;
+  }
+  body.app-theme-custom-active #keepPage.notes-view-cards .keep-card-preview{
+    color:var(--custom-muted)!important;
+  }
+
+  body.app-theme-custom-active #noteActionsMenu,
+  body.app-theme-custom-active dialog,
+  body.app-theme-custom-active .utility-dialog,
+  body.app-theme-custom-active .history-dialog,
+  body.app-theme-custom-active .notes-share-dialog,
+  body.app-theme-custom-active .received-shares-dialog,
+  body.app-theme-custom-active .shared-note-viewer-dialog{
+    background:var(--custom-surface)!important;
+    color:var(--custom-text)!important;
+    border-color:var(--custom-border)!important;
+  }
+  body.app-theme-custom-active #noteActionsMenu .note-menu-item,
+  body.app-theme-custom-active dialog button,
+  body.app-theme-custom-active dialog input,
+  body.app-theme-custom-active dialog select,
+  body.app-theme-custom-active dialog textarea{
+    background:var(--custom-surface-2)!important;
+    color:var(--custom-text)!important;
+    border-color:var(--custom-border)!important;
+  }
+
+  body.app-theme-custom-active .sidebar-theme-picker{
+    background:var(--custom-surface)!important;
+    border-color:var(--custom-border)!important;
+  }
+  body.app-theme-custom-active .sidebar-theme-label{
+    color:var(--custom-text)!important;
+  }
+  body.app-theme-custom-active .sidebar-theme-btn{
+    background:var(--custom-surface-2)!important;
+    color:var(--custom-text)!important;
+    border-color:var(--custom-border)!important;
+  }
+  body.app-theme-custom-active .sidebar-theme-btn.active{
+    border-color:var(--custom-accent)!important;
+    box-shadow:0 0 9px var(--custom-accent-soft)!important;
+  }
+
+  /* Ciano neon */
+  body[data-aghu-theme="cyan"]{
+    --custom-bg:#02161c;--custom-surface:#05242c;--custom-surface-2:#07323c;--custom-surface-3:#0a4551;
+    --custom-border:#117485;--custom-text:#e9fdff;--custom-muted:#99dce3;--custom-accent:#00f5ff;
+    --custom-accent-soft:rgba(0,245,255,.22);--custom-editor:#031b22;
+  }
+  /* Violeta neon */
+  body[data-aghu-theme="violet"]{
+    --custom-bg:#0d0820;--custom-surface:#17102d;--custom-surface-2:#21173d;--custom-surface-3:#32205a;
+    --custom-border:#6546a5;--custom-text:#f5efff;--custom-muted:#c5b1e9;--custom-accent:#9b5cff;
+    --custom-accent-soft:rgba(155,92,255,.24);--custom-editor:#120b27;
+  }
+  /* Magenta neon */
+  body[data-aghu-theme="magenta"]{
+    --custom-bg:#1b0617;--custom-surface:#2a0a23;--custom-surface-2:#3b0f32;--custom-surface-3:#551347;
+    --custom-border:#8d2b78;--custom-text:#fff1fb;--custom-muted:#e0a9d3;--custom-accent:#ff2bd6;
+    --custom-accent-soft:rgba(255,43,214,.22);--custom-editor:#23071d;
+  }
+  /* Esmeralda neon */
+  body[data-aghu-theme="emerald"]{
+    --custom-bg:#031b15;--custom-surface:#06281f;--custom-surface-2:#09372b;--custom-surface-3:#0c4b3a;
+    --custom-border:#18785e;--custom-text:#edfff8;--custom-muted:#9fd9c5;--custom-accent:#00f59f;
+    --custom-accent-soft:rgba(0,245,159,.21);--custom-editor:#041f18;
+  }
+  /* Dourado cintilante */
+  body[data-aghu-theme="gold"]{
+    --custom-bg:#1a1405;--custom-surface:#28200a;--custom-surface-2:#382d0e;--custom-surface-3:#4d3d12;
+    --custom-border:#826b25;--custom-text:#fff9df;--custom-muted:#e6d18d;--custom-accent:#ffd84a;
+    --custom-accent-soft:rgba(255,216,74,.22);--custom-editor:#201906;
+  }
+  /* Rubi neon */
+  body[data-aghu-theme="ruby"]{
+    --custom-bg:#1b070d;--custom-surface:#2b0b14;--custom-surface-2:#3d101d;--custom-surface-3:#571629;
+    --custom-border:#8f2d48;--custom-text:#fff1f4;--custom-muted:#e2a6b6;--custom-accent:#ff365f;
+    --custom-accent-soft:rgba(255,54,95,.23);--custom-editor:#23080f;
+  }
+  /* Turquesa neon */
+  body[data-aghu-theme="turquoise"]{
+    --custom-bg:#031b1a;--custom-surface:#062725;--custom-surface-2:#093634;--custom-surface-3:#0c4a47;
+    --custom-border:#197771;--custom-text:#edfffd;--custom-muted:#9fdad5;--custom-accent:#16e6d2;
+    --custom-accent-soft:rgba(22,230,210,.22);--custom-editor:#041f1d;
+  }
+  /* Prata cintilante */
+  body[data-aghu-theme="silver"]{
+    --custom-bg:#111722;--custom-surface:#1a2330;--custom-surface-2:#242f3e;--custom-surface-3:#344254;
+    --custom-border:#62758c;--custom-text:#f4f8fc;--custom-muted:#b8c7d7;--custom-accent:#dce7f3;
+    --custom-accent-soft:rgba(220,231,243,.18);--custom-editor:#151d28;
+  }
+
+  @media(max-width:1100px){
+    .sidebar-theme-grid{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+  }
+</style>
+
+
+<style id="aghu-v53-hidden-state-fix">
+  #appShell.hidden,
+  #authScreen.hidden,
+  #adminShell.hidden{
+    display:none!important;
+  }
+
+  #appShell.hidden #mainSidebar,
+  #appShell.hidden .workspace{
+    display:none!important;
+  }
+</style>
+
+
+<style id="aghu-v54-theme-readable-text-fix">
+  /* v54: ajuste automático e suave da cor dos textos conforme o tema do app. */
+  body.aghu-readable-applied{
+    --aghu-dynamic-text:#eef7ff;
+    --aghu-dynamic-muted:#bdd5ea;
+  }
+
+  body.aghu-readable-applied #keepPage.notes-view-cards .patient-name-main,
+  body.aghu-readable-applied #keepPage.notes-view-cards .patient-name-main strong,
+  body.aghu-readable-applied #keepPage.notes-view-cards .note-card-firstname,
+  body.aghu-readable-applied #keepPage.notes-view-cards .quick-ref-zone,
+  body.aghu-readable-applied #keepPage .notes-table td[data-label="Nome"],
+  body.aghu-readable-applied #keepPage .notes-table td[data-label="Nome"] strong,
+  body.aghu-readable-applied #keepPage .notes-table td[data-label="Título"],
+  body.aghu-readable-applied #keepPage .notes-table td[data-label="Título"] strong,
+  body.aghu-readable-applied #editorPage .note-title,
+  body.aghu-readable-applied #editorPage .note-body,
+  body.aghu-readable-applied #editorPage [contenteditable="true"],
+  body.aghu-readable-applied .shared-note-viewer-body,
+  body.aghu-readable-applied .received-share-main strong,
+  body.aghu-readable-applied .share-chip-row span{
+    color:var(--aghu-dynamic-text)!important;
+    -webkit-text-fill-color:var(--aghu-dynamic-text)!important;
+    opacity:1!important;
+  }
+
+  body.aghu-readable-applied #keepPage.notes-view-cards .keep-card-preview,
+  body.aghu-readable-applied .received-share-main small,
+  body.aghu-readable-applied .shared-note-viewer-meta,
+  body.aghu-readable-applied .notes-share-help,
+  body.aghu-readable-applied .notes-share-status{
+    color:var(--aghu-dynamic-muted)!important;
+    -webkit-text-fill-color:var(--aghu-dynamic-muted)!important;
+    opacity:1!important;
+  }
+
+  body.aghu-readable-applied #keepPage.notes-view-cards .patient-name-main strong,
+  body.aghu-readable-applied #keepPage.notes-view-cards .note-card-firstname{
+    text-shadow:0 0 0 transparent, 0 0 8px rgba(255,255,255,.04)!important;
+  }
+</style>
+
 </head>
 <body>
   <div id="authScreen" class="auth-screen">
     <div class="auth-card">
       <div class="auth-heading">Acesse o sistema</div>
 
-      <div class="auth-brand" aria-label="AGHU Notes">
+      <div class="auth-brand" aria-label="AGHU Notes - Anotações Gerais de Histórias e Unidades">
         <div class="aghu-notes-logo">
           <div class="aghu-cross" aria-hidden="true"></div>
           <div class="aghu-word">
             <strong>AGHU<em>Notes</em></strong>
-            <small>Aplicativo particular de anotações</small>
+            <small>Anotações Gerais de Histórias e Unidades</small>
           </div>
         </div>
       </div>
@@ -3496,7 +5317,7 @@
       <button id="adminAccessBtn" class="admin-access-link" type="button">Administrador</button>
 
       <div class="auth-privacy">
-        Aplicativo particular para anotações pessoais. Não integra, consulta ou altera dados do sistema AGHU/EBSERH.
+        Aplicativo independente para anotações pessoais. Não integra, consulta ou altera dados de sistemas institucionais externos.
       </div>
     </div>
 
@@ -3507,92 +5328,65 @@
 
 
   <div id="adminPanel" class="admin-shell hidden">
-    <aside class="sidebar admin-sidebar"><div class="sidebar-brand"><div class="aghu-notes-logo sidebar-aghu-logo"><div class="aghu-cross"></div><div class="aghu-word"><strong>AGHU<em>Notes</em></strong><small>Aplicativo particular de anotações</small></div></div></div><nav class="side-menu"><button class="menu-item active" type="button"><span>♟</span>Usuários e acessos</button><button id="adminExitBtn" class="menu-item" type="button"><span>↪</span>Sair</button></nav></aside>
+    <aside class="sidebar admin-sidebar"><div class="sidebar-brand"><div class="aghu-notes-logo sidebar-aghu-logo"><div class="aghu-cross"></div><div class="aghu-word"><strong>AGHU<em>Notes</em></strong><small>Anotações Gerais de Histórias e Unidades</small></div></div></div><nav class="side-menu"><button class="menu-item active" type="button"><span>♟</span>Usuários e acessos</button><button id="adminExitBtn" class="menu-item" type="button"><span>↪</span>Sair</button></nav></aside>
     <div class="admin-main"><header class="topbar"><div class="search-menu admin-top-title">Administrador</div><div class="top-actions"><span class="session-box">Gestão local de contas</span></div></header><main class="workspace"><div class="tabs"><button class="tab active" type="button">♟ Usuários e acessos</button></div><section class="page admin-page">
       <div class="panel-title">Criar novo acesso</div><form id="adminCreateUserForm" class="admin-create-form" autocomplete="off"><label>Login / e-mail<input id="adminNewEmail" type="text" placeholder="ex.: usuario ou usuario@email.com" required></label><label>Senha<input id="adminNewPassword" type="text" minlength="6" required></label><button class="btn btn-primary" type="submit">Criar acesso</button><div id="adminCreateUserStatus" class="admin-inline-status"></div></form>
-      <div class="panel-title admin-users-title">Contas cadastradas</div><div class="table-wrap admin-users-wrap"><table class="notes-table admin-users-table"><thead><tr><th>Login</th><th>Senha</th><th>Criado em</th><th>Status</th><th>Ações</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div><div class="admin-local-warning">Gestão local: as contas existem somente neste navegador/aparelho nesta versão sem Supabase.</div>
+      <div class="panel-title admin-users-title">Contas cadastradas</div><div class="table-wrap admin-users-wrap"><table class="notes-table admin-users-table"><thead><tr><th>Login</th><th>Senha</th><th>Criado em</th><th>Status</th><th>Ações</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div><div class="admin-local-warning">Contas, credenciais e notas permanecem na nuvem entre atualizações. O Administrador pode bloquear ou reativar acessos, mas não excluir contas, senhas ou notas.</div>
     </section></main></div>
   </div>
 
   <div id="appShell" class="app-shell hidden">
-    <aside class="sidebar">
+    <aside id="mainSidebar" class="sidebar">
       <div class="sidebar-brand">
-        <div class="aghu-notes-logo sidebar-aghu-logo" aria-label="AGHU Notes">
+        <div class="aghu-notes-logo sidebar-aghu-logo" aria-label="AGHU Notes - Anotações Gerais de Histórias e Unidades">
           <div class="aghu-cross" aria-hidden="true"></div>
           <div class="aghu-word">
             <strong>AGHU<em>Notes</em></strong>
-            <small>Aplicativo particular de anotações</small>
+            <small>Anotações Gerais de Histórias e Unidades</small>
           </div>
         </div>
       </div>
 
-      <nav id="sideMenu" class="side-menu">
-        <button id="panelMenuBtn" class="menu-item" data-static="true"><span>▣</span>Painel Geral</button>
-        <button class="menu-item" data-static="true"><span>▰</span>Prontuário Online</button>
-        <button id="keepMenuBtn" class="menu-item active" data-page="keep"><span>🗒</span>Notas</button>
-<button id="calculatorMenuBtn" class="menu-item" type="button"><span>▦</span>Calculadora</button>
+      <nav id="sideMenu" class="side-menu" aria-label="Menu principal">
+        <button id="keepMenuBtn" class="menu-item active" data-page="keep" type="button" title="Notas"><span class="menu-icon">🗒</span><span class="menu-label">Notas</span></button>
+        <button id="calculatorMenuBtn" class="menu-item" type="button" title="Calculadora"><span class="menu-icon">▦</span><span class="menu-label">Calculadora</span></button>
+        <button id="googleDocsMenuBtn" class="menu-item" type="button" title="Google Docs"><span class="menu-icon">▤</span><span class="menu-label">Google Docs</span></button>
         <label class="keep-mode-switch" title="Quando marcado, o módulo de notas abre em uma janela central em primeiro plano">
           <input id="keepModeToggle" type="checkbox" />
           <span>Abrir em primeiro plano</span>
         </label>
-
-        <div class="menu-group">
-          <button class="menu-item group-toggle"><span>♟</span>Pacientes <b>⌄</b></button>
-          <div class="submenu">
-            <button data-static="true">Pesquisar Pacientes</button>
-            <button data-static="true">+ Prontuário</button>
-            <button data-static="true">+ Cadastros</button>
-            <button data-static="true">+ Relatórios</button>
-            <button data-static="true">+ Etiquetas</button>
-            <button data-static="true">+ SAME</button>
-          </div>
-        </div>
-
-        <div class="menu-group">
-          <button class="menu-item group-toggle"><span>⚑</span>Internação <b>⌄</b></button>
-          <div class="submenu">
-            <button data-static="true">Solicitação Internação/Autorização Hospitalar</button>
-            <button data-static="true">Internar Paciente</button>
-            <button data-static="true">Registrar Nascimento</button>
-            <button data-static="true">Censo Diário dos Pacientes</button>
-            <button data-static="true">+ Administração</button>
-            <button data-static="true">Escala de Profissionais</button>
-            <button data-static="true">+ Pesquisas</button>
-            <button data-static="true">+ Relatórios</button>
-            <button data-static="true">+ Cadastros</button>
-            <button data-static="true">Estornar Internação</button>
-            <button data-static="true">Estornar Alta do Paciente</button>
-            <button data-static="true">Imprimir Pulseiras de Internação</button>
-            <button data-static="true">Imprimir Placa de Identificação</button>
-            <button data-static="true">+ Impressão</button>
-          </div>
-        </div>
-
-        <div class="menu-group">
-          <button class="menu-item group-toggle"><span>⚕</span>Prescrição <b>⌄</b></button>
-          <div class="submenu open">
-            <button data-static="true">+ Médica</button>
-            <button data-static="true">+ Enfermagem</button>
-            <button data-static="true">+ Multiprofissional</button>
-          </div>
-        </div>
-
-        <button class="menu-item" data-static="true"><span>♙</span>Ambulatório</button>
-        <button class="menu-item" data-static="true"><span>⚗</span>Exames</button>
-        <button class="menu-item" data-static="true"><span>▤</span>Financeiro</button>
-        <button class="menu-item" data-static="true"><span>✚</span>Farmácia</button>
-        <button class="menu-item" data-static="true"><span>▣</span>Suprimentos</button>
-        <button class="menu-item" data-static="true"><span>▦</span>Inventário</button>
-        <button class="menu-item" data-static="true"><span>♙</span>Enfermagem</button>
-        <button class="menu-item" data-static="true"><span>?</span>Manuais de Ajuda</button>
+        <div class="side-menu-divider" aria-hidden="true"></div>
+        <button class="menu-item inert-menu-item" type="button" aria-disabled="true" title="Item visual inativo"><span class="menu-icon">⚑</span><span class="menu-label">Internação</span><b class="menu-chevron">⌄</b></button>
+        <button class="menu-item inert-menu-item" type="button" aria-disabled="true" title="Item visual inativo"><span class="menu-icon">⚕</span><span class="menu-label">Prescrição</span><b class="menu-chevron">⌄</b></button>
+        <button class="menu-item inert-menu-item" type="button" aria-disabled="true" title="Item visual inativo"><span class="menu-icon">♙</span><span class="menu-label">Ambulatório</span><b class="menu-chevron">⌄</b></button>
+        <button class="menu-item inert-menu-item" type="button" aria-disabled="true" title="Item visual inativo"><span class="menu-icon">⚗</span><span class="menu-label">Exames</span><b class="menu-chevron">⌄</b></button>
+        <button class="menu-item inert-menu-item" type="button" aria-disabled="true" title="Item visual inativo"><span class="menu-icon">▣</span><span class="menu-label">Controles do Paciente</span><b class="menu-chevron">⌄</b></button>
+        <button class="menu-item inert-menu-item" type="button" aria-disabled="true" title="Item visual inativo"><span class="menu-icon">♥</span><span class="menu-label">Cirurgias / PDT</span><b class="menu-chevron">⌄</b></button>
+        <button class="menu-item inert-menu-item" type="button" aria-disabled="true" title="Item visual inativo"><span class="menu-icon">▦</span><span class="menu-label">Outros Módulos</span><b class="menu-chevron">⌄</b></button>
       </nav>
+
+      <div class="sidebar-theme-picker" role="group" aria-label="Tema do aplicativo">
+        <span class="sidebar-theme-label">Fundo app</span>
+        <div class="sidebar-theme-grid">
+          <button id="sidebarThemeNavyBtn" class="sidebar-theme-btn active theme-swatch navy" type="button" data-sidebar-theme="navy" title="Azul-marinho neon">Azul</button>
+          <button id="sidebarThemeWhiteBtn" class="sidebar-theme-btn theme-swatch white" type="button" data-sidebar-theme="white" title="Branco">Branco</button>
+          <button class="sidebar-theme-btn theme-swatch cyan" type="button" data-sidebar-theme="cyan" title="Ciano neon">Ciano</button>
+          <button class="sidebar-theme-btn theme-swatch violet" type="button" data-sidebar-theme="violet" title="Violeta neon">Violeta</button>
+          <button class="sidebar-theme-btn theme-swatch magenta" type="button" data-sidebar-theme="magenta" title="Magenta neon">Magenta</button>
+          <button class="sidebar-theme-btn theme-swatch emerald" type="button" data-sidebar-theme="emerald" title="Esmeralda neon">Esmeralda</button>
+          <button class="sidebar-theme-btn theme-swatch gold" type="button" data-sidebar-theme="gold" title="Dourado cintilante">Dourado</button>
+          <button class="sidebar-theme-btn theme-swatch ruby" type="button" data-sidebar-theme="ruby" title="Rubi neon">Rubi</button>
+          <button class="sidebar-theme-btn theme-swatch turquoise" type="button" data-sidebar-theme="turquoise" title="Turquesa neon">Turquesa</button>
+          <button class="sidebar-theme-btn theme-swatch silver" type="button" data-sidebar-theme="silver" title="Prata cintilante">Prata</button>
+        </div>
+      </div>
 
       <div class="independent-note">Ferramenta particular de notas • não oficial</div>
     </aside>
 
     <div class="workspace">
       <header class="topbar">
-        <button id="collapseSidebar" class="icon-btn" title="Recolher menu">«</button>
+        <button id="collapseSidebar" class="icon-btn main-sidebar-toggle" type="button" title="Recolher/expandir menu" aria-label="Recolher/expandir menu" aria-expanded="true">☰</button>
         <div class="menu-search-wrap">
           <span>⌕</span>
           <input id="menuSearch" type="search" placeholder="Pesquisar menu" />
@@ -3604,12 +5398,12 @@
         </div>
       </header>
       <div id="keepFocusBar" class="keep-focus-bar hidden">
-        <div class="focus-aghu-brand" aria-label="AGHU Notes">
+        <div class="focus-aghu-brand" aria-label="AGHU Notes - Anotações Gerais de Histórias e Unidades">
           <div class="aghu-notes-logo focus-aghu-logo">
             <div class="aghu-cross" aria-hidden="true"></div>
             <div class="aghu-word">
               <strong>AGHU<em>Notes</em></strong>
-              <small>Aplicativo particular de anotações</small>
+              <small>Anotações Gerais de Histórias e Unidades</small>
             </div>
           </div>
         </div>
@@ -3663,6 +5457,7 @@
             <button class="filter" data-filter="reminders">Lembretes</button>
             <button class="filter" data-filter="archived">Arquivo</button>
             <button class="filter" data-filter="trash">Lixeira</button>
+            <button id="sharedNotesBtn" class="filter" type="button">Compartilhadas</button>
             <select id="labelFilter"><option value="">Todas as etiquetas</option></select>
             <button id="manageLabelsBtn" class="filter">Editar etiquetas</button>
             <button id="emptyTrashBtn" class="empty-trash-btn hidden">Esvaziar lixeira</button>
@@ -3675,14 +5470,12 @@
                 <table class="notes-table">
                   <thead>
                     <tr>
-                      <th data-sort="title">Nome <span class="sort-glyph">↕</span></th>
-                      <th data-sort="synthetic_age">Idade <span class="sort-glyph">↕</span></th>
-                      <th data-sort="synthetic_record">Prontuário <span class="sort-glyph">↕</span></th>
+                      <th data-sort="title">Título <span class="sort-glyph">↕</span></th>
                       <th class="icon-col" title="Abrir"></th>
                       <th class="icon-col" title="Fixar"></th>
                       <th class="icon-col" title="Arquivar"></th>
                       <th class="icon-col" title="Excluir"></th>
-                      <th class="icon-col blue-cap" title="Editar identificação"></th>
+                      <th class="icon-col blue-cap" title="Editar nota"></th>
                     </tr>
                   </thead>
                   <tbody id="notesTbody"></tbody>
@@ -3693,6 +5486,7 @@
 
             <aside class="list-side-actions">
               <button id="openSelectedBtn" disabled>Abrir nota</button>
+              <button id="shareSelectedBtn" disabled>Compartilhar</button>
               <button id="editPatientMetaBtn" disabled>Editar identificação</button>
               <button id="restoreSelectedBtn" class="hidden">Restaurar</button>
               <button id="deleteSelectedBtn" class="hidden danger-side">Excluir definitivamente</button>
@@ -3707,7 +5501,8 @@
               <span id="autosaveState" class="autosave-state">Salvo</span>
             </div>
             <div class="editor-actions note-menu-host">
-              <button id="noteMenuBtn" class="btn btn-light note-menu-button" type="button" aria-haspopup="menu" aria-expanded="false" onclick="window.toggleNoteActionsMenu && window.toggleNoteActionsMenu(event)">☰ Menu</button>
+              <button id="shareDirectBtn" class="btn btn-light share-direct-button" type="button" title="Compartilhar esta nota com outro login">↗ Compartilhar</button>
+              <button id="noteMenuBtn" class="btn btn-light note-menu-button" type="button" aria-haspopup="menu" aria-expanded="false">☰ Menu</button>
               <div id="noteActionsMenu" class="note-actions-menu hidden" role="menu">
                 <button id="pinBtn" class="note-menu-item" type="button">☆ Fixar</button>
                 <button id="archiveBtn" class="note-menu-item" type="button">▣ Arquivar</button>
@@ -3903,6 +5698,24 @@
     </div>
   </dialog>
 
+<dialog id="notesShareDialog" class="utility-dialog notes-share-dialog">
+  <div class="dialog-head"><h3>Compartilhar nota</h3><button id="notesShareCloseBtn" class="icon-btn" type="button">×</button></div>
+  <div class="notes-share-body"><p class="notes-share-help">Compartilhe esta nota com outra conta do Notes informando apenas o login ou e-mail do destinatário. A senha nunca é solicitada.</p>
+    <label>Login do destinatário<input id="notesShareLogin" type="text" placeholder="login ou e-mail" autocomplete="off"></label>
+    <div id="notesShareStatus" class="notes-share-status"></div>
+    <div class="dialog-actions"><button id="notesShareSendBtn" class="btn btn-primary" type="button">Compartilhar</button><button id="notesShareCancelBtn" class="btn btn-light" type="button">Fechar</button></div>
+    <div class="notes-share-existing-wrap"><strong>Compartilhamentos desta nota</strong><div id="notesShareExisting" class="notes-share-existing"></div></div>
+  </div>
+</dialog>
+<dialog id="receivedSharesDialog" class="utility-dialog received-shares-dialog">
+  <div class="dialog-head"><h3>Notas compartilhadas comigo</h3><button id="receivedSharesCloseBtn" class="icon-btn" type="button">×</button></div>
+  <div class="received-shares-body"><div id="receivedSharesList" class="received-shares-list"></div><div class="dialog-actions"><button id="receivedSharesCloseBottomBtn" class="btn btn-light" type="button">Fechar</button></div></div>
+</dialog>
+<dialog id="sharedNoteViewerDialog" class="utility-dialog shared-note-viewer-dialog">
+  <div class="dialog-head"><h3 id="sharedNoteViewerTitle">Nota compartilhada</h3><button id="sharedNoteViewerCloseBtn" class="icon-btn" type="button">×</button></div>
+  <div class="shared-note-viewer-meta" id="sharedNoteViewerMeta"></div><div class="shared-note-viewer-body" id="sharedNoteViewerBody"></div>
+  <div class="dialog-actions"><button id="sharedNoteImportBtn" class="btn btn-primary" type="button">Copiar para minhas notas</button><button id="sharedNoteViewerCloseBottomBtn" class="btn btn-light" type="button">Fechar</button></div>
+</dialog>
 <dialog id="calculatorDialog" class="utility-dialog calculator-dialog">
     <div class="dialog-head">
       <h3>Calculadora</h3>
@@ -3954,7 +5767,7 @@
   </div>
 
 
-  <div id="campaignJK" class="campaign-jk" role="note" aria-label="Campanha JK">
+  <div id="campaignJK" class="campaign-jk" role="note" aria-label="Campanha JK" aria-hidden="true">
     <span class="campaign-jk-label">Campanha JK:</span>
     Garanta <strong>5 anos de acesso ilimitado</strong> por apenas <strong>R$ 50,00</strong>!
     Para ativar sua conta, faça o Pix no valor de R$ 50,00 para <strong>79 99863-5602</strong>
@@ -4005,10 +5818,43 @@
     apply(q){for(const [t,k,v] of this.f)q=t==='eq'?q.eq(k,v):q.in(k,v);if(this.ord)q=q.order(this.ord[0],{ascending:this.ord[1]});if(Number.isFinite(this.lim))q=q.limit(this.lim);return q}
     async execute(){try{let q;if(this.op==='select'){q=this.apply(raw.from(this.t).select(this.cols))}else if(this.op==='insert'){const many=Array.isArray(this.p),p=many?await Promise.all(this.p.map(x=>encodeInsert(this.t,x))):await encodeInsert(this.t,this.p);q=raw.from(this.t).insert(p);if(this.ret)q=q.select(this.cols)}else if(this.op==='update'){let p={...this.p};if(this.t==='notes'&&secret.some(k=>k in p)){const id=this.f.find(x=>x[0]==='eq'&&x[1]==='id')?.[2];if(!id)throw Error('Atualização criptografada requer ID.');const rr=await raw.from('notes').select('*').eq('id',id).single();if(rr.error)throw rr.error;const cur=await decodeNote(rr.data),en=await encodeNote({...cur,...p});for(const k of secret)p[k]=en[k]}else if(this.t==='labels'&&'name'in p)p=await encodeLabel(p);else if(this.t==='attachments'&&'file_name'in p)p=await encodeAttachment(p);q=this.apply(raw.from(this.t).update(p));if(this.ret)q=q.select(this.cols)}else{q=this.apply(raw.from(this.t).delete())}if(this.mode==='single')q=q.single();else if(this.mode==='maybeSingle')q=q.maybeSingle();const {data,error}=await q;if(error)return{data:null,error};return{data:await decodeRows(this.t,data),error:null}}catch(e){console.error(e);return{data:null,error:{message:e?.message||String(e)}}}}
   }
+  let sharePrivateKey=null;
+  async function ensureShareKeyPair(){
+    if(!currentProfile?.user_id||!dataKey)return false;
+    const p=await raw.from('profiles').select('share_public_jwk,share_private_enc').eq('user_id',currentProfile.user_id).single();
+    if(p.error)throw p.error;
+    if(p.data?.share_public_jwk&&p.data?.share_private_enc){
+      const box=await unpack(p.data.share_private_enc);
+      if(!box?.private_jwk)throw Error('Chave privada de compartilhamento inválida.');
+      sharePrivateKey=await crypto.subtle.importKey('jwk',box.private_jwk,{name:'RSA-OAEP',hash:'SHA-256'},false,['decrypt']);
+      return true;
+    }
+    const pair=await crypto.subtle.generateKey({name:'RSA-OAEP',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['encrypt','decrypt']);
+    const publicJwk=await crypto.subtle.exportKey('jwk',pair.publicKey),privateJwk=await crypto.subtle.exportKey('jwk',pair.privateKey),privateEnc=await pack({private_jwk:privateJwk});
+    const r=await raw.rpc('ensure_share_keys',{public_jwk:publicJwk,private_enc:privateEnc});if(r.error)throw r.error;sharePrivateKey=pair.privateKey;return true;
+  }
+  async function encryptSharePayload(payload,recipientPublicJwk){
+    const publicKey=await crypto.subtle.importKey('jwk',recipientPublicJwk,{name:'RSA-OAEP',hash:'SHA-256'},false,['encrypt']);
+    const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']),rawKey=await crypto.subtle.exportKey('raw',key),iv=crypto.getRandomValues(new Uint8Array(12));
+    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(JSON.stringify(payload))),wrapped=await crypto.subtle.encrypt({name:'RSA-OAEP'},publicKey,rawKey);
+    return{encrypted_payload:JSON.stringify({iv:b64(iv),cipher:b64(cipher)}),wrapped_key:b64(wrapped)};
+  }
+  async function decryptSharePayload(row){
+    await ensureShareKeyPair();const rawKey=await crypto.subtle.decrypt({name:'RSA-OAEP'},sharePrivateKey,unb64(row.wrapped_key));const key=await crypto.subtle.importKey('raw',rawKey,{name:'AES-GCM'},false,['decrypt']);const box=JSON.parse(row.encrypted_payload);const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(box.iv)},key,unb64(box.cipher));return JSON.parse(dec.decode(plain));
+  }
+  async function shareNoteWithLogin(note,login){
+    await ensureShareKeyPair();const look=await raw.rpc('get_share_recipient',{desired_login:normalizeLogin(login)});if(look.error)throw look.error;const rec=Array.isArray(look.data)?look.data[0]:look.data;if(!rec?.recipient_user_id)throw Error('Login destinatário não encontrado ou inativo.');if(!rec.recipient_public_jwk)throw Error('Essa conta precisa acessar a versão atual do Notes ao menos uma vez antes de receber notas criptografadas.');
+    const box=await encryptSharePayload({title:note.title||'Sem título',content_html:note.content_html||'',color:note.color||'#ffffff',shared_at:new Date().toISOString(),source_updated_at:note.updated_at||null},rec.recipient_public_jwk);
+    const q=await raw.from('note_shares').upsert({note_id:note.id,owner_id:currentProfile.user_id,recipient_id:rec.recipient_user_id,recipient_login:rec.recipient_login,owner_login:currentProfile.login,encrypted_payload:box.encrypted_payload,wrapped_key:box.wrapped_key,updated_at:new Date().toISOString()},{onConflict:'note_id,recipient_id'}).select('id,note_id,recipient_id,recipient_login,owner_login,created_at,updated_at').single();if(q.error)throw q.error;return{...q.data,recipient_login:rec.recipient_login};
+  }
+  async function listSharesForNote(noteId){const q=await raw.from('note_shares').select('id,note_id,recipient_id,recipient_login,owner_login,created_at,updated_at').eq('note_id',noteId).eq('owner_id',currentProfile.user_id).order('updated_at',{ascending:false});if(q.error)throw q.error;return q.data||[]}
+  async function revokeShare(shareId){const q=await raw.from('note_shares').delete().eq('id',shareId).eq('owner_id',currentProfile.user_id);if(q.error)throw q.error;return true}
+  async function listReceivedShares(){await ensureShareKeyPair();const q=await raw.from('note_shares').select('*').eq('recipient_id',currentProfile.user_id).order('updated_at',{ascending:false});if(q.error)throw q.error;const out=[];for(const row of q.data||[]){try{out.push({...row,payload:await decryptSharePayload(row)})}catch(e){out.push({...row,payload:null,decrypt_error:e?.message||String(e)})}}return out}
+  window.AGhuShareCrypto={ensure:ensureShareKeyPair,shareNoteWithLogin,listSharesForNote,revokeShare,listReceivedShares};
   const auth={
     async getSession(){const r=await raw.auth.getSession();if(r.error)return r;if(r.data?.session&&!dataKey){await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:{session:null},error:null}}return r},
-    async signInWithPassword({email,password}){const login=normalizeLogin(email),r=await raw.auth.signInWithPassword({email:authEmailFor(login),password});if(r.error)return r;const p=await raw.from('profiles').select('*').eq('user_id',r.data.user.id).single();if(p.error||!p.data){await raw.auth.signOut();return{data:null,error:{message:'Perfil da conta não encontrado.'}}}if(!p.data.active){await raw.auth.signOut();return{data:null,error:{message:'Este acesso está bloqueado pelo Administrador.'}}}dataKey=await deriveKey(password,p.data.crypto_salt);currentProfile=p.data;const first=await raw.rpc('mark_first_access');const u={...r.data.user,login:p.data.login,role:p.data.role,first_access:first.data===true};return{data:{user:u,session:{...r.data.session,user:u}},error:null}},
-    async signOut(){dataKey=null;currentProfile=null;return raw.auth.signOut()},
+    async signInWithPassword({email,password}){const login=normalizeLogin(email),r=await raw.auth.signInWithPassword({email:authEmailFor(login),password});if(r.error)return r;const p=await raw.from('profiles').select('*').eq('user_id',r.data.user.id).single();if(p.error||!p.data){await raw.auth.signOut();return{data:null,error:{message:'Perfil da conta não encontrado.'}}}if(!p.data.active){await raw.auth.signOut();return{data:null,error:{message:'Este acesso está bloqueado pelo Administrador.'}}}dataKey=await deriveKey(password,p.data.crypto_salt);currentProfile=p.data;try{await ensureShareKeyPair()}catch(e){console.warn('Chaves de compartilhamento:',e)}const first=await raw.rpc('mark_first_access');const u={...r.data.user,login:p.data.login,role:p.data.role,first_access:first.data===true};return{data:{user:u,session:{...r.data.session,user:u}},error:null}},
+    async signOut(){dataKey=null;sharePrivateKey=null;currentProfile=null;return raw.auth.signOut()},
     onAuthStateChange(cb){return raw.auth.onAuthStateChange((ev,s)=>{if(!s){cb(ev,null);return}if(dataKey)cb(ev,{...s,user:{...s.user,login:currentProfile?.login,role:currentProfile?.role}})})}
   };
   const storage={from(bucket){const b=raw.storage.from(bucket);return{async upload(path,blob,o={}){try{return await b.upload(path,await encryptBlob(blob),o)}catch(e){return{data:null,error:{message:e.message}}}},async download(path){const r=await b.download(path);if(r.error||!r.data)return r;try{return{data:await decryptBlob(r.data),error:null}}catch(e){return{data:null,error:{message:e.message}}}},remove:p=>b.remove(p),async createSignedUrl(path){const r=await b.download(path);if(r.error||!r.data)return{data:null,error:r.error};try{return{data:{signedUrl:URL.createObjectURL(await decryptBlob(r.data))},error:null}}catch(e){return{data:null,error:{message:e.message}}}}}}};
@@ -4150,8 +5996,8 @@
     const btn=getNoteMenuBtn();
     if(!menu||!btn||menu.classList.contains('hidden'))return;
     menu.style.position='absolute';
-    menu.style.top=`${btn.offsetTop + btn.offsetHeight + 6}px`;
-    menu.style.right='0px';
+    menu.style.top='calc(100% + 6px)';
+    menu.style.right='0';
     menu.style.left='auto';
     menu.style.bottom='auto';
     menu.style.visibility='visible';
@@ -4176,39 +6022,32 @@
   }
 
   function toggleNoteActionsMenu(event){
-    if(event){
-      event.preventDefault();
-      event.stopPropagation();
-    }
+    if(event){event.preventDefault();event.stopPropagation();}
     const menu=getNoteActionsMenu();
     if(!menu)return;
-    if(menu.classList.contains('hidden')) openNoteActionsMenu();
+    if(menu.classList.contains('hidden'))openNoteActionsMenu();
     else closeNoteActionsMenu();
   }
 
-  document.addEventListener('click',event=>{
-    const btn=event.target.closest('#noteMenuBtn');
-    if(btn){
-      toggleNoteActionsMenu(event);
-      return;
-    }
-    const menu=getNoteActionsMenu();
-    if(menu && menu.contains(event.target)){
-      const actionBtn=event.target.closest('button');
-      if(actionBtn) setTimeout(closeNoteActionsMenu,0);
-      return;
-    }
-    closeNoteActionsMenu();
-  }, true);
-
-  document.addEventListener('keydown',event=>{
-    if(event.key==='Escape') closeNoteActionsMenu();
+  const noteMenuButton=getNoteMenuBtn();
+  if(noteMenuButton){
+    noteMenuButton.onclick=toggleNoteActionsMenu;
+  }
+  const noteMenuPanel=getNoteActionsMenu();
+  noteMenuPanel?.addEventListener('click',event=>{
+    event.stopPropagation();
+    if(event.target.closest('button'))setTimeout(closeNoteActionsMenu,0);
   });
-
+  document.addEventListener('click',event=>{
+    if(getNoteMenuBtn()?.contains(event.target))return;
+    if(getNoteActionsMenu()?.contains(event.target))return;
+    closeNoteActionsMenu();
+  });
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')closeNoteActionsMenu();});
   window.addEventListener('resize',()=>{
     const menu=getNoteActionsMenu();
-    if(menu && !menu.classList.contains('hidden')) positionNoteActionsMenu();
-  }, {passive:true});
+    if(menu&&!menu.classList.contains('hidden'))positionNoteActionsMenu();
+  },{passive:true});
 
   window.openNoteActionsMenu=openNoteActionsMenu;
   window.closeNoteActionsMenu=closeNoteActionsMenu;
@@ -4916,10 +6755,8 @@
   }
   async function renderAdminUsers(){
     if(!state.adminActive)return;const us=await AGhuLocalAdmin.listUsers();
-    els.adminUsersBody.innerHTML=us.map(u=>`<tr><td>${esc(u.email)}</td><td class="admin-password">••••••</td><td>${u.createdAt?new Date(u.createdAt).toLocaleString('pt-BR'):'-'}</td><td>${u.active?'Ativo':'Bloqueado'}</td><td><div class="admin-user-actions"><button data-reset-user="${u.id}">Nova senha</button><button data-toggle-user="${u.id}">${u.active?'Bloquear':'Ativar'}</button>${u.role==='admin'?'':`<button class="danger" data-delete-user="${u.id}">Excluir</button>`}</div></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;padding:25px;color:#888">Nenhum login cadastrado.</td></tr>';
-    els.adminUsersBody.querySelectorAll('[data-reset-user]').forEach(b=>b.onclick=async()=>{const p=prompt('Nova senha (mínimo 6 caracteres):');if(p===null)return;try{await AGhuLocalAdmin.resetPassword(b.dataset.resetUser,p);showToast('Senha redefinida.')}catch(e){alert(e.message||String(e))}});
+    els.adminUsersBody.innerHTML=us.map(u=>`<tr><td>${esc(u.email)}</td><td class="admin-password">••••••</td><td>${u.createdAt?new Date(u.createdAt).toLocaleString('pt-BR'):'-'}</td><td>${u.active?'Ativo':'Bloqueado'}</td><td><div class="admin-user-actions"><button data-toggle-user="${u.id}">${u.active?'Bloquear':'Ativar'}</button></div></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;padding:25px;color:#888">Nenhum login cadastrado.</td></tr>';
     els.adminUsersBody.querySelectorAll('[data-toggle-user]').forEach(b=>b.onclick=async()=>{try{await AGhuLocalAdmin.toggleUser(b.dataset.toggleUser);await renderAdminUsers()}catch(e){alert(e.message||String(e))}});
-    els.adminUsersBody.querySelectorAll('[data-delete-user]').forEach(b=>b.onclick=async()=>{if(!confirm('Excluir definitivamente este acesso?'))return;try{await AGhuLocalAdmin.deleteUser(b.dataset.deleteUser);await renderAdminUsers()}catch(e){alert(e.message||String(e))}});
   }
   async function enterAdmin(){state.adminActive=true;els.auth.classList.add('hidden');els.app.classList.add('hidden');els.adminPanel.classList.remove('hidden');await renderAdminUsers()}
   window.AGhuLocalAdmin?.onUsersChanged?.(()=>{if(state.adminActive)renderAdminUsers().catch(()=>{})});
@@ -5167,6 +7004,8 @@
     const n=state.notes.find(x=>x.id===state.selectedId);
     const has=!!n;
     els.openSelected.disabled=!has;
+    const shareSelectedBtn=document.getElementById('shareSelectedBtn');
+    if(shareSelectedBtn)shareSelectedBtn.disabled=!has;
     els.editPatientMeta.disabled=!has;
     els.restoreSelected.classList.toggle('hidden',!(has&&state.filter==='trash'));
     els.deleteSelected.classList.toggle('hidden',!(has&&state.filter==='trash'));
@@ -5788,6 +7627,7 @@
 
   async function deleteNoteForever(note,ask=true){
     if(!note) return;
+    if(note.user_id && state.user?.id && note.user_id!==state.user.id){showToast('Somente o criador desta nota pode excluí-la.');return;}
     if(ask && !confirm('Excluir definitivamente esta nota? Esta ação não poderá ser desfeita.')) return;
     clearDraft(note.id);
     try{await deleteLocalAttachmentsForNote(note.id);}catch{}
@@ -6686,7 +8526,26 @@
   function notePlainText(){return `${els.title.value.trim()||'Sem título'}
 
 ${stripHtml(els.body.innerHTML)}`.trim();}
-  els.share.addEventListener('click',async()=>{const payload={title:els.title.value.trim()||'Nota',text:notePlainText()};try{if(navigator.share)await navigator.share(payload);else{await navigator.clipboard.writeText(payload.text);showToast('Nota copiada para a área de transferência.');}}catch(err){if(err?.name!=='AbortError')showToast('Não foi possível compartilhar.');}});
+  els.share.addEventListener('click',()=>openInternalShareDialog(state.current));
+
+  $('shareDirectBtn')?.addEventListener('click',()=>openInternalShareDialog(state.current));
+  $('shareSelectedBtn')?.addEventListener('click',()=>{
+    const note=state.notes.find(n=>n.id===state.selectedId);
+    if(note)openInternalShareDialog(note);
+  });
+
+  let shareTargetNote=null;
+  const shareUi={dialog:$('notesShareDialog'),close:$('notesShareCloseBtn'),cancel:$('notesShareCancelBtn'),login:$('notesShareLogin'),send:$('notesShareSendBtn'),status:$('notesShareStatus'),existing:$('notesShareExisting'),receivedDialog:$('receivedSharesDialog'),receivedClose:$('receivedSharesCloseBtn'),receivedCloseBottom:$('receivedSharesCloseBottomBtn'),receivedList:$('receivedSharesList'),viewer:$('sharedNoteViewerDialog'),viewerTitle:$('sharedNoteViewerTitle'),viewerMeta:$('sharedNoteViewerMeta'),viewerBody:$('sharedNoteViewerBody'),viewerImport:$('sharedNoteImportBtn'),viewerClose:$('sharedNoteViewerCloseBtn'),viewerCloseBottom:$('sharedNoteViewerCloseBottomBtn')};
+  let currentReceivedShare=null;
+  function setShareStatus(msg,type=''){shareUi.status.textContent=msg||'';shareUi.status.className=`notes-share-status ${type}`.trim()}
+  async function renderCurrentNoteShares(){if(!shareTargetNote)return;try{const rows=await window.AGhuShareCrypto.listSharesForNote(shareTargetNote.id);shareUi.existing.innerHTML=rows.length?rows.map(r=>`<div class="share-chip-row"><span><strong>${esc(r.recipient_login||'Conta destinatária')}</strong><br><small>Atualizado em ${new Date(r.updated_at||r.created_at).toLocaleString('pt-BR')}</small></span><button type="button" data-revoke-share="${r.id}">Revogar</button></div>`).join(''):'<div style="color:#7a858e">Ainda não compartilhada com nenhuma conta.</div>';shareUi.existing.querySelectorAll('[data-revoke-share]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Revogar este compartilhamento?'))return;try{await window.AGhuShareCrypto.revokeShare(b.dataset.revokeShare);await renderCurrentNoteShares();showToast('Compartilhamento revogado.')}catch(e){showToast(e.message||'Falha ao revogar.')}}))}catch(e){shareUi.existing.innerHTML=`<div style="color:#a22d35">${esc(e.message||'Falha ao carregar.')}</div>`}}
+  async function openInternalShareDialog(note=state.current){if(!note){showToast('Selecione ou abra uma nota primeiro.');return}shareTargetNote=note;setShareStatus('');shareUi.login.value='';try{await window.AGhuShareCrypto.ensure()}catch(e){setShareStatus(e.message||'Falha ao preparar compartilhamento.','error')}await renderCurrentNoteShares();shareUi.dialog.showModal()}
+  shareUi.send?.addEventListener('click',async()=>{const login=shareUi.login.value.trim();if(!login){setShareStatus('Informe o login do destinatário.','error');return}shareUi.send.disabled=true;setShareStatus('Criptografando e compartilhando...');try{const r=await window.AGhuShareCrypto.shareNoteWithLogin(shareTargetNote,login);setShareStatus(`Nota compartilhada com ${r.recipient_login||login}.`,'ok');shareUi.login.value='';await renderCurrentNoteShares()}catch(e){setShareStatus(e.message||'Não foi possível compartilhar.','error')}finally{shareUi.send.disabled=false}});
+  shareUi.close?.addEventListener('click',()=>{shareTargetNote=null;shareUi.dialog.close()});shareUi.cancel?.addEventListener('click',()=>{shareTargetNote=null;shareUi.dialog.close()});
+  async function openReceivedShares(){shareUi.receivedList.innerHTML='<div style="padding:18px;color:#78838c">Carregando...</div>';shareUi.receivedDialog.showModal();try{const rows=await window.AGhuShareCrypto.listReceivedShares();if(!rows.length){shareUi.receivedList.innerHTML='<div style="padding:18px;color:#78838c">Nenhuma nota compartilhada com esta conta.</div>';return}shareUi.receivedList.innerHTML=rows.map(r=>`<div class="received-share-row"><div class="received-share-main"><strong>${esc(r.payload?.title||'Nota criptografada')}</strong><small>De: ${esc(r.owner_login||'outra conta')} • ${esc(new Date(r.updated_at||r.created_at).toLocaleString('pt-BR'))}</small></div><button type="button" data-view-share="${r.id}">Visualizar</button></div>`).join('');shareUi.receivedList.querySelectorAll('[data-view-share]').forEach(b=>b.addEventListener('click',()=>{const r=rows.find(x=>x.id===b.dataset.viewShare);if(!r?.payload){showToast('Não foi possível descriptografar esta nota.');return}currentReceivedShare=r;shareUi.viewerTitle.textContent=r.payload.title||'Nota compartilhada';shareUi.viewerMeta.textContent=`Compartilhada por ${r.owner_login||'outra conta'} em ${new Date(r.updated_at||r.created_at).toLocaleString('pt-BR')}`;shareUi.viewerBody.innerHTML=r.payload.content_html||'<em>Sem conteúdo.</em>';shareUi.viewer.showModal()}))}catch(e){shareUi.receivedList.innerHTML=`<div style="padding:18px;color:#a22d35">${esc(e.message||'Falha ao carregar notas compartilhadas.')}</div>`}}
+  $('sharedNotesBtn')?.addEventListener('click',openReceivedShares);shareUi.receivedClose?.addEventListener('click',()=>shareUi.receivedDialog.close());shareUi.receivedCloseBottom?.addEventListener('click',()=>shareUi.receivedDialog.close());shareUi.viewerClose?.addEventListener('click',()=>shareUi.viewer.close());shareUi.viewerCloseBottom?.addEventListener('click',()=>shareUi.viewer.close());
+  shareUi.viewerImport?.addEventListener('click',async()=>{if(!currentReceivedShare?.payload)return;const p=currentReceivedShare.payload,m=randomMeta();try{const {error}=await supabase.from('notes').insert({user_id:state.user.id,title:p.title||'Nota compartilhada',content_html:p.content_html||'',color:p.color||'#ffffff',reminder_at:null,...m});if(error)throw error;await loadNotes();renderNotes();shareUi.viewer.close();showToast('Cópia adicionada às suas notas.')}catch(e){showToast(e.message||'Não foi possível copiar a nota.')}});
+
   // Google Docs agora é gerenciado pelo backup automático acima.
 
   function initDrawing(){
@@ -6868,11 +8727,114 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     els.quickImageViewerImg.removeAttribute('src');
   });
 
-  document.querySelectorAll('.group-toggle').forEach(b=>b.addEventListener('click',()=>b.nextElementSibling.classList.toggle('open')));
-  document.querySelectorAll('[data-static="true"]').forEach(b=>b.addEventListener('click',()=>{}));
   document.querySelector('[data-page="keep"]')?.addEventListener('click',openKeepModule);
-  $('collapseSidebar').addEventListener('click',()=>document.querySelector('.sidebar').classList.toggle('collapsed'));
-  $('menuSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.side-menu button').forEach(b=>b.style.display=!q||b.textContent.toLowerCase().includes(q)?'':'none');});
+
+  function setMainSidebarRetracted(retracted){
+    const sidebar=document.getElementById('mainSidebar');
+    const app=document.getElementById('appShell');
+    const button=document.getElementById('collapseSidebar');
+    if(!sidebar||!app||!button)return;
+    sidebar.classList.toggle('is-retracted',!!retracted);
+    app.classList.toggle('sidebar-retracted',!!retracted);
+    button.setAttribute('aria-expanded',retracted?'false':'true');
+    button.title=retracted?'Expandir menu':'Recolher menu';
+    localStorage.setItem('aghuNotes.sidebarRetracted',retracted?'1':'0');
+  }
+  const sidebarToggle=document.getElementById('collapseSidebar');
+  sidebarToggle?.addEventListener('click',()=>{
+    const sidebar=document.getElementById('mainSidebar');
+    setMainSidebarRetracted(!sidebar?.classList.contains('is-retracted'));
+  });
+  setMainSidebarRetracted(localStorage.getItem('aghuNotes.sidebarRetracted')==='1');
+
+
+  const AGHU_THEMES=['navy','white','cyan','violet','magenta','emerald','gold','ruby','turquoise','silver'];
+
+
+  function applyReadableThemeText(theme){
+    const root=document.body;
+    if(!root)return;
+    let text='#eef7ff';
+    let muted='#bdd5ea';
+
+    if(theme==='white'){
+      text='#111111';
+      muted='#4f5963';
+    }else if(theme==='navy'){
+      text='#eef7ff';
+      muted='#bdd5ea';
+    }else{
+      const cs=getComputedStyle(root);
+      const customText=(cs.getPropertyValue('--custom-text')||'').trim();
+      const customMuted=(cs.getPropertyValue('--custom-muted')||'').trim();
+      text=customText||'#eefaff';
+      muted=customMuted||'#9cc8d3';
+    }
+
+    root.style.setProperty('--aghu-dynamic-text',text);
+    root.style.setProperty('--aghu-dynamic-muted',muted);
+    root.classList.add('aghu-readable-applied');
+  }
+
+
+  function setSidebarTheme(theme){
+    const sidebar=document.getElementById('mainSidebar');
+    const app=document.getElementById('appShell');
+    if(!sidebar)return;
+
+    if(!AGHU_THEMES.includes(theme))theme='navy';
+    const isWhite=theme==='white';
+    const isNavy=theme==='navy';
+    const isCustom=!isWhite&&!isNavy;
+
+    // Classes legadas continuam válidas para Azul e Branco.
+    sidebar.classList.toggle('sidebar-light-theme',isWhite);
+    document.body.classList.toggle('app-theme-white-active',isWhite);
+    document.body.classList.toggle('app-theme-navy-active',isNavy);
+    document.body.classList.toggle('app-theme-custom-active',isCustom);
+
+    app?.classList.toggle('app-theme-white',isWhite);
+    app?.classList.toggle('app-theme-navy',isNavy);
+    app?.classList.toggle('app-theme-custom',isCustom);
+
+    document.body.dataset.aghuTheme=theme;
+    applyReadableThemeText(theme);
+
+    document.querySelectorAll('[data-sidebar-theme]').forEach(btn=>{
+      btn.classList.toggle('active',btn.dataset.sidebarTheme===theme);
+    });
+
+    localStorage.setItem('aghuNotes.sidebarTheme',theme);
+  }
+
+  document.querySelectorAll('[data-sidebar-theme]').forEach(btn=>{
+    btn.addEventListener('click',()=>setSidebarTheme(btn.dataset.sidebarTheme));
+  });
+
+  const savedTheme=localStorage.getItem('aghuNotes.sidebarTheme')||'navy';
+  setSidebarTheme(AGHU_THEMES.includes(savedTheme)?savedTheme:'navy');
+
+
+  document.querySelectorAll('.inert-menu-item').forEach(button=>{
+    button.addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      showToast('Item visual inativo neste aplicativo.');
+    });
+  });
+
+  const googleSideMenu=document.getElementById('googleDocsMenuBtn');
+  googleSideMenu?.addEventListener('click',event=>{
+    event.preventDefault();event.stopPropagation();openGoogleDocsSettings();
+  });
+
+  const menuSearch=document.getElementById('menuSearch');
+  menuSearch?.addEventListener('input',event=>{
+    const q=event.target.value.trim().toLowerCase();
+    document.querySelectorAll('#sideMenu .menu-item').forEach(button=>{
+      button.style.display=!q||button.textContent.toLowerCase().includes(q)?'':'none';
+    });
+  });
 
   window.addEventListener('online',async()=>{
     refreshAppCounters();
@@ -6916,9 +8878,252 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     if(wasCompact!==isCompact && !els.keepPage?.classList.contains('hidden'))renderNotes();
   });
 
+
+// v42 - rebrand, simplificação visual e menu interno corrigido
+const AGHU_V42_BRAND = 'Anotações Gerais de Histórias e Unidades';
+function applyV42BrandingAndLayout(){
+  document.body.classList.add('v44-sidebar-menu');
+  document.querySelectorAll('.aghu-word small').forEach(el=>el.textContent=AGHU_V42_BRAND);
+  const authPrivacy=document.querySelector('.auth-privacy');
+  if(authPrivacy)authPrivacy.textContent='Aplicativo independente para anotações pessoais. Sincronização online e offline por usuário.';
+  const authDisclaimer=document.querySelector('.auth-disclaimer');
+  if(authDisclaimer)authDisclaimer.textContent='Notas criptografadas • login pessoal • salva offline • sincroniza quando houver internet';
+  const keepTabOpen=document.getElementById('keepTabOpenBtn');
+  if(keepTabOpen)keepTabOpen.innerHTML='🗒 Notas';
+  const keepTab=document.getElementById('keepTab');
+  if(keepTab)keepTab.classList.add('active');
+  const theadRow=document.querySelector('.notes-table thead tr');
+  if(theadRow){
+    theadRow.innerHTML=`<th data-sort="title">Título <span class="sort-glyph">↕</span></th><th class="icon-col" title="Abrir"></th><th class="icon-col" title="Fixar"></th><th class="icon-col" title="Arquivar"></th><th class="icon-col" title="Excluir"></th><th class="icon-col blue-cap" title="Editar nota"></th>`;
+  }
+  const openSel=document.getElementById('openSelectedBtn');
+  if(openSel)openSel.textContent='Abrir nota';
+  const editBtn=document.getElementById('editPatientMetaBtn');
+  if(editBtn){
+    editBtn.textContent='Editar nota';
+    editBtn.onclick=()=>{if(state.selectedId)openNote(state.selectedId);};
+  }
+}
+
+extractPatientMetadata=function(note){
+  const title=String(note?.title||'').trim() || 'Sem título';
+  return {
+    name:title,
+    age:'',
+    record:'',
+    recognized:{name:true,age:false,record:false},
+    manual:{name:false,age:false,record:false},
+    auto:{name:'',age:'',record:''}
+  };
+};
+
+actionCells=function(n){
+  if(n.deleted){
+    return `<td class="row-action"><button class="grid-icon-btn restore" title="Restaurar" data-restore-row="${n.id}">↩</button></td><td class="row-action"><button class="grid-icon-btn danger" title="Excluir definitivamente" data-delete-forever="${n.id}">×</button></td><td class="row-action"></td><td class="row-action"></td><td class="row-action"></td>`;
+  }
+  return `<td class="row-action"><button class="grid-icon-btn" title="Abrir" data-open="${n.id}">▧</button></td><td class="row-action"><button class="grid-icon-btn" title="Fixar" data-star="${n.id}">${n.pinned?'★':'☆'}</button></td><td class="row-action"><button class="grid-icon-btn" title="${n.archived?'Restaurar do arquivo':'Arquivar'}" data-archive-row="${n.id}">▣</button></td><td class="row-action"><button class="grid-icon-btn danger" title="Mover para a lixeira" data-trash-row="${n.id}">×</button></td><td class="row-action"><button class="grid-icon-btn" title="Editar nota" data-open="${n.id}">✎</button></td>`;
+};
+
+renderNotes=function(){
+  const rows=filteredNotes();
+  updateCompactNameOnlyMode();
+
+  els.empty.classList.toggle('hidden',rows.length>0);
+  els.emptyTrash.classList.toggle('hidden',state.filter!=='trash');
+  if(state.selectedId && !rows.some(n=>n.id===state.selectedId))state.selectedId=null;
+
+  const one=n=>{
+    const title=String(n?.title||'').trim() || 'Sem título';
+    const qrefs=quickReferenceAttachments(n);
+    const hint=qrefs.length ? `<span class="quick-ref-count" title="Imagens para consulta rápida">${qrefs.length} img</span>` : '';
+    const accent=noteAccentColor(n);
+    return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}" style="--note-accent:${accent}">
+      <td data-label="Nome" class="patient-name-cell" data-name-cell="${n.id}">
+        <div class="note-card-idbar">
+          <span class="note-card-firstname" title="${esc(title)}">${esc(title)}</span>
+          <div class="note-card-meta">
+            <label class="note-card-accent-wrap" title="Cor do contorno da nota">
+              <input class="note-card-accent-input" type="color" value="${accent}" data-card-accent="${n.id}" aria-label="Selecionar cor do contorno">
+            </label>
+          </div>
+        </div>
+        <div class="patient-name-main">
+          <strong>${esc(title)}</strong>
+          ${hint}
+          <button class="quick-ref-add" type="button" data-add-quick-image="${n.id}" title="Adicionar imagem para consulta rápida">＋ imagem</button>
+        </div>
+        <div class="keep-card-preview">${esc(stripHtml(n.content_html||'').slice(0,420))}</div>
+        <div class="quick-ref-zone" data-quick-zone="${n.id}" tabindex="0" aria-label="Cole uma imagem para consulta rápida">
+          <div class="quick-ref-paste-hint">Selecione esta nota e cole um print com Ctrl+V, ou use “＋ imagem”.</div>
+          <div class="quick-ref-strip" data-quick-strip="${n.id}"></div>
+        </div>
+      </td>
+      ${actionCells(n)}
+    </tr>`;
+  };
+
+  let h='';
+  if(state.filter==='all'){
+    const fixed=rows.filter(n=>n.pinned),normal=rows.filter(n=>!n.pinned);
+    if(fixed.length)h+=`<tr class="notes-group-row pinned-group"><td colspan="6">Fixadas</td></tr>`+fixed.map(one).join('');
+    if(normal.length)h+=`<tr class="notes-group-row"><td colspan="6">Não Fixadas</td></tr>`+normal.map(one).join('');
+  }else h=rows.map(one).join('');
+
+  els.tbody.innerHTML=h;
+
+  els.tbody.querySelectorAll('tr[data-id]').forEach(tr=>{
+    tr.addEventListener('click',e=>{
+      if(e.target.closest('button')||e.target.closest('input')||e.target.closest('.quick-ref-thumb'))return;
+      state.selectedId=tr.dataset.id;
+      renderNotes();
+    });
+    tr.addEventListener('dblclick',e=>{
+      if(e.target.closest('.quick-ref-zone')||e.target.closest('button')||e.target.closest('input'))return;
+      openNote(tr.dataset.id);
+    });
+  });
+
+  els.tbody.querySelectorAll('[data-card-accent]').forEach(input=>{
+    input.addEventListener('click',e=>e.stopPropagation());
+    input.addEventListener('input',e=>{
+      const tr=input.closest('tr[data-id]');
+      if(tr)tr.style.setProperty('--note-accent',input.value);
+    });
+    input.addEventListener('change',async e=>{
+      e.stopPropagation();
+      await updateCardAccent(input.dataset.cardAccent,input.value);
+    });
+  });
+
+  els.tbody.querySelectorAll('[data-quick-zone]').forEach(zone=>{
+    zone.addEventListener('click',e=>{e.stopPropagation(); state.selectedId=zone.dataset.quickZone;});
+    zone.addEventListener('paste',e=>handleQuickReferencePaste(e,zone.dataset.quickZone));
+    zone.addEventListener('dragover',e=>{ if([...(e.dataTransfer?.items||[])].some(i=>i.kind==='file')){ e.preventDefault(); zone.classList.add('quick-ref-active'); } });
+    zone.addEventListener('dragleave',()=>zone.classList.remove('quick-ref-active'));
+    zone.addEventListener('drop',async e=>{
+      zone.classList.remove('quick-ref-active');
+      const files=[...(e.dataTransfer?.files||[])].filter(f=>f.type.startsWith('image/'));
+      if(files.length){ e.preventDefault(); e.stopPropagation(); await addQuickImagesToNote(zone.dataset.quickZone,files); }
+    });
+  });
+
+  els.tbody.querySelectorAll('[data-add-quick-image]').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();
+    state.quickImageTargetNoteId=b.dataset.addQuickImage;
+    state.selectedId=b.dataset.addQuickImage;
+    els.quickImageInput.value='';
+    els.quickImageInput.click();
+  }));
+
+  els.tbody.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation(); openNote(b.dataset.open)}));
+  els.tbody.querySelectorAll('[data-star]').forEach(b=>b.addEventListener('click',async e=>{e.stopPropagation(); const n=state.notes.find(x=>x.id===b.dataset.star); if(n)await quickUpdate(n.id,{pinned:!n.pinned})}));
+  els.tbody.querySelectorAll('[data-archive-row]').forEach(b=>b.addEventListener('click',async e=>{e.stopPropagation(); const n=state.notes.find(x=>x.id===b.dataset.archiveRow); if(n)await quickUpdate(n.id,{archived:!n.archived})}));
+  els.tbody.querySelectorAll('[data-trash-row]').forEach(b=>b.addEventListener('click',async e=>{e.stopPropagation(); const n=state.notes.find(x=>x.id===b.dataset.trashRow); if(n)await moveToTrash(n.id)}));
+  els.tbody.querySelectorAll('[data-restore-row]').forEach(b=>b.addEventListener('click',async e=>{e.stopPropagation(); await restoreNote(b.dataset.restoreRow)}));
+  els.tbody.querySelectorAll('[data-delete-forever]').forEach(b=>b.addEventListener('click',async e=>{e.stopPropagation(); const n=state.notes.find(x=>x.id===b.dataset.deleteForever); if(n)await deleteNoteForever(n,true)}));
+
+  updateSideActions();
+  hydrateQuickReferenceImages().catch(err=>console.warn('Consulta rápida:',err));
+};
+
+applyV42BrandingAndLayout();
+
+
+  // v47: Campanha JK exclusivamente no login, visível por 10s a cada ciclo de 30s.
+  let campaignJKInterval=null;
+  let campaignJKHideTimer=null;
+
+  function stopCampaignJKLoginCycle(){
+    if(campaignJKInterval){clearInterval(campaignJKInterval);campaignJKInterval=null;}
+    if(campaignJKHideTimer){clearTimeout(campaignJKHideTimer);campaignJKHideTimer=null;}
+    const banner=document.getElementById('campaignJK');
+    if(!banner)return;
+    banner.classList.remove('campaign-visible','campaign-login-active');
+    banner.setAttribute('aria-hidden','true');
+  }
+
+  function showCampaignJKLoginBurst(){
+    const banner=document.getElementById('campaignJK');
+    const auth=document.getElementById('authScreen');
+    if(!banner||!auth||auth.classList.contains('hidden'))return;
+    banner.classList.add('campaign-login-active');
+    requestAnimationFrame(()=>banner.classList.add('campaign-visible'));
+    banner.setAttribute('aria-hidden','false');
+    if(campaignJKHideTimer)clearTimeout(campaignJKHideTimer);
+    campaignJKHideTimer=setTimeout(()=>{
+      banner.classList.remove('campaign-visible');
+      banner.setAttribute('aria-hidden','true');
+    },10000);
+  }
+
+  function startCampaignJKLoginCycle(){
+    stopCampaignJKLoginCycle();
+    const auth=document.getElementById('authScreen');
+    if(!auth||auth.classList.contains('hidden'))return;
+    showCampaignJKLoginBurst();
+    campaignJKInterval=setInterval(showCampaignJKLoginBurst,30000);
+  }
+
+  const campaignAuthObserver=new MutationObserver(()=>{
+    const auth=document.getElementById('authScreen');
+    if(!auth)return;
+    if(auth.classList.contains('hidden'))stopCampaignJKLoginCycle();
+    else startCampaignJKLoginCycle();
+  });
+  const campaignAuthScreen=document.getElementById('authScreen');
+  if(campaignAuthScreen){
+    campaignAuthObserver.observe(campaignAuthScreen,{attributes:true,attributeFilter:['class']});
+    if(!campaignAuthScreen.classList.contains('hidden'))startCampaignJKLoginCycle();
+  }
+
   bootstrap();
 })();
 
   </script>
+
+<script id="aghu-v51-responsive-js">
+(function(){
+  const KEY='aghuNotes.v51ResponsiveInitialized';
+
+  function applyResponsiveStartup(){
+    const app=document.getElementById('appShell');
+    const sidebar=document.getElementById('mainSidebar');
+    if(!app||!sidebar)return;
+
+    const compact=window.matchMedia('(max-width:1100px)').matches;
+    if(compact && sessionStorage.getItem(KEY)!=='1'){
+      try{
+        if(typeof window.setMainSidebarRetracted==='function'){
+          window.setMainSidebarRetracted(true);
+        }else{
+          sidebar.classList.add('is-retracted');
+          app.classList.add('sidebar-retracted');
+          const b=document.getElementById('collapseSidebar');
+          if(b)b.setAttribute('aria-expanded','false');
+        }
+      }catch{}
+      sessionStorage.setItem(KEY,'1');
+    }
+  }
+
+  function normalizeViewport(){
+    document.documentElement.style.setProperty('--aghu-vw',`${document.documentElement.clientWidth}px`);
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>{
+      normalizeViewport();
+      setTimeout(applyResponsiveStartup,0);
+    },{once:true});
+  }else{
+    normalizeViewport();
+    setTimeout(applyResponsiveStartup,0);
+  }
+
+  window.addEventListener('resize',normalizeViewport,{passive:true});
+  window.visualViewport?.addEventListener('resize',normalizeViewport,{passive:true});
+})();
+</script>
+
 </body>
 </html>
