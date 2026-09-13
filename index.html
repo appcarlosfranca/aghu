@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- AGHU Notes CLOUD v57: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
+<!-- AGHU Notes CLOUD v57.2: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -5381,7 +5381,7 @@
   .purchase-pulse{width:8px;height:8px;border-radius:50%;background:#2aa86e;box-shadow:0 0 8px rgba(42,168,110,.55);animation:purchasePulse 1.6s ease-in-out infinite}
   @keyframes purchasePulse{50%{opacity:.35;transform:scale(.72)}}
   .purchase-ticket{font-size:10px;color:#0877a8}
-  .purchase-activate{display:inline-flex!important;align-items:center;justify-content:center;text-decoration:none;min-height:34px;padding:0 14px}
+  .purchase-activate{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;min-height:34px;padding:0 14px}.purchase-activate.hidden{display:none!important}
   .activation-help{margin:0 0 12px;color:#5e6c76;font-size:10px;line-height:1.45}
   @media(max-width:600px){
     .purchase-dialog{width:calc(100vw - 12px)}
@@ -5454,6 +5454,10 @@
         <label>
           E-mail
           <input id="purchaseEmail" type="email" maxlength="200" autocomplete="email" required>
+        </label>
+        <label>
+          CPF
+          <input id="purchaseCpf" type="text" inputmode="numeric" maxlength="14" autocomplete="off" placeholder="000.000.000-00" required>
         </label>
         <button id="purchaseGenerateBtn" class="btn btn-primary" type="submit">Gerar Pix</button>
       </form>
@@ -9500,11 +9504,13 @@ applyV42BrandingAndLayout();
   const form=$('purchaseForm');
   const nameInput=$('purchaseName');
   const emailInput=$('purchaseEmail');
+  const cpfInput=$('purchaseCpf');
   const genBtn=$('purchaseGenerateBtn');
   const status=$('purchaseStatus');
   const result=$('purchasePixResult');
   const qr=$('purchaseQrImage');
   const pixCode=$('purchasePixCode');
+  const copyBox=pixCode?.closest('.purchase-copy-box');
   const copyBtn=$('purchaseCopyBtn');
   const payState=$('purchasePaymentState');
   const ticket=$('purchaseTicketLink');
@@ -9552,12 +9558,44 @@ applyV42BrandingAndLayout();
     try{sessionStorage.setItem('aghuNotes.pendingPix',JSON.stringify(p||null))}catch{}
   }
 
+  function cpfDigits(value){
+    return String(value||'').replace(/\D/g,'').slice(0,11);
+  }
+
+  function validCpf(value){
+    const cpf=cpfDigits(value);
+    if(cpf.length!==11||/^(\d)\1{10}$/.test(cpf))return false;
+    const calc=(base,factor)=>{
+      let sum=0;
+      for(const d of base)sum+=Number(d)*factor--;
+      const r=(sum*10)%11;
+      return r===10?0:r;
+    };
+    return calc(cpf.slice(0,9),10)===Number(cpf[9]) &&
+           calc(cpf.slice(0,10),11)===Number(cpf[10]);
+  }
+
+  cpfInput?.addEventListener('input',()=>{
+    const d=cpfDigits(cpfInput.value);
+    let v=d;
+    if(d.length>3)v=d.slice(0,3)+'.'+d.slice(3);
+    if(d.length>6)v=d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6);
+    if(d.length>9)v=d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9,11);
+    cpfInput.value=v;
+  });
+
   function showPix(p){
     currentPurchase={order_id:p.order_id,status_token:p.status_token};
     savePendingPurchase(currentPurchase);
 
     result.classList.remove('hidden');
-    pixCode.value=p.qr_code||'';
+    activateLink.classList.add('hidden');
+
+    const code=String(p.qr_code||'').trim();
+    pixCode.value=code;
+    if(code) copyBox?.classList.remove('hidden');
+    else copyBox?.classList.add('hidden');
+
     if(p.qr_code_base64){
       qr.src=p.qr_code_base64.startsWith('data:')?p.qr_code_base64:`data:image/png;base64,${p.qr_code_base64}`;
       qr.classList.remove('hidden');
@@ -9565,10 +9603,15 @@ applyV42BrandingAndLayout();
       qr.removeAttribute('src');
       qr.classList.add('hidden');
     }
+
     if(p.ticket_url){
       ticket.href=p.ticket_url;
       ticket.classList.remove('hidden');
     }else ticket.classList.add('hidden');
+
+    if(!code&&!p.qr_code_base64&&!p.ticket_url){
+      setPurchaseStatus('O Mercado Pago criou a cobrança, mas não devolveu os dados do Pix. Gere uma nova cobrança e confira o CPF informado.','error');
+    }
 
     payState.textContent=p.status==='approved'?'Pagamento confirmado.':'Aguardando confirmação do pagamento...';
     startPurchasePolling();
@@ -9634,9 +9677,13 @@ applyV42BrandingAndLayout();
     genBtn.disabled=true;
     genBtn.textContent='Gerando Pix...';
     try{
+      if(!validCpf(cpfInput?.value||'')){
+        throw new Error('Informe um CPF válido para gerar o Pix.');
+      }
       const p=await functionCall('pix-create',{
         name:nameInput.value.trim(),
         email:emailInput.value.trim(),
+        cpf:cpfDigits(cpfInput.value),
         request_id:crypto.randomUUID()
       });
       setPurchaseStatus('Pix gerado. Faça o pagamento pelo QR Code ou Pix Copia e Cola.','ok');
