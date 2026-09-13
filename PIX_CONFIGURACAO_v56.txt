@@ -1,0 +1,24 @@
+CONFIGURAÇÃO FINAL DO PIX — necessária para colocar cobrança real em produção
+
+A estrutura já está no código e no Supabase. Falta somente cadastrar as credenciais privadas
+do seu provedor, porque elas pertencem à sua conta e não podem ser inventadas nem colocadas
+no HTML/GitHub.
+
+No Supabase > Edge Functions > Secrets, configure:
+
+MP_ACCESS_TOKEN=<Access Token privado da sua aplicação Mercado Pago>
+MP_WEBHOOK_SECRET=<assinatura secreta da configuração de Webhooks do Mercado Pago>
+APP_BASE_URL=https://appcarlosfranca.github.io/aghu/
+
+Para envio automático do link de ativação por e-mail, configure também:
+RESEND_API_KEY=<sua chave privada do Resend>
+RESEND_FROM_EMAIL=<remetente verificado, por exemplo AGHU Notes <acesso@seudominio.com>>
+
+No Mercado Pago, configure o evento de Webhook de pagamentos apontando para:
+https://aufujiafalafuncsbjzu.supabase.co/functions/v1/pix-webhook
+
+IMPORTANTE:
+- Nunca coloque MP_ACCESS_TOKEN, MP_WEBHOOK_SECRET ou RESEND_API_KEY no index.html/GitHub.
+- Sem MP_ACCESS_TOKEN, o botão “Adquirir acesso” informa que a integração ainda não foi ativada.
+- Sem Resend, o pagamento continua podendo ser confirmado e o link aparece automaticamente
+  na própria tela, mas o envio por e-mail não ocorrerá até o segredo de e-mail ser configurado.

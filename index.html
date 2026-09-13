@@ -1900,7 +1900,7 @@
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>window.APP_CONFIG={SUPABASE_URL:"https://aufujiafalafuncsbjzu.supabase.co",SUPABASE_ANON_KEY:"sb_publishable_u0p7ZsvaBivvZwOgqVowcw_opxxFTOO"};</script>
+  <script>window.APP_CONFIG={SUPABASE_URL:"https://aufujiafalafuncsbjzu.supabase.co",SUPABASE_ANON_KEY:"sb_publishable_u0p7ZsvaBivvZwOgqVowcw_opxxFTOO",GOOGLE_CLIENT_ID:""};</script>
 <style id="aghu-cloud-v28-style">.sync-status.syncing{color:#b47b00!important}.sync-status.offline{color:#9a4248!important}.sync-status:not(.offline):not(.syncing){color:#2f7d70!important}</style>
 
 <style id="aghu-v30-card-refinement">
@@ -5289,6 +5289,108 @@
   }
 </style>
 
+
+<style id="aghu-v55-google-fix">
+  .google-oauth-advanced{
+    margin:8px 0 10px;
+    padding:8px 9px;
+    border:1px solid #d5dce2;
+    border-radius:4px;
+    background:rgba(127,140,152,.05);
+    font-size:10px;
+  }
+  .google-oauth-advanced summary{
+    cursor:pointer;
+    font-weight:700;
+    color:inherit;
+  }
+  .google-oauth-advanced[open] summary{margin-bottom:8px}
+  .google-oauth-advanced small{
+    display:block;
+    margin-top:5px;
+    color:#6d7882;
+    line-height:1.35;
+  }
+  body.app-theme-custom-active .google-oauth-advanced,
+  body.app-theme-navy-active .google-oauth-advanced{
+    border-color:rgba(130,170,205,.35);
+    background:rgba(255,255,255,.035);
+  }
+  body.app-theme-custom-active .google-oauth-advanced small,
+  body.app-theme-navy-active .google-oauth-advanced small{
+    color:inherit;
+    opacity:.72;
+  }
+</style>
+
+
+<style id="aghu-v56-pix-session-ui">
+  .purchase-access-btn{
+    display:block;
+    width:100%;
+    margin:7px 0 2px;
+    height:34px;
+    border:1px solid #159bdf;
+    border-radius:3px;
+    background:#f4fbff;
+    color:#0877a8;
+    font:700 10px Arial,Helvetica,sans-serif;
+    cursor:pointer;
+  }
+  .purchase-access-btn:hover{background:#e9f8ff}
+  .purchase-dialog{
+    width:min(520px,calc(100vw - 20px));
+    max-width:520px;
+    padding:0;
+    border:1px solid #bfcbd5;
+    border-radius:7px;
+    background:#fff;
+    color:#222;
+    box-shadow:0 16px 42px rgba(0,0,0,.24);
+  }
+  .purchase-dialog::backdrop{background:rgba(6,19,43,.44)}
+  .purchase-body{padding:14px}
+  .purchase-price{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:2px 10px;
+    align-items:center;
+    margin-bottom:12px;
+    padding:10px 11px;
+    border:1px solid #d5e1e9;
+    border-radius:5px;
+    background:#f7fbfd;
+  }
+  .purchase-price strong{font-size:13px}
+  .purchase-price span{grid-row:1/3;grid-column:2;font-size:20px;font-weight:700;color:#0877a8}
+  .purchase-price small{color:#6f7d88}
+  #purchaseForm,#activationForm{display:grid;gap:9px}
+  #purchaseForm label,#activationForm label{display:grid;gap:4px;font-size:10px;font-weight:700}
+  #purchaseForm input,#activationForm input{
+    height:35px;padding:0 9px;border:1px solid #c7cfd6;border-radius:3px;background:#fff;color:#222;font:12px Arial;
+  }
+  .purchase-status{min-height:18px;margin-top:8px;font-size:10px;color:#667784;line-height:1.4}
+  .purchase-status.error{color:#ae2730}
+  .purchase-status.ok{color:#277553}
+  .purchase-pix-result{display:grid;gap:10px;justify-items:center;margin-top:10px;padding-top:12px;border-top:1px solid #e1e6ea}
+  .purchase-pix-result img{width:min(240px,72vw);height:auto;aspect-ratio:1/1;object-fit:contain;border:8px solid #fff;box-shadow:0 0 0 1px #cad4db}
+  .purchase-copy-box{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}
+  .purchase-copy-box textarea{height:58px;resize:none;padding:7px;border:1px solid #cbd3d9;font:9px Consolas,monospace;overflow-wrap:anywhere}
+  .purchase-copy-box button{height:58px}
+  .purchase-waiting{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;font-size:10px;color:#596a77}
+  .purchase-pulse{width:8px;height:8px;border-radius:50%;background:#2aa86e;box-shadow:0 0 8px rgba(42,168,110,.55);animation:purchasePulse 1.6s ease-in-out infinite}
+  @keyframes purchasePulse{50%{opacity:.35;transform:scale(.72)}}
+  .purchase-ticket{font-size:10px;color:#0877a8}
+  .purchase-activate{display:inline-flex!important;align-items:center;justify-content:center;text-decoration:none;min-height:34px;padding:0 14px}
+  .activation-help{margin:0 0 12px;color:#5e6c76;font-size:10px;line-height:1.45}
+  @media(max-width:600px){
+    .purchase-dialog{width:calc(100vw - 12px)}
+    .purchase-body{padding:11px}
+    .purchase-copy-box{grid-template-columns:1fr}
+    .purchase-copy-box button{height:34px}
+  }
+</style>
+
 </head>
 <body>
   <div id="authScreen" class="auth-screen">
@@ -5314,6 +5416,11 @@
         <div class="login-memory-hint">Contas online são cadastradas pelo Administrador e podem ser acessadas em qualquer dispositivo.</div>
         <div id="loginError" class="form-error"></div>
       </form>
+
+      <button id="purchaseAccessBtn" class="purchase-access-btn" type="button">
+        ◈ Adquirir acesso — R$ 50,00
+      </button>
+
       <button id="adminAccessBtn" class="admin-access-link" type="button">Administrador</button>
 
       <div class="auth-privacy">
@@ -5325,6 +5432,75 @@
       Bloco de notas particular • dados isolados por usuário neste aparelho • sem Supabase
     </div>
   </div>
+
+
+  <dialog id="purchaseAccessDialog" class="purchase-dialog">
+    <div class="dialog-head">
+      <h3>Adquirir acesso</h3>
+      <button id="purchaseCloseBtn" class="icon-btn" type="button" aria-label="Fechar">×</button>
+    </div>
+    <div class="purchase-body">
+      <div class="purchase-price">
+        <strong>AGHU Notes</strong>
+        <span>R$ 50,00</span>
+        <small>Pagamento único via Pix</small>
+      </div>
+
+      <form id="purchaseForm" autocomplete="on">
+        <label>
+          Nome
+          <input id="purchaseName" type="text" maxlength="120" autocomplete="name" required>
+        </label>
+        <label>
+          E-mail
+          <input id="purchaseEmail" type="email" maxlength="200" autocomplete="email" required>
+        </label>
+        <button id="purchaseGenerateBtn" class="btn btn-primary" type="submit">Gerar Pix</button>
+      </form>
+
+      <div id="purchaseStatus" class="purchase-status" aria-live="polite"></div>
+
+      <div id="purchasePixResult" class="purchase-pix-result hidden">
+        <img id="purchaseQrImage" alt="QR Code Pix">
+        <div class="purchase-copy-box">
+          <textarea id="purchasePixCode" readonly aria-label="Pix Copia e Cola"></textarea>
+          <button id="purchaseCopyBtn" class="btn btn-light" type="button">Copiar Pix</button>
+        </div>
+        <div class="purchase-waiting">
+          <span class="purchase-pulse"></span>
+          <span id="purchasePaymentState">Aguardando confirmação do pagamento...</span>
+        </div>
+        <a id="purchaseTicketLink" class="purchase-ticket hidden" target="_blank" rel="noopener noreferrer">Abrir página do Pix</a>
+        <a id="purchaseActivateLink" class="btn btn-primary purchase-activate hidden">Criar login e senha</a>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="activationDialog" class="purchase-dialog activation-dialog">
+    <div class="dialog-head">
+      <h3>Ativar acesso</h3>
+      <button id="activationCloseBtn" class="icon-btn" type="button" aria-label="Fechar">×</button>
+    </div>
+    <div class="purchase-body">
+      <p class="activation-help">Pagamento confirmado. Crie seu login e sua senha. Este link é de uso único.</p>
+      <form id="activationForm" autocomplete="off">
+        <label>
+          Login ou e-mail
+          <input id="activationLogin" type="text" minlength="3" maxlength="200" autocomplete="username" required>
+        </label>
+        <label>
+          Senha
+          <input id="activationPassword" type="password" minlength="6" maxlength="200" autocomplete="new-password" required>
+        </label>
+        <label>
+          Confirmar senha
+          <input id="activationPasswordConfirm" type="password" minlength="6" maxlength="200" autocomplete="new-password" required>
+        </label>
+        <button id="activationSubmitBtn" class="btn btn-primary" type="submit">Criar minha conta</button>
+      </form>
+      <div id="activationStatus" class="purchase-status" aria-live="polite"></div>
+    </div>
+  </dialog>
 
 
   <div id="adminPanel" class="admin-shell hidden">
@@ -5672,9 +5848,18 @@
       </p>
 
       <label>
-        Google OAuth Client ID
-        <input id="googleClientIdInput" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+        Conta Google
+        <input id="googleAccountInput" type="email" placeholder="seuemail@gmail.com" autocomplete="email">
       </label>
+
+      <details class="google-oauth-advanced">
+        <summary>Configuração técnica do Google Docs</summary>
+        <label>
+          OAuth Client ID do aplicativo <span style="font-weight:400">(não é o seu e-mail)</span>
+          <input id="googleClientIdInput" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+        </label>
+        <small>Esse identificador é configurado uma única vez para o aplicativo e precisa terminar em <strong>.apps.googleusercontent.com</strong>.</small>
+      </details>
 
       <label class="google-toggle-row">
         <input id="googleAutoBackupToggle" type="checkbox" checked>
@@ -5786,13 +5971,25 @@
   const raw=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   const BOOTSTRAP_ADMIN_LOGIN='carlosjfranca07@gmail.com';
   const ENC='AGHUENC1:',enc=new TextEncoder(),dec=new TextDecoder(),MAGIC=enc.encode('AGHUIMG1');
-  let dataKey=null,currentProfile=null;
+  let dataKey=null,currentProfile=null,activeExclusiveSessionId=null;
   const accountListeners=new Set();
   const b64=b=>{let s='',a=new Uint8Array(b);for(let i=0;i<a.length;i+=32768)s+=String.fromCharCode(...a.subarray(i,i+32768));return btoa(s)};
   const unb64=s=>{const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a};
   const normalizeLogin=v=>String(v||'').trim().toLowerCase();
   const authEmailFor=v=>{v=normalizeLogin(v);return v.includes('@')?v:`${v}@aghu-notes.invalid`};
   const validLogin=v=>{v=normalizeLogin(v);if(v.length<3||/\s/.test(v))return false;return v.includes('@')?/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v):/^[a-z0-9._-]+$/i.test(v)};
+  const deviceLabel=()=>{
+    const ua=navigator.userAgent||'Navegador';
+    const platform=navigator.userAgentData?.platform||navigator.platform||'';
+    let family='Navegador';
+    if(/iPad|iPhone|iPod/i.test(ua))family='iOS';
+    else if(/Android/i.test(ua))family=/Mi |Redmi|POCO|Xiaomi/i.test(ua)?'Xiaomi / Android':'Android';
+    else if(/Windows/i.test(ua))family='Windows';
+    else if(/Macintosh|Mac OS X/i.test(ua))family='macOS';
+    else if(/Linux/i.test(ua))family='Linux';
+    const browser=/Edg\//.test(ua)?'Edge':/Firefox\//.test(ua)?'Firefox':/Chrome\//.test(ua)?'Chrome':/Safari\//.test(ua)?'Safari':'Browser';
+    return `${family} • ${browser}${platform?` • ${platform}`:''}`.slice(0,180);
+  };
   async function deriveKey(password,salt){const material=await crypto.subtle.importKey('raw',enc.encode(String(password)),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:unb64(salt),iterations:210000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
   async function pack(value){if(!dataKey)throw Error('Chave de criptografia indisponível.');const iv=crypto.getRandomValues(new Uint8Array(12));const c=await crypto.subtle.encrypt({name:'AES-GCM',iv},dataKey,enc.encode(JSON.stringify(value)));return `${ENC}${b64(iv)}.${b64(c)}`}
   async function unpack(value){if(typeof value!=='string'||!value.startsWith(ENC))return null;if(!dataKey)throw Error('Chave de criptografia indisponível.');const [i,c]=value.slice(ENC.length).split('.');const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(i)},dataKey,unb64(c));return JSON.parse(dec.decode(p))}
@@ -5821,8 +6018,9 @@
   let sharePrivateKey=null;
   async function ensureShareKeyPair(){
     if(!currentProfile?.user_id||!dataKey)return false;
-    const p=await raw.from('profiles').select('share_public_jwk,share_private_enc').eq('user_id',currentProfile.user_id).single();
+    const p=await raw.from('profiles').select('share_public_jwk,share_private_enc').eq('user_id',currentProfile.user_id).maybeSingle();
     if(p.error)throw p.error;
+    if(!p.data)throw Error('Perfil ativo não encontrado para o compartilhamento.');
     if(p.data?.share_public_jwk&&p.data?.share_private_enc){
       const box=await unpack(p.data.share_private_enc);
       if(!box?.private_jwk)throw Error('Chave privada de compartilhamento inválida.');
@@ -5843,9 +6041,32 @@
     await ensureShareKeyPair();const rawKey=await crypto.subtle.decrypt({name:'RSA-OAEP'},sharePrivateKey,unb64(row.wrapped_key));const key=await crypto.subtle.importKey('raw',rawKey,{name:'AES-GCM'},false,['decrypt']);const box=JSON.parse(row.encrypted_payload);const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(box.iv)},key,unb64(box.cipher));return JSON.parse(dec.decode(plain));
   }
   async function shareNoteWithLogin(note,login){
-    await ensureShareKeyPair();const look=await raw.rpc('get_share_recipient',{desired_login:normalizeLogin(login)});if(look.error)throw look.error;const rec=Array.isArray(look.data)?look.data[0]:look.data;if(!rec?.recipient_user_id)throw Error('Login destinatário não encontrado ou inativo.');if(!rec.recipient_public_jwk)throw Error('Essa conta precisa acessar a versão atual do Notes ao menos uma vez antes de receber notas criptografadas.');
-    const box=await encryptSharePayload({title:note.title||'Sem título',content_html:note.content_html||'',color:note.color||'#ffffff',shared_at:new Date().toISOString(),source_updated_at:note.updated_at||null},rec.recipient_public_jwk);
-    const q=await raw.from('note_shares').upsert({note_id:note.id,owner_id:currentProfile.user_id,recipient_id:rec.recipient_user_id,recipient_login:rec.recipient_login,owner_login:currentProfile.login,encrypted_payload:box.encrypted_payload,wrapped_key:box.wrapped_key,updated_at:new Date().toISOString()},{onConflict:'note_id,recipient_id'}).select('id,note_id,recipient_id,recipient_login,owner_login,created_at,updated_at').single();if(q.error)throw q.error;return{...q.data,recipient_login:rec.recipient_login};
+    await ensureShareKeyPair();
+    const desired=normalizeLogin(login);
+    const look=await raw.rpc('get_share_recipient',{desired_login:desired});
+    if(look.error)throw look.error;
+    const rec=Array.isArray(look.data)?look.data[0]:look.data;
+    if(!rec?.recipient_user_id)throw Error('Login destinatário não encontrado ou inativo.');
+    if(!rec.recipient_public_jwk)throw Error('Essa conta precisa acessar a versão atual do Notes ao menos uma vez antes de receber notas criptografadas.');
+
+    const box=await encryptSharePayload({
+      title:note.title||'Sem título',
+      content_html:note.content_html||'',
+      color:note.color||'#ffffff',
+      shared_at:new Date().toISOString(),
+      source_updated_at:note.updated_at||null
+    },rec.recipient_public_jwk);
+
+    const saved=await raw.rpc('save_note_share',{
+      target_login:rec.recipient_login,
+      target_note_id:note.id,
+      encrypted_payload_arg:box.encrypted_payload,
+      wrapped_key_arg:box.wrapped_key
+    });
+    if(saved.error)throw saved.error;
+
+    const row=Array.isArray(saved.data)?saved.data[0]:saved.data;
+    return {...(row||{}),recipient_login:rec.recipient_login};
   }
   async function listSharesForNote(noteId){const q=await raw.from('note_shares').select('id,note_id,recipient_id,recipient_login,owner_login,created_at,updated_at').eq('note_id',noteId).eq('owner_id',currentProfile.user_id).order('updated_at',{ascending:false});if(q.error)throw q.error;return q.data||[]}
   async function revokeShare(shareId){const q=await raw.from('note_shares').delete().eq('id',shareId).eq('owner_id',currentProfile.user_id);if(q.error)throw q.error;return true}
@@ -5853,8 +6074,57 @@
   window.AGhuShareCrypto={ensure:ensureShareKeyPair,shareNoteWithLogin,listSharesForNote,revokeShare,listReceivedShares};
   const auth={
     async getSession(){const r=await raw.auth.getSession();if(r.error)return r;if(r.data?.session&&!dataKey){await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:{session:null},error:null}}return r},
-    async signInWithPassword({email,password}){const login=normalizeLogin(email),r=await raw.auth.signInWithPassword({email:authEmailFor(login),password});if(r.error)return r;const p=await raw.from('profiles').select('*').eq('user_id',r.data.user.id).single();if(p.error||!p.data){await raw.auth.signOut();return{data:null,error:{message:'Perfil da conta não encontrado.'}}}if(!p.data.active){await raw.auth.signOut();return{data:null,error:{message:'Este acesso está bloqueado pelo Administrador.'}}}dataKey=await deriveKey(password,p.data.crypto_salt);currentProfile=p.data;try{await ensureShareKeyPair()}catch(e){console.warn('Chaves de compartilhamento:',e)}const first=await raw.rpc('mark_first_access');const u={...r.data.user,login:p.data.login,role:p.data.role,first_access:first.data===true};return{data:{user:u,session:{...r.data.session,user:u}},error:null}},
-    async signOut(){dataKey=null;sharePrivateKey=null;currentProfile=null;return raw.auth.signOut()},
+    async signInWithPassword({email,password}){
+      const login=normalizeLogin(email);
+      const r=await raw.auth.signInWithPassword({email:authEmailFor(login),password});
+      if(r.error)return r;
+
+      const p=await raw.from('profiles').select('*').eq('user_id',r.data.user.id).single();
+      if(p.error||!p.data){
+        await raw.auth.signOut({scope:'local'}).catch(()=>{});
+        return{data:null,error:{message:'Perfil da conta não encontrado.'}};
+      }
+      if(!p.data.active){
+        await raw.auth.signOut({scope:'local'}).catch(()=>{});
+        return{data:null,error:{message:'Este acesso está bloqueado pelo Administrador.'}};
+      }
+
+      dataKey=await deriveKey(password,p.data.crypto_salt);
+      currentProfile=p.data;
+
+      try{await ensureShareKeyPair()}catch(e){console.warn('Chaves de compartilhamento:',e)}
+
+      const exclusiveSessionId=crypto.randomUUID();
+      const claimed=await raw.rpc('claim_active_session',{
+        new_session_id:exclusiveSessionId,
+        device_label:deviceLabel()
+      });
+      if(claimed.error){
+        dataKey=null;sharePrivateKey=null;currentProfile=null;activeExclusiveSessionId=null;
+        await raw.auth.signOut({scope:'local'}).catch(()=>{});
+        return{data:null,error:{message:'Não foi possível iniciar a sessão exclusiva. Tente novamente.'}};
+      }
+      activeExclusiveSessionId=exclusiveSessionId;
+
+      const first=await raw.rpc('mark_first_access');
+      const u={
+        ...r.data.user,
+        login:p.data.login,
+        role:p.data.role,
+        first_access:first.data===true,
+        exclusive_session_id:exclusiveSessionId
+      };
+      return{data:{user:u,session:{...r.data.session,user:u}},error:null};
+    },
+    async signOut(options={}){
+      const release=options?.release!==false;
+      const sessionId=activeExclusiveSessionId;
+      if(release&&sessionId){
+        try{await raw.rpc('release_active_session',{session_id_arg:sessionId})}catch{}
+      }
+      dataKey=null;sharePrivateKey=null;currentProfile=null;activeExclusiveSessionId=null;
+      return raw.auth.signOut({scope:'local'});
+    },
     onAuthStateChange(cb){return raw.auth.onAuthStateChange((ev,s)=>{if(!s){cb(ev,null);return}if(dataKey)cb(ev,{...s,user:{...s.user,login:currentProfile?.login,role:currentProfile?.role}})})}
   };
   const storage={from(bucket){const b=raw.storage.from(bucket);return{async upload(path,blob,o={}){try{return await b.upload(path,await encryptBlob(blob),o)}catch(e){return{data:null,error:{message:e.message}}}},async download(path){const r=await b.download(path);if(r.error||!r.data)return r;try{return{data:await decryptBlob(r.data),error:null}}catch(e){return{data:null,error:{message:e.message}}}},remove:p=>b.remove(p),async createSignedUrl(path){const r=await b.download(path);if(r.error||!r.data)return{data:null,error:r.error};try{return{data:{signedUrl:URL.createObjectURL(await decryptBlob(r.data))},error:null}}catch(e){return{data:null,error:{message:e.message}}}}}}};
@@ -5955,7 +6225,12 @@
     quickImageTargetNoteId:null,
     quickImageObjectUrls:new Map(),
     notesViewMode:localStorage.getItem('aghuNotes.notesViewMode')==='cards'?'cards':'rows',
-    realtimeChannel:null,realtimeDebounce:null
+    realtimeChannel:null,realtimeDebounce:null,
+    exclusiveSessionId:null,
+    exclusiveSessionChannel:null,
+    exclusiveHeartbeatTimer:null,
+    exclusiveCheckTimer:null,
+    forcedSessionLogout:false
   };
 
   const els = {
@@ -5977,7 +6252,7 @@
     pin: $('pinBtn'), archive: $('archiveBtn'), trash: $('trashBtn'), permanentDelete: $('permanentDeleteBtn'), duplicate: $('duplicateBtn'), share: $('shareBtn'), draw: $('drawBtn'), copyDocs: $('copyDocsBtn'),
     noteMenuBtn:$('noteMenuBtn'), noteActionsMenu:$('noteActionsMenu'),
     googleDocsDialog:$('googleDocsDialog'), googleDocsClose:$('googleDocsCloseBtn'), googleDocsCancel:$('googleDocsCancelBtn'),
-    googleClientIdInput:$('googleClientIdInput'), googleAutoBackup:$('googleAutoBackupToggle'),
+    googleAccountInput:$('googleAccountInput'), googleClientIdInput:$('googleClientIdInput'), googleAutoBackup:$('googleAutoBackupToggle'),
     googleDocsStatus:$('googleDocsStatus'), googleConnect:$('googleConnectBtn'), googleSyncNow:$('googleSyncNowBtn'),
     googleOAuthOrigin:$('googleOAuthOrigin'), copyGoogleOrigin:$('copyGoogleOriginBtn'),
     history: $('historyBtn'), historyDialog: $('historyDialog'), historyList: $('historyList'), imageInput: $('imageInput'), imageGallery: $('imageGallery'),
@@ -6795,15 +7070,93 @@
     }
   });
 
-  function showAuth(){els.adminPanel?.classList.add('hidden');stopSyncLoop();stopReminderLoop();state.user=null;document.body.classList.remove('keep-focus-mode');els.keepFocusBar?.classList.add('hidden');els.app.classList.add('hidden');els.auth.classList.remove('hidden');}
+  function stopExclusiveSessionWatch(){
+    if(state.exclusiveHeartbeatTimer){clearInterval(state.exclusiveHeartbeatTimer);state.exclusiveHeartbeatTimer=null}
+    if(state.exclusiveCheckTimer){clearInterval(state.exclusiveCheckTimer);state.exclusiveCheckTimer=null}
+    if(state.exclusiveSessionChannel){
+      try{window.AGhuCloudRaw.removeChannel(state.exclusiveSessionChannel)}catch{}
+      state.exclusiveSessionChannel=null;
+    }
+    state.exclusiveSessionId=null;
+  }
+
+  async function forceLogoutByOtherDevice(){
+    if(state.forcedSessionLogout)return;
+    state.forcedSessionLogout=true;
+    stopExclusiveSessionWatch();
+    stopSyncLoop();
+    stopReminderLoop();
+    try{await supabase.auth.signOut({release:false})}catch{}
+    showAuth('Sua conta foi acessada em outro dispositivo.');
+    state.forcedSessionLogout=false;
+  }
+
+  async function verifyExclusiveSession(){
+    if(!state.user||!state.exclusiveSessionId||!navigator.onLine)return;
+    try{
+      const r=await window.AGhuCloudRaw.rpc('current_active_session');
+      if(r.error)return;
+      const active=r.data?.session_id||null;
+      if(active&&active!==state.exclusiveSessionId)await forceLogoutByOtherDevice();
+    }catch{}
+  }
+
+  function startExclusiveSessionWatch(user){
+    stopExclusiveSessionWatch();
+    const sid=user?.exclusive_session_id;
+    if(!sid||!user?.id)return;
+    state.exclusiveSessionId=sid;
+
+    try{
+      state.exclusiveSessionChannel=window.AGhuCloudRaw
+        .channel(`aghu-exclusive-${user.id}-${sid}`)
+        .on('postgres_changes',{
+          event:'UPDATE',
+          schema:'public',
+          table:'profiles',
+          filter:`user_id=eq.${user.id}`
+        },payload=>{
+          const active=payload?.new?.active_session_id||null;
+          if(active&&active!==state.exclusiveSessionId)forceLogoutByOtherDevice();
+        })
+        .subscribe();
+    }catch(e){console.warn('Sessão exclusiva realtime:',e)}
+
+    state.exclusiveHeartbeatTimer=setInterval(async()=>{
+      if(!state.user||!state.exclusiveSessionId||!navigator.onLine)return;
+      try{
+        const r=await window.AGhuCloudRaw.rpc('touch_active_session',{session_id_arg:state.exclusiveSessionId});
+        if(!r.error&&r.data===false)await forceLogoutByOtherDevice();
+      }catch{}
+    },25000);
+
+    state.exclusiveCheckTimer=setInterval(verifyExclusiveSession,45000);
+    window.addEventListener('online',verifyExclusiveSession,{once:true});
+  }
+
+  function showAuth(message=''){
+    els.adminPanel?.classList.add('hidden');
+    stopExclusiveSessionWatch();
+    stopSyncLoop();
+    stopReminderLoop();
+    state.user=null;
+    document.body.classList.remove('keep-focus-mode');
+    els.keepFocusBar?.classList.add('hidden');
+    els.app.classList.add('hidden');
+    els.auth.classList.remove('hidden');
+    if(message)els.loginError.textContent=message;
+  }
+
   async function enterApp(user){
     if(state.entering)return;
     state.entering=true;
     try{
       state.user=user;
+      setSidebarTheme(preferredThemeForUser(user));
       const ok=await confirmFirstDeviceSync(user);
       if(!ok){await supabase.auth.signOut();showAuth();return;}
       els.auth.classList.add('hidden');els.app.classList.remove('hidden');setSyncStatus('syncing');
+      startExclusiveSessionWatch(user);
       await initLocalPersistence(user.id);
       await Promise.all([loadNotes(),loadLabels()]);
       applyNotesViewMode(state.notesViewMode);
@@ -6824,7 +7177,7 @@
   if(rememberedEmail) els.loginEmail.value=rememberedEmail;
 
   els.login.addEventListener('submit', async e=>{
-    e.preventDefault(); els.loginError.textContent='';
+    e.preventDefault(); els.loginError.textContent='';els.loginError.style.removeProperty('color');
     const login=els.loginEmail.value.trim(),password=els.loginPassword.value;
     if(!login||!password){els.loginError.textContent='Informe login e senha.';return;}
     const {data,error}=await supabase.auth.signInWithPassword({email:login,password});
@@ -6839,7 +7192,7 @@
     els.loginPassword.value='';
     await enterApp(data.user);
   });
-  els.logout.addEventListener('click', async()=>{ stopSyncLoop(); await supabase.auth.signOut(); showAuth(); });
+  els.logout.addEventListener('click', async()=>{ stopExclusiveSessionWatch();stopSyncLoop(); await supabase.auth.signOut(); showAuth(); });
 
   let deferredInstallPrompt=null;
   window.addEventListener('beforeinstallprompt',e=>{
@@ -7238,7 +7591,13 @@
   }
 
 
+  function cardAccentLocalKey(noteId){
+    return state.user?.id&&noteId?`aghuNotes.cardAccent:${state.user.id}:${noteId}`:null;
+  }
   function noteAccentColor(note){
+    const localKey=cardAccentLocalKey(note?.id);
+    const local=localKey?String(localStorage.getItem(localKey)||'').trim():'';
+    if(/^#[0-9a-f]{6}$/i.test(local))return local;
     const raw=String(note?.patient_meta?.cardAccent||'#171717').trim();
     return /^#[0-9a-f]{6}$/i.test(raw)?raw:'#171717';
   }
@@ -7259,20 +7618,45 @@
     if(!/^#[0-9a-f]{6}$/i.test(String(color||'')))return;
     const note=state.notes.find(n=>n.id===noteId);
     if(!note)return;
-    const patient_meta={...(note.patient_meta||{}),cardAccent:color};
+
+    const normalized=String(color).toLowerCase();
+    const now=new Date().toISOString();
+    const patient_meta={...(note.patient_meta||{}),cardAccent:normalized};
+
+    const localKey=cardAccentLocalKey(noteId);
+    if(localKey)localStorage.setItem(localKey,normalized);
+
+    note.patient_meta=patient_meta;
+    note.updated_at=now;
+    if(state.current?.id===noteId){
+      state.current.patient_meta=patient_meta;
+      state.current.updated_at=now;
+    }
+
+    const pending=state.localDrafts.get(noteId);
+    if(pending){
+      const updatedDraft={...pending,patient_meta:{...(pending.patient_meta||{}),cardAccent:normalized},updated_at:now};
+      state.localDrafts.set(noteId,updatedDraft);
+      if(state.localPersistenceReady){
+        idbPut('drafts',{
+          key:draftId(noteId),userId:state.user.id,noteId,data:updatedDraft,updatedAt:Date.now()
+        }).catch(persistenceError);
+      }
+    }
+
+    cacheNotes();
+    renderNotes();
+
     setSyncStatus('syncing');
     const {error}=await supabase.from('notes')
-      .update({patient_meta,updated_at:new Date().toISOString()})
+      .update({patient_meta,updated_at:now})
       .eq('id',noteId);
     if(error){
-      showToast('Não foi possível alterar a cor da nota.');
+      showToast('Cor preservada neste aparelho; sincronização pendente.');
       setSyncStatus('ok');
       return;
     }
-    note.patient_meta=patient_meta;
-    if(state.current?.id===noteId)state.current.patient_meta=patient_meta;
-    cacheNotes();
-    renderNotes();
+    setSyncStatus('ok');
     setSyncStatus('ok');
   }
 
@@ -8212,6 +8596,7 @@
 
 
   const GOOGLE_CLIENT_ID_KEY='aghuNotes.googleClientId';
+  const GOOGLE_ACCOUNT_KEY_PREFIX='aghuNotes.googleAccount:';
   const GOOGLE_AUTO_KEY_PREFIX='aghuNotes.googleAuto:';
   const GOOGLE_SCOPE='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/documents';
 
@@ -8252,8 +8637,22 @@
     });
     return true;
   }
+  function googleAccountKey(){
+    return state.user?GOOGLE_ACCOUNT_KEY_PREFIX+state.user.id:null;
+  }
+  function googleAccountEmail(){
+    return (els.googleAccountInput?.value||(googleAccountKey()?localStorage.getItem(googleAccountKey()):'')||'').trim();
+  }
+  function isValidGoogleClientId(value){
+    return /^[0-9A-Za-z._-]+\.apps\.googleusercontent\.com$/.test(String(value||'').trim());
+  }
   function googleClientId(){
-    return (els.googleClientIdInput?.value||localStorage.getItem(GOOGLE_CLIENT_ID_KEY)||'').trim();
+    const configured=String(cfg.GOOGLE_CLIENT_ID||'').trim();
+    if(isValidGoogleClientId(configured))return configured;
+    const input=String(els.googleClientIdInput?.value||'').trim();
+    if(isValidGoogleClientId(input))return input;
+    const stored=String(localStorage.getItem(GOOGLE_CLIENT_ID_KEY)||'').trim();
+    return isValidGoogleClientId(stored)?stored:'';
   }
 
   function googleOAuthOrigin(){
@@ -8277,11 +8676,7 @@
     }
 
     if(!clientId){
-      throw new Error('Informe primeiro o Google OAuth Client ID.');
-    }
-
-    if(!/^[0-9A-Za-z._-]+\.apps\.googleusercontent\.com$/.test(clientId)){
-      throw new Error('O Google OAuth Client ID informado não parece válido.');
+      throw new Error('Configuração técnica do Google Docs pendente: informe um OAuth Client ID válido do aplicativo. Ele não é o seu e-mail e precisa terminar em .apps.googleusercontent.com.');
     }
 
     return {
@@ -8303,13 +8698,22 @@
       return;
     }
 
-    if(els.googleConnect)els.googleConnect.disabled=false;
+    const clientId=googleClientId();
+    if(els.googleConnect)els.googleConnect.disabled=!clientId;
 
-    setGoogleStatus(
-      `No Google Cloud, o cliente OAuth do tipo "Aplicativo da Web" precisa autorizar a origem JavaScript: ${location.origin}. `+
-      'Também habilite as APIs Google Drive e Google Docs.',
-      googleConnected()?'ok':''
-    );
+    if(clientId){
+      setGoogleStatus(
+        googleConnected()
+          ? 'Google conectado. As notas podem ser copiadas automaticamente.'
+          : 'Configuração OAuth reconhecida. Clique em “Conectar Google” para autorizar a conta.',
+        googleConnected()?'ok':''
+      );
+    }else{
+      setGoogleStatus(
+        'Informe em “Configuração técnica do Google Docs” o OAuth Client ID do aplicativo. O seu e-mail deve ficar somente no campo “Conta Google”.',
+        'error'
+      );
+    }
   }
 
   async function requestGoogleToken(interactive=true){
@@ -8322,6 +8726,7 @@
       state.googleTokenClient=google.accounts.oauth2.initTokenClient({
         client_id:clientId,
         scope:GOOGLE_SCOPE,
+        login_hint:googleAccountEmail()||undefined,
         callback:resp=>{
           if(resp?.error){reject(new Error(resp.error_description||resp.error));return}
           state.googleToken=resp.access_token;
@@ -8338,7 +8743,7 @@
           reject(new Error(message));
         }
       });
-      try{state.googleTokenClient.requestAccessToken({prompt:interactive?'consent':''})}
+      try{state.googleTokenClient.requestAccessToken({prompt:interactive?'consent':'',login_hint:googleAccountEmail()||undefined})}
       catch(err){reject(err)}
     });
   }
@@ -8474,7 +8879,25 @@
   }
   function openGoogleDocsSettings(){
     if(!state.user){showToast('Faça login primeiro.');return}
-    els.googleClientIdInput.value=localStorage.getItem(GOOGLE_CLIENT_ID_KEY)||'';
+
+    const legacy=String(localStorage.getItem(GOOGLE_CLIENT_ID_KEY)||'').trim();
+    const looksLikeEmail=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(legacy) && !isValidGoogleClientId(legacy);
+    if(looksLikeEmail){
+      const key=googleAccountKey();
+      if(key&&!localStorage.getItem(key))localStorage.setItem(key,legacy);
+      localStorage.removeItem(GOOGLE_CLIENT_ID_KEY);
+    }
+
+    const accountKey=googleAccountKey();
+    const suggested=(accountKey?localStorage.getItem(accountKey):'')||
+      (String(state.user?.login||'').includes('@')?state.user.login:'');
+    if(els.googleAccountInput)els.googleAccountInput.value=suggested||'';
+
+    const configured=String(cfg.GOOGLE_CLIENT_ID||'').trim();
+    const stored=String(localStorage.getItem(GOOGLE_CLIENT_ID_KEY)||'').trim();
+    els.googleClientIdInput.value=isValidGoogleClientId(configured)?configured:(isValidGoogleClientId(stored)?stored:'');
+    els.googleClientIdInput.disabled=isValidGoogleClientId(configured);
+
     els.googleAutoBackup.checked=googleAutoEnabled();
     if(els.googleOAuthOrigin)els.googleOAuthOrigin.textContent=googleOAuthOrigin();
     els.googleDocsDialog.showModal();
@@ -8499,9 +8922,14 @@
       showToast(`Origem: ${origin}`,3500);
     }
   });
+  els.googleAccountInput?.addEventListener('input',()=>{
+    const key=googleAccountKey();
+    if(key)localStorage.setItem(key,els.googleAccountInput.value.trim());
+  });
   els.googleClientIdInput?.addEventListener('input',()=>{
     const value=els.googleClientIdInput.value.trim();
-    if(value)localStorage.setItem(GOOGLE_CLIENT_ID_KEY,value);
+    if(isValidGoogleClientId(value))localStorage.setItem(GOOGLE_CLIENT_ID_KEY,value);
+    else if(!value)localStorage.removeItem(GOOGLE_CLIENT_ID_KEY);
     explainGoogleOAuthSetup();
   });
   els.googleAutoBackup?.addEventListener('change',()=>{
@@ -8804,15 +9232,28 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
       btn.classList.toggle('active',btn.dataset.sidebarTheme===theme);
     });
 
-    localStorage.setItem('aghuNotes.sidebarTheme',theme);
+    localStorage.setItem(THEME_BASE_KEY,theme);
+    if(state.user?.id)localStorage.setItem(userThemeKey(state.user.id),theme);
   }
 
   document.querySelectorAll('[data-sidebar-theme]').forEach(btn=>{
     btn.addEventListener('click',()=>setSidebarTheme(btn.dataset.sidebarTheme));
   });
 
-  const savedTheme=localStorage.getItem('aghuNotes.sidebarTheme')||'navy';
-  setSidebarTheme(AGHU_THEMES.includes(savedTheme)?savedTheme:'navy');
+  const THEME_BASE_KEY='aghuNotes.sidebarTheme';
+  function userThemeKey(userId=state.user?.id){
+    return userId?`${THEME_BASE_KEY}:${userId}`:THEME_BASE_KEY;
+  }
+  function preferredThemeForUser(user){
+    if(user?.first_access===true)return 'white';
+    const own=user?.id?localStorage.getItem(userThemeKey(user.id)):null;
+    const legacy=localStorage.getItem(THEME_BASE_KEY);
+    const candidate=own||legacy||'white';
+    return AGHU_THEMES.includes(candidate)?candidate:'white';
+  }
+
+  const savedTheme=localStorage.getItem(THEME_BASE_KEY)||'white';
+  setSidebarTheme(AGHU_THEMES.includes(savedTheme)?savedTheme:'white');
 
 
   document.querySelectorAll('.inert-menu-item').forEach(button=>{
@@ -9122,6 +9563,301 @@ applyV42BrandingAndLayout();
 
   window.addEventListener('resize',normalizeViewport,{passive:true});
   window.visualViewport?.addEventListener('resize',normalizeViewport,{passive:true});
+})();
+</script>
+
+
+<script id="aghu-v56-pix-client">
+(()=>{
+  const cfg=window.APP_CONFIG||{};
+  const $=id=>document.getElementById(id);
+  const purchaseBtn=$('purchaseAccessBtn');
+  const dialog=$('purchaseAccessDialog');
+  const closeBtn=$('purchaseCloseBtn');
+  const form=$('purchaseForm');
+  const nameInput=$('purchaseName');
+  const emailInput=$('purchaseEmail');
+  const genBtn=$('purchaseGenerateBtn');
+  const status=$('purchaseStatus');
+  const result=$('purchasePixResult');
+  const qr=$('purchaseQrImage');
+  const pixCode=$('purchasePixCode');
+  const copyBtn=$('purchaseCopyBtn');
+  const payState=$('purchasePaymentState');
+  const ticket=$('purchaseTicketLink');
+  const activateLink=$('purchaseActivateLink');
+
+  const activationDialog=$('activationDialog');
+  const activationClose=$('activationCloseBtn');
+  const activationForm=$('activationForm');
+  const activationLogin=$('activationLogin');
+  const activationPassword=$('activationPassword');
+  const activationConfirm=$('activationPasswordConfirm');
+  const activationSubmit=$('activationSubmitBtn');
+  const activationStatus=$('activationStatus');
+
+  let purchasePollTimer=null;
+  let currentPurchase=null;
+
+  const jsonHeaders=()=>({
+    'Content-Type':'application/json',
+    'apikey':cfg.SUPABASE_ANON_KEY||''
+  });
+
+  async function functionCall(name,payload){
+    const r=await fetch(`${cfg.SUPABASE_URL}/functions/v1/${name}`,{
+      method:'POST',
+      headers:jsonHeaders(),
+      body:JSON.stringify(payload)
+    });
+    let data={};
+    try{data=await r.json()}catch{}
+    if(!r.ok)throw new Error(data?.error||data?.detail||`Falha HTTP ${r.status}`);
+    return data;
+  }
+
+  function setPurchaseStatus(message,type=''){
+    status.textContent=message||'';
+    status.className=`purchase-status${type?` ${type}`:''}`;
+  }
+
+  function stopPurchasePolling(){
+    if(purchasePollTimer){clearInterval(purchasePollTimer);purchasePollTimer=null}
+  }
+
+  function savePendingPurchase(p){
+    try{sessionStorage.setItem('aghuNotes.pendingPix',JSON.stringify(p||null))}catch{}
+  }
+
+  function showPix(p){
+    currentPurchase={order_id:p.order_id,status_token:p.status_token};
+    savePendingPurchase(currentPurchase);
+
+    result.classList.remove('hidden');
+    pixCode.value=p.qr_code||'';
+    if(p.qr_code_base64){
+      qr.src=p.qr_code_base64.startsWith('data:')?p.qr_code_base64:`data:image/png;base64,${p.qr_code_base64}`;
+      qr.classList.remove('hidden');
+    }else{
+      qr.removeAttribute('src');
+      qr.classList.add('hidden');
+    }
+    if(p.ticket_url){
+      ticket.href=p.ticket_url;
+      ticket.classList.remove('hidden');
+    }else ticket.classList.add('hidden');
+
+    payState.textContent=p.status==='approved'?'Pagamento confirmado.':'Aguardando confirmação do pagamento...';
+    startPurchasePolling();
+  }
+
+  async function checkPurchase(){
+    if(!currentPurchase)return;
+    try{
+      const p=await functionCall('pix-status',currentPurchase);
+      if(p.approved){
+        stopPurchasePolling();
+        payState.textContent=p.activated?'Acesso já ativado.':'Pagamento confirmado!';
+        setPurchaseStatus(
+          p.email_sent
+            ? 'Pagamento aprovado. O link de ativação também foi enviado ao e-mail informado.'
+            : 'Pagamento aprovado. Seu link de ativação já está disponível.',
+          'ok'
+        );
+        if(p.activation_url&&!p.activated){
+          activateLink.href=p.activation_url;
+          activateLink.classList.remove('hidden');
+        }
+        savePendingPurchase(null);
+      }else if(['rejected','cancelled','expired','error'].includes(p.status)){
+        stopPurchasePolling();
+        payState.textContent='Pagamento não aprovado.';
+        setPurchaseStatus(`Status do pagamento: ${p.status}.`,'error');
+      }
+    }catch(e){
+      console.warn('Consulta Pix:',e);
+    }
+  }
+
+  function startPurchasePolling(){
+    stopPurchasePolling();
+    checkPurchase();
+    purchasePollTimer=setInterval(checkPurchase,8000);
+  }
+
+  purchaseBtn?.addEventListener('click',()=>{
+    setPurchaseStatus('');
+    const remembered=localStorage.getItem('aghuNotes.lastLogin')||'';
+    if(!emailInput.value&&/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(remembered))emailInput.value=remembered;
+    dialog.showModal();
+    try{
+      const pending=JSON.parse(sessionStorage.getItem('aghuNotes.pendingPix')||'null');
+      if(pending?.order_id&&pending?.status_token){
+        currentPurchase=pending;
+        result.classList.remove('hidden');
+        payState.textContent='Consultando pagamento anterior...';
+        startPurchasePolling();
+      }
+    }catch{}
+  });
+
+  closeBtn?.addEventListener('click',()=>{stopPurchasePolling();dialog.close()});
+
+  form?.addEventListener('submit',async e=>{
+    e.preventDefault();
+    setPurchaseStatus('');
+    result.classList.add('hidden');
+    activateLink.classList.add('hidden');
+    genBtn.disabled=true;
+    genBtn.textContent='Gerando Pix...';
+    try{
+      const p=await functionCall('pix-create',{
+        name:nameInput.value.trim(),
+        email:emailInput.value.trim(),
+        request_id:crypto.randomUUID()
+      });
+      setPurchaseStatus('Pix gerado. Faça o pagamento pelo QR Code ou Pix Copia e Cola.','ok');
+      showPix(p);
+    }catch(e){
+      setPurchaseStatus(e?.message||'Não foi possível gerar o Pix.','error');
+    }finally{
+      genBtn.disabled=false;
+      genBtn.textContent='Gerar Pix';
+    }
+  });
+
+  copyBtn?.addEventListener('click',async()=>{
+    const value=pixCode.value;
+    if(!value)return;
+    try{
+      await navigator.clipboard.writeText(value);
+      copyBtn.textContent='Copiado';
+    }catch{
+      pixCode.focus();pixCode.select();
+      try{document.execCommand('copy');copyBtn.textContent='Copiado'}catch{}
+    }
+    setTimeout(()=>copyBtn.textContent='Copiar Pix',1600);
+  });
+
+  async function tokenHash(rawToken){
+    const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(rawToken));
+    return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function activationTokenFromUrl(){
+    return new URL(location.href).searchParams.get('activate')||'';
+  }
+
+  async function validateActivationToken(raw){
+    const h=await tokenHash(raw);
+    const r=await window.AGhuCloudRaw.rpc('validate_paid_activation',{token_hash_arg:h});
+    if(r.error)throw r.error;
+    return r.data;
+  }
+
+  function setActivationStatus(message,type=''){
+    activationStatus.textContent=message||'';
+    activationStatus.className=`purchase-status${type?` ${type}`:''}`;
+  }
+
+  async function openActivationFromUrl(){
+    const raw=activationTokenFromUrl();
+    if(!raw)return;
+    activationDialog.showModal();
+    activationSubmit.disabled=true;
+    setActivationStatus('Validando seu link...');
+    try{
+      const v=await validateActivationToken(raw);
+      if(!v?.valid){
+        setActivationStatus('Este link é inválido, expirou ou já foi utilizado.','error');
+        return;
+      }
+      setActivationStatus('Pagamento confirmado. Defina seu login e sua senha.','ok');
+      activationSubmit.disabled=false;
+    }catch(e){
+      setActivationStatus(e?.message||'Não foi possível validar o link.','error');
+    }
+  }
+
+  activationClose?.addEventListener('click',()=>activationDialog.close());
+
+  activationForm?.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const raw=activationTokenFromUrl();
+    const login=activationLogin.value.trim().toLowerCase();
+    const password=activationPassword.value;
+    if(!raw){setActivationStatus('Link de ativação ausente.','error');return}
+    if(password.length<6){setActivationStatus('A senha deve ter pelo menos 6 caracteres.','error');return}
+    if(password!==activationConfirm.value){setActivationStatus('As senhas não coincidem.','error');return}
+
+    activationSubmit.disabled=true;
+    activationSubmit.textContent='Criando conta...';
+    setActivationStatus('');
+
+    let temp=null;
+    try{
+      const valid=await validateActivationToken(raw);
+      if(!valid?.valid)throw new Error('Este link é inválido, expirou ou já foi utilizado.');
+
+      const authLogin=login.includes('@')?login:`${login}@aghu-notes.invalid`;
+      temp=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{
+        auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
+      });
+
+      let signed=await temp.auth.signUp({
+        email:authLogin,
+        password,
+        options:{data:{
+          display_login:login,
+          aghu_admin_provision:'true',
+          aghu_paid_activation:'true'
+        }}
+      });
+      if(signed.error)throw signed.error;
+
+      if(!signed.data?.session){
+        signed=await temp.auth.signInWithPassword({email:authLogin,password});
+        if(signed.error)throw signed.error;
+      }
+
+      const h=await tokenHash(raw);
+      const activated=await temp.rpc('activate_paid_user',{
+        token_hash_arg:h,
+        desired_login:login
+      });
+      if(activated.error)throw activated.error;
+
+      try{await temp.auth.signOut({scope:'local'})}catch{}
+
+      const u=new URL(location.href);
+      u.searchParams.delete('activate');
+      history.replaceState({},'',u.pathname+u.search+u.hash);
+
+      activationDialog.close();
+      const loginInput=document.getElementById('loginEmail');
+      const loginError=document.getElementById('loginError');
+      if(loginInput)loginInput.value=login;
+      if(loginError){
+        loginError.textContent='Conta criada com sucesso. Entre com o login e a senha que você acabou de definir.';
+        loginError.style.color='#287b58';
+      }
+    }catch(e){
+      try{await temp?.auth?.signOut({scope:'local'})}catch{}
+      const msg=String(e?.message||e||'Não foi possível criar a conta.');
+      setActivationStatus(
+        /already|registered|exists|duplicate|unique/i.test(msg)
+          ? 'Este login/e-mail já está em uso. Escolha outro.'
+          : msg,
+        'error'
+      );
+    }finally{
+      activationSubmit.disabled=false;
+      activationSubmit.textContent='Criar minha conta';
+    }
+  });
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',openActivationFromUrl,{once:true});
+  else setTimeout(openActivationFromUrl,0);
 })();
 </script>
 

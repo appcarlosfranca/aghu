@@ -1,0 +1,15 @@
+AGHU Notes v56 — BACKEND APLICADO
+
+Já aplicado no projeto Supabase:
+- active_session_id, dispositivo e timestamps no perfil;
+- RPCs claim_active_session, touch_active_session, release_active_session e current_active_session;
+- profiles adicionado ao Supabase Realtime;
+- tabelas privadas access_orders e payment_webhook_events;
+- proteção RLS/grants para dados financeiros;
+- ativação paga de uso único;
+- Edge Functions implantadas:
+  • pix-create
+  • pix-status
+  • pix-webhook
+
+O fluxo de criação da conta usa token de ativação de alta entropia e a RPC activate_paid_user.
