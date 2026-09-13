@@ -1,53 +1,56 @@
-const CACHE = "aghu-notes-cloud-v41";
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./manifest.webmanifest",
-  "./favicon.ico",
-  "./favicon-96-v16.png",
-  "./favicon-48-v16.png",
-  "./icon-192-v16.png",
-  "./icon-512-v16.png",
-  "./maskable-192-v16.png",
-  "./maskable-512-v16.png",
-  "./apple-touch-icon-v16.png"
+const CACHE='aghu-notes-cloud-v57-shell';
+const SHELL=[
+  './manifest.webmanifest',
+  './icon-192-v16.png',
+  './icon-512-v16.png',
+  './maskable-192-v16.png',
+  './maskable-512-v16.png',
+  './apple-touch-icon-v16.png',
+  './favicon-96-v16.png',
+  './fundo-azul-marinho-neon.png',
+  './moldura-neon-oceano.png'
 ];
 
-self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
-  self.skipWaiting();
+self.addEventListener('install',event=>{
+  event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));
 });
 
-self.addEventListener("activate", event => {
+self.addEventListener('activate',event=>{
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    caches.keys().then(keys=>Promise.all(
+      keys.filter(k=>k.startsWith('aghu-notes-')&&k!==CACHE).map(k=>caches.delete(k))
+    )).then(()=>self.clients.claim())
   );
-  self.clients.claim();
 });
 
-self.addEventListener("fetch", event => {
-  if(event.request.method !== "GET") return;
-  const url = new URL(event.request.url);
-  if(url.origin !== self.location.origin) return;
+self.addEventListener('fetch',event=>{
+  const req=event.request;
+  if(req.method!=='GET') return;
+  const url=new URL(req.url);
 
-  if(event.request.mode === "navigate"){
+  // Nunca intercepta Supabase, Mercado Pago ou outros backends.
+  if(url.origin!==self.location.origin) return;
+
+  if(req.mode==='navigate'){
     event.respondWith(
-      fetch(event.request)
-        .then(resp => {
-          if(resp && resp.ok) caches.open(CACHE).then(c => c.put("./index.html",resp.clone()));
+      fetch(req,{cache:'no-store'})
+        .then(resp=>{
+          const copy=resp.clone();
+          caches.open(CACHE).then(c=>c.put('./index.html',copy)).catch(()=>{});
           return resp;
         })
-        .catch(() => caches.match("./index.html"))
+        .catch(()=>caches.match('./index.html').then(r=>r||caches.match('./')))
     );
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then(cached =>
-      cached || fetch(event.request).then(resp => {
-        if(resp && resp.ok) caches.open(CACHE).then(c => c.put(event.request,resp.clone()));
-        return resp;
-      })
-    )
+    caches.match(req).then(cached=>cached||fetch(req).then(resp=>{
+      if(resp && resp.ok){
+        const copy=resp.clone();
+        caches.open(CACHE).then(c=>c.put(req,copy)).catch(()=>{});
+      }
+      return resp;
+    }))
   );
 });

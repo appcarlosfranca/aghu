@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- AGHU Notes LOCAL v21: funcionamento 100% local, sem Supabase. -->
+<!-- AGHU Notes CLOUD v57: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -7,12 +7,12 @@
   <meta name="color-scheme" content="light" />
   <title>AGHU Notes</title>
   <meta name="theme-color" content="#ffffff" />
-  <link rel="manifest" href="./manifest.webmanifest?v=21" />
-  <link rel="shortcut icon" href="./favicon.ico?v=21" />
-  <link rel="icon" href="./favicon.ico?v=21" sizes="any" />
-  <link rel="icon" type="image/png" sizes="96x96" href="./favicon-96-v16.png?v=21" />
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192-v16.png?v=21" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-v16.png?v=21" />
+  <link rel="manifest" href="./manifest.webmanifest?v=57" />
+  <link rel="shortcut icon" href="./favicon.ico?v=57" />
+  <link rel="icon" href="./favicon.ico?v=57" sizes="any" />
+  <link rel="icon" type="image/png" sizes="96x96" href="./favicon-96-v16.png?v=57" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192-v16.png?v=57" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-v16.png?v=57" />
   <meta name="application-name" content="AGHU Notes" />
   <meta name="apple-mobile-web-app-title" content="AGHU Notes" />
 
@@ -1900,7 +1900,7 @@
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>window.APP_CONFIG={SUPABASE_URL:"https://aufujiafalafuncsbjzu.supabase.co",SUPABASE_ANON_KEY:"sb_publishable_u0p7ZsvaBivvZwOgqVowcw_opxxFTOO",GOOGLE_CLIENT_ID:""};</script>
+  <script>window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPABASE_ANON_KEY:"sb_publishable_5-96i6Atx7piLOhmQujUlQ___-9fLwW",GOOGLE_CLIENT_ID:""};</script>
 <style id="aghu-cloud-v28-style">.sync-status.syncing{color:#b47b00!important}.sync-status.offline{color:#9a4248!important}.sync-status:not(.offline):not(.syncing){color:#2f7d70!important}</style>
 
 <style id="aghu-v30-card-refinement">
@@ -5970,224 +5970,147 @@
   if(!window.supabase?.createClient)throw new Error('Supabase JS não carregado.');
   const raw=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   const BOOTSTRAP_ADMIN_LOGIN='carlosjfranca07@gmail.com';
-  const ENC='AGHUENC1:',enc=new TextEncoder(),dec=new TextDecoder(),MAGIC=enc.encode('AGHUIMG1');
-  let dataKey=null,currentProfile=null,activeExclusiveSessionId=null;
+  const LOGICAL=new Set(['notes','labels','note_labels','note_versions','attachments']);
+  const OPEN={
+    notes:['id','user_id'],labels:['id','user_id'],note_labels:['id','user_id','note_id','label_id'],
+    note_versions:['id','user_id','note_id'],attachments:['id','user_id','note_id']
+  };
+  const enc=new TextEncoder(),dec=new TextDecoder(),MAGIC=enc.encode('AGHUIMG1'),ENC='AGHUENC1:';
+  let dataKey=null,legacy210Key=null,currentProfile=null,activeExclusiveSessionId=null,sharePrivateKey=null;
   const accountListeners=new Set();
   const b64=b=>{let s='',a=new Uint8Array(b);for(let i=0;i<a.length;i+=32768)s+=String.fromCharCode(...a.subarray(i,i+32768));return btoa(s)};
-  const unb64=s=>{const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a};
+  const unb64=s=>{const b=atob(String(s||'')),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a};
+  const clone=v=>{try{return structuredClone(v)}catch{return JSON.parse(JSON.stringify(v))}};
   const normalizeLogin=v=>String(v||'').trim().toLowerCase();
   const authEmailFor=v=>{v=normalizeLogin(v);return v.includes('@')?v:`${v}@aghu-notes.invalid`};
+  const displayLogin=(email,login='')=>{if(login)return normalizeLogin(login);email=normalizeLogin(email);return email.endsWith('@aghu-notes.invalid')?email.slice(0,-19):email};
   const validLogin=v=>{v=normalizeLogin(v);if(v.length<3||/\s/.test(v))return false;return v.includes('@')?/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v):/^[a-z0-9._-]+$/i.test(v)};
-  const deviceLabel=()=>{
-    const ua=navigator.userAgent||'Navegador';
-    const platform=navigator.userAgentData?.platform||navigator.platform||'';
-    let family='Navegador';
-    if(/iPad|iPhone|iPod/i.test(ua))family='iOS';
-    else if(/Android/i.test(ua))family=/Mi |Redmi|POCO|Xiaomi/i.test(ua)?'Xiaomi / Android':'Android';
-    else if(/Windows/i.test(ua))family='Windows';
-    else if(/Macintosh|Mac OS X/i.test(ua))family='macOS';
-    else if(/Linux/i.test(ua))family='Linux';
-    const browser=/Edg\//.test(ua)?'Edge':/Firefox\//.test(ua)?'Firefox':/Chrome\//.test(ua)?'Chrome':/Safari\//.test(ua)?'Safari':'Browser';
-    return `${family} • ${browser}${platform?` • ${platform}`:''}`.slice(0,180);
-  };
-  async function deriveKey(password,salt){const material=await crypto.subtle.importKey('raw',enc.encode(String(password)),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:unb64(salt),iterations:210000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
-  async function pack(value){if(!dataKey)throw Error('Chave de criptografia indisponível.');const iv=crypto.getRandomValues(new Uint8Array(12));const c=await crypto.subtle.encrypt({name:'AES-GCM',iv},dataKey,enc.encode(JSON.stringify(value)));return `${ENC}${b64(iv)}.${b64(c)}`}
-  async function unpack(value){if(typeof value!=='string'||!value.startsWith(ENC))return null;if(!dataKey)throw Error('Chave de criptografia indisponível.');const [i,c]=value.slice(ENC.length).split('.');const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(i)},dataKey,unb64(c));return JSON.parse(dec.decode(p))}
-  async function encryptBlob(blob){if(!dataKey)throw Error('Chave de criptografia indisponível.');const iv=crypto.getRandomValues(new Uint8Array(12)),cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},dataKey,await blob.arrayBuffer())),mime=enc.encode(blob.type||'application/octet-stream'),out=new Uint8Array(8+2+mime.length+12+cipher.length);out.set(MAGIC,0);new DataView(out.buffer).setUint16(8,mime.length);out.set(mime,10);out.set(iv,10+mime.length);out.set(cipher,22+mime.length);return new Blob([out],{type:'application/octet-stream'})}
-  async function decryptBlob(blob){const a=new Uint8Array(await blob.arrayBuffer()),is=a.length>22&&MAGIC.every((v,i)=>a[i]===v);if(!is)return blob;if(!dataKey)throw Error('Chave de criptografia indisponível.');const ml=new DataView(a.buffer,a.byteOffset,a.byteLength).getUint16(8),mime=dec.decode(a.slice(10,10+ml)),iv=a.slice(10+ml,22+ml),cipher=a.slice(22+ml),plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},dataKey,cipher);return new Blob([plain],{type:mime||'application/octet-stream'})}
-  const secret=['title','content_html','patient_meta','synthetic_local','synthetic_age','synthetic_record','reminder_at','color'];
-  async function encodeNote(r){const p={};for(const k of secret)p[k]=r[k]??(k==='patient_meta'?{}:(k==='synthetic_age'||k==='synthetic_record'?0:(k==='title'?'Nova nota':(k==='content_html'?'':(k==='color'?'#ffffff':null)))));return {...r,title:'🔒',content_html:await pack(p),patient_meta:{},synthetic_local:'',synthetic_age:0,synthetic_record:0,reminder_at:null,color:'#ffffff'}}
-  async function decodeAttachment(r){if(!r)return r;const x=await unpack(r.file_name).catch(()=>null);return x?{...r,file_name:x.file_name||''}:r}
-  async function decodeNote(r){if(!r)return r;let o={...r};const x=await unpack(r.content_html).catch(()=>null);if(x)o={...o,...x};if(Array.isArray(o.note_labels))o.note_labels=await Promise.all(o.note_labels.map(async l=>{const y={...l};if(y.labels?.name){const z=await unpack(y.labels.name).catch(()=>null);if(z)y.labels={...y.labels,name:z.name||''}}return y}));if(Array.isArray(o.attachments))o.attachments=await Promise.all(o.attachments.map(decodeAttachment));return o}
-  async function encodeLabel(r){return {...r,name:r.name?.startsWith?.(ENC)?r.name:await pack({name:r.name||''})}}
-  async function decodeLabel(r){if(!r)return r;const x=await unpack(r.name).catch(()=>null);return x?{...r,name:x.name||''}:r}
-  async function encodeVersion(r){return {...r,title:'🔒',content_html:await pack({title:r.title||'',content_html:r.content_html||''})}}
-  async function decodeVersion(r){if(!r)return r;const x=await unpack(r.content_html).catch(()=>null);return x?{...r,title:x.title||'',content_html:x.content_html||''}:r}
-  async function encodeAttachment(r){return {...r,file_name:r.file_name?.startsWith?.(ENC)?r.file_name:await pack({file_name:r.file_name||''})}}
-  async function encodeInsert(t,r){if(t==='notes')return encodeNote(r);if(t==='labels')return encodeLabel(r);if(t==='note_versions')return encodeVersion(r);if(t==='attachments')return encodeAttachment(r);return r}
-  async function decodeRows(t,d){if(d==null)return d;const a=Array.isArray(d)?d:[d];let o;if(t==='notes')o=await Promise.all(a.map(decodeNote));else if(t==='labels')o=await Promise.all(a.map(decodeLabel));else if(t==='note_versions')o=await Promise.all(a.map(decodeVersion));else if(t==='attachments')o=await Promise.all(a.map(decodeAttachment));else o=a;return Array.isArray(d)?o:o[0]}
+  const deviceLabel=()=>{const ua=navigator.userAgent||'Navegador',platform=navigator.userAgentData?.platform||navigator.platform||'';let family='Navegador';if(/iPad|iPhone|iPod/i.test(ua))family='iOS';else if(/Android/i.test(ua))family=/Mi |Redmi|POCO|Xiaomi/i.test(ua)?'Xiaomi / Android':'Android';else if(/Windows/i.test(ua))family='Windows';else if(/Macintosh|Mac OS X/i.test(ua))family='macOS';else if(/Linux/i.test(ua))family='Linux';const browser=/Edg\//.test(ua)?'Edge':/Firefox\//.test(ua)?'Firefox':/Chrome\//.test(ua)?'Chrome':/Safari\//.test(ua)?'Safari':'Browser';return `${family} • ${browser}${platform?` • ${platform}`:''}`.slice(0,180)};
+
+  async function deriveKey(password,salt,iterations){const material=await crypto.subtle.importKey('raw',enc.encode(String(password)),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:unb64(salt),iterations:Number(iterations)||180000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+  async function encryptObject(value,key=dataKey){if(!key)throw Error('Chave de criptografia indisponível.');const iv=crypto.getRandomValues(new Uint8Array(12)),cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(JSON.stringify(value)));return{v:1,alg:'AES-GCM',iv:b64(iv),cipher:b64(cipher)}}
+  async function decryptObject(box,key){if(!box||!box.iv||!box.cipher||!key)throw Error('Payload criptografado inválido.');const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(box.iv)},key,unb64(box.cipher));return JSON.parse(dec.decode(plain))}
+  async function decryptPayload(payload){
+    let box=payload;
+    if(typeof box==='string'&&box.startsWith(ENC)){
+      const [iv,cipher]=box.slice(ENC.length).split('.');
+      const legacy={v:1,iv,cipher};
+      for(const key of [legacy210Key,dataKey]){if(!key)continue;try{return await decryptObject(legacy,key)}catch{}}
+      throw Error('Não foi possível descriptografar um registro local legado.');
+    }
+    if(typeof box==='string'){try{box=JSON.parse(box)}catch{}}
+    if(box&&typeof box==='object'&&box.iv&&box.cipher){
+      for(const key of [dataKey,legacy210Key]){if(!key)continue;try{return await decryptObject(box,key)}catch{}}
+      throw Error('Não foi possível descriptografar os dados desta conta.');
+    }
+    return clone(payload);
+  }
+  async function encryptLegacyString(value,key=legacy210Key||dataKey){const box=await encryptObject(value,key);return `${ENC}${box.iv}.${box.cipher}`}
+
+  async function chooseDataKey(password,p){
+    const salt=p.encryption_salt||p.crypto_salt;if(!salt)throw Error('Perfil sem chave de criptografia.');
+    const preferred=Number(p.encryption_iterations||180000)||180000;
+    const candidates=[preferred,180000,210000].filter((x,i,a)=>a.indexOf(x)===i);
+    const probe=await raw.from('vault_records').select('payload').eq('user_id',p.id).limit(1).maybeSingle();
+    if(probe.error)throw probe.error;
+    if(!probe.data){dataKey=await deriveKey(password,salt,preferred);legacy210Key=preferred===210000?dataKey:await deriveKey(password,salt,210000);return preferred}
+    for(const it of candidates){
+      const k=await deriveKey(password,salt,it);
+      try{await decryptObject(probe.data.payload,k);dataKey=k;legacy210Key=it===210000?k:await deriveKey(password,salt,210000);return it}catch{}
+    }
+    throw Error('Senha aceita, mas não foi possível abrir os dados criptografados desta conta. Não alteramos nenhuma nota.');
+  }
+
+  function normalizeProfile(p){if(!p)return null;return{...p,user_id:p.id,login:displayLogin(p.email,p.login),crypto_salt:p.encryption_salt}}
+  async function getOwnProfile(userId){const r=await raw.from('profiles').select('*').eq('id',userId).single();if(r.error)return r;return{data:normalizeProfile(r.data),error:null}}
+
+  async function vaultRows(kind){if(!currentProfile?.user_id)return[];const r=await raw.from('vault_records').select('*').eq('user_id',currentProfile.user_id).eq('kind',kind);if(r.error)throw r.error;return r.data||[]}
+  async function decodeVaultRow(v){const payload=await decryptPayload(v.payload);const row={...(payload&&typeof payload==='object'?payload:{}),id:v.record_id,user_id:v.user_id};if(v.note_id)row.note_id=v.note_id;if(v.kind==='note_labels'&&v.ref_id)row.label_id=v.ref_id;if(!row.created_at)row.created_at=v.created_at;if(!row.updated_at)row.updated_at=v.updated_at;Object.defineProperty(row,'__vault_id',{value:v.id,enumerable:false});return row}
+  async function encodeVaultRow(kind,row,wrapperId=null){const now=new Date().toISOString(),id=row.id||crypto.randomUUID(),userId=row.user_id||currentProfile?.user_id;if(!userId)throw Error('Usuário indisponível.');const keep=new Set(OPEN[kind]||['id','user_id']),payload={};for(const [k,v] of Object.entries({...row,id,user_id:userId})){if(!keep.has(k)&&!k.startsWith('__'))payload[k]=v}if(!('created_at'in payload))payload.created_at=row.created_at||now;if(!('updated_at'in payload))payload.updated_at=row.updated_at||now;return{id:wrapperId||crypto.randomUUID(),user_id:userId,kind,record_id:id,note_id:row.note_id||null,ref_id:kind==='note_labels'?(row.label_id||null):null,payload:await encryptObject(payload),created_at:row.created_at||now,updated_at:row.updated_at||now}}
+  async function fetchLogical(kind,enrich=false){const vs=await vaultRows(kind),out=[];for(const v of vs){try{out.push(await decodeVaultRow(v))}catch(e){console.error('Falha ao descriptografar',kind,v.record_id,e);throw e}}if(kind==='notes'&&enrich){const [nls,labels,atts]=await Promise.all([fetchLogical('note_labels'),fetchLogical('labels'),fetchLogical('attachments')]);const lm=new Map(labels.map(x=>[x.id,x]));for(const n of out){n.note_labels=nls.filter(x=>x.note_id===n.id).map(x=>({label_id:x.label_id,labels:lm.has(x.label_id)?{id:x.label_id,name:lm.get(x.label_id).name}:null}));n.attachments=atts.filter(x=>x.note_id===n.id)}}return out}
+  function matches(row,filters){for(const [op,k,v] of filters){const rv=row?.[k];if(op==='eq'&&rv!==v)return false;if(op==='in'&&!(v||[]).includes(rv))return false}return true}
+  function sortRows(rows,ord){if(!ord)return rows;const[k,asc]=ord;return rows.sort((a,b)=>{const av=a?.[k],bv=b?.[k];if(av==null&&bv==null)return 0;if(av==null)return 1;if(bv==null)return-1;let c;if(typeof av==='number'&&typeof bv==='number')c=av-bv;else{const ad=Date.parse(av),bd=Date.parse(bv);c=Number.isFinite(ad)&&Number.isFinite(bd)?ad-bd:String(av).localeCompare(String(bv),'pt-BR',{numeric:true,sensitivity:'base'})}return asc?c:-c})}
+  async function deleteLogicalRows(kind,rows){for(const row of rows){const vid=row.__vault_id;if(vid){const r=await raw.from('vault_records').delete().eq('id',vid);if(r.error)throw r.error}else{const r=await raw.from('vault_records').delete().eq('user_id',currentProfile.user_id).eq('kind',kind).eq('record_id',row.id);if(r.error)throw r.error}if(kind==='notes'){const dep=await raw.from('vault_records').delete().eq('user_id',currentProfile.user_id).in('kind',['note_labels','note_versions','attachments']).eq('note_id',row.id);if(dep.error)throw dep.error}else if(kind==='labels'){const dep=await raw.from('vault_records').delete().eq('user_id',currentProfile.user_id).eq('kind','note_labels').eq('ref_id',row.id);if(dep.error)throw dep.error}}}
+
   class Q{
     constructor(t){this.t=t;this.op='select';this.p=null;this.f=[];this.ord=null;this.lim=null;this.cols='*';this.ret=false;this.mode=null}
     select(c='*'){this.cols=c||'*';if(this.op==='insert'||this.op==='update')this.ret=true;else this.op='select';return this}
-    insert(p){this.op='insert';this.p=p;return this} update(p){this.op='update';this.p=p;return this} delete(){this.op='delete';return this}
-    eq(k,v){this.f.push(['eq',k,v]);return this} in(k,v){this.f.push(['in',k,[...(v||[])]]);return this} order(k,o={}){this.ord=[k,o.ascending!==false];return this} limit(n){this.lim=+n;return this}
-    single(){this.mode='single';return this.execute()} maybeSingle(){this.mode='maybeSingle';return this.execute()} then(a,b){return this.execute().then(a,b)}
-    apply(q){for(const [t,k,v] of this.f)q=t==='eq'?q.eq(k,v):q.in(k,v);if(this.ord)q=q.order(this.ord[0],{ascending:this.ord[1]});if(Number.isFinite(this.lim))q=q.limit(this.lim);return q}
-    async execute(){try{let q;if(this.op==='select'){q=this.apply(raw.from(this.t).select(this.cols))}else if(this.op==='insert'){const many=Array.isArray(this.p),p=many?await Promise.all(this.p.map(x=>encodeInsert(this.t,x))):await encodeInsert(this.t,this.p);q=raw.from(this.t).insert(p);if(this.ret)q=q.select(this.cols)}else if(this.op==='update'){let p={...this.p};if(this.t==='notes'&&secret.some(k=>k in p)){const id=this.f.find(x=>x[0]==='eq'&&x[1]==='id')?.[2];if(!id)throw Error('Atualização criptografada requer ID.');const rr=await raw.from('notes').select('*').eq('id',id).single();if(rr.error)throw rr.error;const cur=await decodeNote(rr.data),en=await encodeNote({...cur,...p});for(const k of secret)p[k]=en[k]}else if(this.t==='labels'&&'name'in p)p=await encodeLabel(p);else if(this.t==='attachments'&&'file_name'in p)p=await encodeAttachment(p);q=this.apply(raw.from(this.t).update(p));if(this.ret)q=q.select(this.cols)}else{q=this.apply(raw.from(this.t).delete())}if(this.mode==='single')q=q.single();else if(this.mode==='maybeSingle')q=q.maybeSingle();const {data,error}=await q;if(error)return{data:null,error};return{data:await decodeRows(this.t,data),error:null}}catch(e){console.error(e);return{data:null,error:{message:e?.message||String(e)}}}}
+    insert(p){this.op='insert';this.p=p;return this}update(p){this.op='update';this.p=p;return this}delete(){this.op='delete';return this}
+    eq(k,v){this.f.push(['eq',k,v]);return this}in(k,v){this.f.push(['in',k,[...(v||[])]]);return this}order(k,o={}){this.ord=[k,o.ascending!==false];return this}limit(n){this.lim=Number(n);return this}
+    single(){this.mode='single';return this.execute()}maybeSingle(){this.mode='maybeSingle';return this.execute()}then(a,b){return this.execute().then(a,b)}
+    finish(rows){let r=sortRows(rows,this.ord);if(Number.isFinite(this.lim))r=r.slice(0,this.lim);if(this.mode==='single'){if(r.length!==1)return{data:null,error:{message:`JSON object requested, multiple (or no) rows returned: ${r.length}`}};return{data:r[0],error:null}}if(this.mode==='maybeSingle'){if(r.length>1)return{data:null,error:{message:`JSON object requested, multiple rows returned: ${r.length}`}};return{data:r[0]||null,error:null}}return{data:r,error:null}}
+    async execute(){
+      if(!LOGICAL.has(this.t)){let q=raw.from(this.t);if(this.op==='select')q=q.select(this.cols);else if(this.op==='insert'){q=q.insert(this.p);if(this.ret)q=q.select(this.cols)}else if(this.op==='update'){q=q.update(this.p);if(this.ret)q=q.select(this.cols)}else q=q.delete();for(const[op,k,v]of this.f)q=op==='eq'?q.eq(k,v):q.in(k,v);if(this.ord)q=q.order(this.ord[0],{ascending:this.ord[1]});if(Number.isFinite(this.lim))q=q.limit(this.lim);if(this.mode==='single')q=q.single();else if(this.mode==='maybeSingle')q=q.maybeSingle();return await q}
+      try{
+        const enrich=this.t==='notes'&&this.op==='select';
+        if(this.op==='select'){const all=await fetchLogical(this.t,enrich),filtered=all.filter(r=>matches(r,this.f));return this.finish(filtered)}
+        if(this.op==='insert'){
+          const many=Array.isArray(this.p),items=many?this.p:[this.p],saved=[];
+          for(const input of items){const row={...clone(input)};if(!row.id)row.id=crypto.randomUUID();if(!row.user_id)row.user_id=currentProfile?.user_id;const exists=await raw.from('vault_records').select('id').eq('user_id',row.user_id).eq('kind',this.t).eq('record_id',row.id).limit(1).maybeSingle();if(exists.error)throw exists.error;if(exists.data){const er=new Error('duplicate logical record');er.code='23505';throw er;}const vr=await encodeVaultRow(this.t,row);const r=await raw.from('vault_records').insert(vr).select('*').single();if(r.error)throw r.error;saved.push(await decodeVaultRow(r.data))}
+          const result=many?saved:saved[0];if(this.ret||this.mode){const arr=Array.isArray(result)?result:[result];return this.finish(arr)}return{data:null,error:null}
+        }
+        const all=await fetchLogical(this.t,false),matched=all.filter(r=>matches(r,this.f));
+        if(this.op==='update'){
+          const saved=[];for(const old of matched){const merged={...old,...clone(this.p)};if(!('updated_at'in this.p))merged.updated_at=new Date().toISOString();const vr=await encodeVaultRow(this.t,merged,old.__vault_id);const r=await raw.from('vault_records').update({payload:vr.payload,note_id:vr.note_id,ref_id:vr.ref_id,updated_at:vr.updated_at}).eq('id',old.__vault_id).select('*').single();if(r.error)throw r.error;saved.push(await decodeVaultRow(r.data))}if(this.ret||this.mode)return this.finish(saved);return{data:null,error:null}
+        }
+        await deleteLogicalRows(this.t,matched);return{data:null,error:null}
+      }catch(e){console.error(e);return{data:null,error:{message:e?.message||String(e),code:e?.code}}}
+    }
   }
-  let sharePrivateKey=null;
+
   async function ensureShareKeyPair(){
     if(!currentProfile?.user_id||!dataKey)return false;
-    const p=await raw.from('profiles').select('share_public_jwk,share_private_enc').eq('user_id',currentProfile.user_id).maybeSingle();
-    if(p.error)throw p.error;
-    if(!p.data)throw Error('Perfil ativo não encontrado para o compartilhamento.');
-    if(p.data?.share_public_jwk&&p.data?.share_private_enc){
-      const box=await unpack(p.data.share_private_enc);
-      if(!box?.private_jwk)throw Error('Chave privada de compartilhamento inválida.');
-      sharePrivateKey=await crypto.subtle.importKey('jwk',box.private_jwk,{name:'RSA-OAEP',hash:'SHA-256'},false,['decrypt']);
-      return true;
-    }
+    const p=await raw.from('profiles').select('share_public_jwk,share_private_enc').eq('id',currentProfile.user_id).maybeSingle();if(p.error)throw p.error;if(!p.data)throw Error('Perfil ativo não encontrado para o compartilhamento.');
+    if(p.data.share_public_jwk&&p.data.share_private_enc){const box=await decryptPayload(p.data.share_private_enc);if(!box?.private_jwk)throw Error('Chave privada de compartilhamento inválida.');sharePrivateKey=await crypto.subtle.importKey('jwk',box.private_jwk,{name:'RSA-OAEP',hash:'SHA-256'},false,['decrypt']);return true}
     const pair=await crypto.subtle.generateKey({name:'RSA-OAEP',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['encrypt','decrypt']);
-    const publicJwk=await crypto.subtle.exportKey('jwk',pair.publicKey),privateJwk=await crypto.subtle.exportKey('jwk',pair.privateKey),privateEnc=await pack({private_jwk:privateJwk});
+    const publicJwk=await crypto.subtle.exportKey('jwk',pair.publicKey),privateJwk=await crypto.subtle.exportKey('jwk',pair.privateKey),privateEnc=await encryptObject({private_jwk:privateJwk});
     const r=await raw.rpc('ensure_share_keys',{public_jwk:publicJwk,private_enc:privateEnc});if(r.error)throw r.error;sharePrivateKey=pair.privateKey;return true;
   }
-  async function encryptSharePayload(payload,recipientPublicJwk){
-    const publicKey=await crypto.subtle.importKey('jwk',recipientPublicJwk,{name:'RSA-OAEP',hash:'SHA-256'},false,['encrypt']);
-    const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']),rawKey=await crypto.subtle.exportKey('raw',key),iv=crypto.getRandomValues(new Uint8Array(12));
-    const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(JSON.stringify(payload))),wrapped=await crypto.subtle.encrypt({name:'RSA-OAEP'},publicKey,rawKey);
-    return{encrypted_payload:JSON.stringify({iv:b64(iv),cipher:b64(cipher)}),wrapped_key:b64(wrapped)};
-  }
-  async function decryptSharePayload(row){
-    await ensureShareKeyPair();const rawKey=await crypto.subtle.decrypt({name:'RSA-OAEP'},sharePrivateKey,unb64(row.wrapped_key));const key=await crypto.subtle.importKey('raw',rawKey,{name:'AES-GCM'},false,['decrypt']);const box=JSON.parse(row.encrypted_payload);const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(box.iv)},key,unb64(box.cipher));return JSON.parse(dec.decode(plain));
-  }
-  async function shareNoteWithLogin(note,login){
-    await ensureShareKeyPair();
-    const desired=normalizeLogin(login);
-    const look=await raw.rpc('get_share_recipient',{desired_login:desired});
-    if(look.error)throw look.error;
-    const rec=Array.isArray(look.data)?look.data[0]:look.data;
-    if(!rec?.recipient_user_id)throw Error('Login destinatário não encontrado ou inativo.');
-    if(!rec.recipient_public_jwk)throw Error('Essa conta precisa acessar a versão atual do Notes ao menos uma vez antes de receber notas criptografadas.');
-
-    const box=await encryptSharePayload({
-      title:note.title||'Sem título',
-      content_html:note.content_html||'',
-      color:note.color||'#ffffff',
-      shared_at:new Date().toISOString(),
-      source_updated_at:note.updated_at||null
-    },rec.recipient_public_jwk);
-
-    const saved=await raw.rpc('save_note_share',{
-      target_login:rec.recipient_login,
-      target_note_id:note.id,
-      encrypted_payload_arg:box.encrypted_payload,
-      wrapped_key_arg:box.wrapped_key
-    });
-    if(saved.error)throw saved.error;
-
-    const row=Array.isArray(saved.data)?saved.data[0]:saved.data;
-    return {...(row||{}),recipient_login:rec.recipient_login};
-  }
+  async function encryptSharePayload(payload,recipientPublicJwk){const publicKey=await crypto.subtle.importKey('jwk',recipientPublicJwk,{name:'RSA-OAEP',hash:'SHA-256'},false,['encrypt']);const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']),rawKey=await crypto.subtle.exportKey('raw',key),iv=crypto.getRandomValues(new Uint8Array(12));const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(JSON.stringify(payload))),wrapped=await crypto.subtle.encrypt({name:'RSA-OAEP'},publicKey,rawKey);return{encrypted_payload:JSON.stringify({iv:b64(iv),cipher:b64(cipher)}),wrapped_key:b64(wrapped)}}
+  async function decryptSharePayload(row){await ensureShareKeyPair();const rawKey=await crypto.subtle.decrypt({name:'RSA-OAEP'},sharePrivateKey,unb64(row.wrapped_key));const key=await crypto.subtle.importKey('raw',rawKey,{name:'AES-GCM'},false,['decrypt']);const box=JSON.parse(row.encrypted_payload);const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(box.iv)},key,unb64(box.cipher));return JSON.parse(dec.decode(plain))}
+  async function shareNoteWithLogin(note,login){await ensureShareKeyPair();const desired=normalizeLogin(login),look=await raw.rpc('get_share_recipient',{desired_login:desired});if(look.error)throw look.error;const rec=Array.isArray(look.data)?look.data[0]:look.data;if(!rec?.recipient_user_id)throw Error('Login destinatário não encontrado ou inativo.');if(!rec.recipient_public_jwk)throw Error('Essa conta precisa acessar a versão atual do Notes ao menos uma vez antes de receber notas criptografadas.');const box=await encryptSharePayload({title:note.title||'Sem título',content_html:note.content_html||'',color:note.color||'#ffffff',shared_at:new Date().toISOString(),source_updated_at:note.updated_at||null},rec.recipient_public_jwk);const saved=await raw.rpc('save_note_share',{target_login:rec.recipient_login,target_note_id:note.id,encrypted_payload_arg:box.encrypted_payload,wrapped_key_arg:box.wrapped_key});if(saved.error)throw saved.error;const row=Array.isArray(saved.data)?saved.data[0]:saved.data;return{...(row||{}),recipient_login:rec.recipient_login}}
   async function listSharesForNote(noteId){const q=await raw.from('note_shares').select('id,note_id,recipient_id,recipient_login,owner_login,created_at,updated_at').eq('note_id',noteId).eq('owner_id',currentProfile.user_id).order('updated_at',{ascending:false});if(q.error)throw q.error;return q.data||[]}
   async function revokeShare(shareId){const q=await raw.from('note_shares').delete().eq('id',shareId).eq('owner_id',currentProfile.user_id);if(q.error)throw q.error;return true}
   async function listReceivedShares(){await ensureShareKeyPair();const q=await raw.from('note_shares').select('*').eq('recipient_id',currentProfile.user_id).order('updated_at',{ascending:false});if(q.error)throw q.error;const out=[];for(const row of q.data||[]){try{out.push({...row,payload:await decryptSharePayload(row)})}catch(e){out.push({...row,payload:null,decrypt_error:e?.message||String(e)})}}return out}
   window.AGhuShareCrypto={ensure:ensureShareKeyPair,shareNoteWithLogin,listSharesForNote,revokeShare,listReceivedShares};
+
   const auth={
     async getSession(){const r=await raw.auth.getSession();if(r.error)return r;if(r.data?.session&&!dataKey){await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:{session:null},error:null}}return r},
     async signInWithPassword({email,password}){
-      const login=normalizeLogin(email);
-      const r=await raw.auth.signInWithPassword({email:authEmailFor(login),password});
-      if(r.error)return r;
-
-      const p=await raw.from('profiles').select('*').eq('user_id',r.data.user.id).single();
-      if(p.error||!p.data){
-        await raw.auth.signOut({scope:'local'}).catch(()=>{});
-        return{data:null,error:{message:'Perfil da conta não encontrado.'}};
-      }
-      if(!p.data.active){
-        await raw.auth.signOut({scope:'local'}).catch(()=>{});
-        return{data:null,error:{message:'Este acesso está bloqueado pelo Administrador.'}};
-      }
-
-      dataKey=await deriveKey(password,p.data.crypto_salt);
-      currentProfile=p.data;
-
+      const login=normalizeLogin(email),r=await raw.auth.signInWithPassword({email:authEmailFor(login),password});if(r.error)return r;
+      const pr=await getOwnProfile(r.data.user.id);if(pr.error||!pr.data){await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:null,error:{message:'Perfil da conta não encontrado.'}}}if(!pr.data.active){await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:null,error:{message:'Este acesso está bloqueado pelo Administrador.'}}}
+      currentProfile=pr.data;try{currentProfile.encryption_iterations=await chooseDataKey(password,pr.data)}catch(e){currentProfile=null;dataKey=null;legacy210Key=null;await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:null,error:{message:e.message}}}
       try{await ensureShareKeyPair()}catch(e){console.warn('Chaves de compartilhamento:',e)}
-
-      const exclusiveSessionId=crypto.randomUUID();
-      const claimed=await raw.rpc('claim_active_session',{
-        new_session_id:exclusiveSessionId,
-        device_label:deviceLabel()
-      });
-      if(claimed.error){
-        dataKey=null;sharePrivateKey=null;currentProfile=null;activeExclusiveSessionId=null;
-        await raw.auth.signOut({scope:'local'}).catch(()=>{});
-        return{data:null,error:{message:'Não foi possível iniciar a sessão exclusiva. Tente novamente.'}};
-      }
-      activeExclusiveSessionId=exclusiveSessionId;
-
-      const first=await raw.rpc('mark_first_access');
-      const u={
-        ...r.data.user,
-        login:p.data.login,
-        role:p.data.role,
-        first_access:first.data===true,
-        exclusive_session_id:exclusiveSessionId
-      };
-      return{data:{user:u,session:{...r.data.session,user:u}},error:null};
+      const sid=crypto.randomUUID(),claimed=await raw.rpc('claim_active_session',{new_session_id:sid,device_label:deviceLabel()});if(claimed.error){dataKey=null;legacy210Key=null;sharePrivateKey=null;currentProfile=null;await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:null,error:{message:'Não foi possível iniciar a sessão exclusiva. Tente novamente.'}}}activeExclusiveSessionId=sid;
+      const first=await raw.rpc('mark_first_access');const u={...r.data.user,login:currentProfile.login,role:currentProfile.role,first_access:first.data===true,exclusive_session_id:sid};return{data:{user:u,session:{...r.data.session,user:u}},error:null}
     },
-    async signOut(options={}){
-      const release=options?.release!==false;
-      const sessionId=activeExclusiveSessionId;
-      if(release&&sessionId){
-        try{await raw.rpc('release_active_session',{session_id_arg:sessionId})}catch{}
-      }
-      dataKey=null;sharePrivateKey=null;currentProfile=null;activeExclusiveSessionId=null;
-      return raw.auth.signOut({scope:'local'});
-    },
+    async signOut(options={}){const release=options?.release!==false,sid=activeExclusiveSessionId;if(release&&sid){try{await raw.rpc('release_active_session',{session_id_arg:sid})}catch{}}dataKey=null;legacy210Key=null;sharePrivateKey=null;currentProfile=null;activeExclusiveSessionId=null;return raw.auth.signOut({scope:'local'})},
     onAuthStateChange(cb){return raw.auth.onAuthStateChange((ev,s)=>{if(!s){cb(ev,null);return}if(dataKey)cb(ev,{...s,user:{...s.user,login:currentProfile?.login,role:currentProfile?.role}})})}
   };
+
+  async function encryptBlob(blob){if(!dataKey)throw Error('Chave de criptografia indisponível.');const iv=crypto.getRandomValues(new Uint8Array(12)),cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},dataKey,await blob.arrayBuffer())),mime=enc.encode(blob.type||'application/octet-stream'),out=new Uint8Array(8+2+mime.length+12+cipher.length);out.set(MAGIC,0);new DataView(out.buffer).setUint16(8,mime.length);out.set(mime,10);out.set(iv,10+mime.length);out.set(cipher,22+mime.length);return new Blob([out],{type:'application/octet-stream'})}
+  async function decryptBlobBinary(blob,key){const a=new Uint8Array(await blob.arrayBuffer()),is=a.length>22&&MAGIC.every((v,i)=>a[i]===v);if(!is)throw Error('not-binary');const ml=new DataView(a.buffer,a.byteOffset,a.byteLength).getUint16(8),mime=dec.decode(a.slice(10,10+ml)),iv=a.slice(10+ml,22+ml),cipher=a.slice(22+ml),plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,cipher);return new Blob([plain],{type:mime||'application/octet-stream'})}
+  async function decryptBlob(blob){for(const key of [dataKey,legacy210Key]){if(!key)continue;try{return await decryptBlobBinary(blob,key)}catch{}}try{const txt=await blob.text(),box=JSON.parse(txt);if(box?.iv&&box?.cipher){for(const key of [dataKey,legacy210Key]){if(!key)continue;try{const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(box.iv)},key,unb64(box.cipher));return new Blob([plain],{type:box.type||'application/octet-stream'})}catch{}}}}catch{}return blob}
   const storage={from(bucket){const b=raw.storage.from(bucket);return{async upload(path,blob,o={}){try{return await b.upload(path,await encryptBlob(blob),o)}catch(e){return{data:null,error:{message:e.message}}}},async download(path){const r=await b.download(path);if(r.error||!r.data)return r;try{return{data:await decryptBlob(r.data),error:null}}catch(e){return{data:null,error:{message:e.message}}}},remove:p=>b.remove(p),async createSignedUrl(path){const r=await b.download(path);if(r.error||!r.data)return{data:null,error:r.error};try{return{data:{signedUrl:URL.createObjectURL(await decryptBlob(r.data))},error:null}}catch(e){return{data:null,error:{message:e.message}}}}}}};
+
   const client={auth,storage,from:t=>new Q(t),rpc:(n,a)=>raw.rpc(n,a)};
   function notify(){for(const cb of accountListeners){try{cb()}catch{}}}
+  async function adminFunction(action,payload={}){const s=await raw.auth.getSession(),token=s.data?.session?.access_token;if(!token)throw Error('Sessão do Administrador expirada.');const r=await fetch(`${cfg.SUPABASE_URL}/functions/v1/admin-users`,{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.SUPABASE_ANON_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({action,...payload})});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||`Falha HTTP ${r.status}`);return d}
   const admin={
     hasAdmin:()=>true,setup:async()=>{throw Error('Administrador é gerenciado pela nuvem.')},
-    async login(id,pw){
-      id=normalizeLogin(id);pw=String(pw||'');
-
-      let r=await auth.signInWithPassword({email:id,password:pw});
-
-      if(r.error && id===BOOTSTRAP_ADMIN_LOGIN){
-        const temp=window.supabase.createClient(
-          cfg.SUPABASE_URL,
-          cfg.SUPABASE_ANON_KEY,
-          {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}
-        );
-
-        const created=await temp.auth.signUp({
-          email:id,
-          password:pw,
-          options:{
-            data:{
-              display_login:id,
-              aghu_admin_provision:'true',
-              aghu_bootstrap_admin:'true'
-            }
-          }
-        });
-
-        if(!created.error && created.data?.user?.id){
-          try{await temp.auth.signOut()}catch{}
-          r=await auth.signInWithPassword({email:id,password:pw});
-        }
-      }
-
-      if(r.error){
-        const msg=(r.error.message||'').toLowerCase();
-        if(msg.includes('invalid login credentials')){
-          throw Error('Login ou senha inválidos. Se esta é sua primeira entrada online, use o acesso Administrador com a conta principal.');
-        }
-        throw Error(r.error.message||'Não foi possível autenticar.');
-      }
-
-      if(r.data.user.role!=='admin'){
-        await auth.signOut();
-        throw Error('Esta conta não possui permissão de Administrador.');
-      }
-      return true;
-    },
+    async login(id,pw){const r=await auth.signInWithPassword({email:id,password:pw});if(r.error)throw Error(r.error.message||'Não foi possível autenticar.');if(r.data.user.role!=='admin'){await auth.signOut();throw Error('Esta conta não possui permissão de Administrador.')}return true},
     logout(){auth.signOut().catch(()=>{})},
-    async listUsers(){const r=await raw.from('profiles').select('user_id,login,role,active,created_at,first_access_done').order('created_at',{ascending:true});if(r.error)throw r.error;return(r.data||[]).map(p=>({id:p.user_id,email:p.login,password:'••••••',createdAt:p.created_at,active:p.active,role:p.role,firstAccessDone:p.first_access_done}))},
-    async createUser(login,password){login=normalizeLogin(login);password=String(password||'');if(!validLogin(login))throw Error('Login inválido.');if(password.length<6)throw Error('A senha deve ter pelo menos 6 caracteres.');const temp=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});const r=await temp.auth.signUp({email:authEmailFor(login),password,options:{data:{display_login:login,aghu_admin_provision:'true'}}});if(r.error)throw r.error;if(!r.data?.user?.id)throw Error('Usuário não criado.');const a=await raw.rpc('admin_activate_user',{target_user_id:r.data.user.id,desired_login:login});if(a.error)throw a.error;notify();return{id:r.data.user.id,email:login,active:true}},
-    async resetPassword(id,password){const r=await raw.rpc('admin_reset_user_password',{target_user_id:id,new_password:String(password||'')});if(r.error)throw r.error;return true},
-    async toggleUser(id){const x=await raw.from('profiles').select('active').eq('user_id',id).single();if(x.error)throw x.error;const n=!x.data.active,r=await raw.rpc('admin_set_user_active',{target_user_id:id,new_active:n});if(r.error)throw r.error;notify();return n},
-    async deleteUser(id){const r=await raw.rpc('admin_delete_user',{target_user_id:id});if(r.error)throw r.error;notify();return true},
-    onUsersChanged(cb){accountListeners.add(cb);return()=>accountListeners.delete(cb)}
+    async listUsers(){const r=await raw.from('profiles').select('id,email,login,role,active,created_at,first_access_done').order('created_at',{ascending:true});if(r.error)throw r.error;return(r.data||[]).map(p=>({id:p.id,email:displayLogin(p.email,p.login),password:'••••••',createdAt:p.created_at,active:p.active,role:p.role,firstAccessDone:p.first_access_done}))},
+    async createUser(login,password){login=normalizeLogin(login);password=String(password||'');if(!validLogin(login))throw Error('Login inválido.');if(password.length<6)throw Error('A senha deve ter pelo menos 6 caracteres.');const d=await adminFunction('create',{login,password});notify();return{id:d.user_id,email:login,active:true}},
+    async resetPassword(id,password){await adminFunction('reset_password',{user_id:id,password:String(password||'')});return true},
+    async toggleUser(id){const d=await adminFunction('toggle_active',{user_id:id});notify();return!!d.active},
+    async deleteUser(id){await adminFunction('set_active',{user_id:id,active:false});notify();return true},onUsersChanged(cb){accountListeners.add(cb);return()=>accountListeners.delete(cb)}
   };
   raw.channel('aghu-admin-profiles').on('postgres_changes',{event:'*',schema:'public',table:'profiles'},notify).subscribe();
   window.AGhuCloud={createClient:()=>client,raw};window.AGhuCloudRaw=raw;window.AGhuLocalAdmin=admin;
-  window.AGhuLocalCrypto={ready:()=>!!dataKey,userId:()=>currentProfile?.user_id||null,encryptJson:pack,decryptJson:async v=>typeof v==='string'?unpack(v):v,encryptBlob,decryptBlob};
+  window.AGhuLocalCrypto={ready:()=>!!dataKey,userId:()=>currentProfile?.user_id||null,encryptJson:v=>encryptObject(v),decryptJson:decryptPayload,encryptBlob,decryptBlob};
 })();
+
 </script>
 
 <script>
@@ -7114,7 +7037,7 @@
           event:'UPDATE',
           schema:'public',
           table:'profiles',
-          filter:`user_id=eq.${user.id}`
+          filter:`id=eq.${user.id}`
         },payload=>{
           const active=payload?.new?.active_session_id||null;
           if(active&&active!==state.exclusiveSessionId)forceLogoutByOtherDevice();
@@ -7239,7 +7162,7 @@
     stopRealtimeSync();if(!state.user||!window.AGhuCloudRaw)return;
     const schedule=()=>{clearTimeout(state.realtimeDebounce);state.realtimeDebounce=setTimeout(()=>syncFromCloud(),280)};
     let ch=window.AGhuCloudRaw.channel(`aghu-notes-${state.user.id}`);
-    for(const table of ['notes','labels','note_labels','attachments','note_versions'])ch=ch.on('postgres_changes',{event:'*',schema:'public',table,filter:`user_id=eq.${state.user.id}`},schedule);
+    ch=ch.on('postgres_changes',{event:'*',schema:'public',table:'vault_records',filter:`user_id=eq.${state.user.id}`},schedule);
     state.realtimeChannel=ch.subscribe();
   }
   function startSyncLoop(){stopSyncLoop();startRealtimeSync();state.syncTimer=setInterval(syncFromCloud,10000);}
@@ -9567,7 +9490,7 @@ applyV42BrandingAndLayout();
 </script>
 
 
-<script id="aghu-v56-pix-client">
+<script id="aghu-v57-pix-client">
 (()=>{
   const cfg=window.APP_CONFIG||{};
   const $=id=>document.getElementById(id);
@@ -9789,71 +9712,19 @@ applyV42BrandingAndLayout();
     if(!raw){setActivationStatus('Link de ativação ausente.','error');return}
     if(password.length<6){setActivationStatus('A senha deve ter pelo menos 6 caracteres.','error');return}
     if(password!==activationConfirm.value){setActivationStatus('As senhas não coincidem.','error');return}
-
     activationSubmit.disabled=true;
     activationSubmit.textContent='Criando conta...';
     setActivationStatus('');
-
-    let temp=null;
     try{
-      const valid=await validateActivationToken(raw);
-      if(!valid?.valid)throw new Error('Este link é inválido, expirou ou já foi utilizado.');
-
-      const authLogin=login.includes('@')?login:`${login}@aghu-notes.invalid`;
-      temp=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{
-        auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
-      });
-
-      let signed=await temp.auth.signUp({
-        email:authLogin,
-        password,
-        options:{data:{
-          display_login:login,
-          aghu_admin_provision:'true',
-          aghu_paid_activation:'true'
-        }}
-      });
-      if(signed.error)throw signed.error;
-
-      if(!signed.data?.session){
-        signed=await temp.auth.signInWithPassword({email:authLogin,password});
-        if(signed.error)throw signed.error;
-      }
-
-      const h=await tokenHash(raw);
-      const activated=await temp.rpc('activate_paid_user',{
-        token_hash_arg:h,
-        desired_login:login
-      });
-      if(activated.error)throw activated.error;
-
-      try{await temp.auth.signOut({scope:'local'})}catch{}
-
-      const u=new URL(location.href);
-      u.searchParams.delete('activate');
-      history.replaceState({},'',u.pathname+u.search+u.hash);
-
+      const created=await functionCall('activate-account',{token:raw,login,password});
+      if(!created?.ok)throw new Error('Não foi possível concluir a ativação.');
+      const u=new URL(location.href);u.searchParams.delete('activate');history.replaceState({},'',u.pathname+u.search+u.hash);
       activationDialog.close();
-      const loginInput=document.getElementById('loginEmail');
-      const loginError=document.getElementById('loginError');
-      if(loginInput)loginInput.value=login;
-      if(loginError){
-        loginError.textContent='Conta criada com sucesso. Entre com o login e a senha que você acabou de definir.';
-        loginError.style.color='#287b58';
-      }
-    }catch(e){
-      try{await temp?.auth?.signOut({scope:'local'})}catch{}
-      const msg=String(e?.message||e||'Não foi possível criar a conta.');
-      setActivationStatus(
-        /already|registered|exists|duplicate|unique/i.test(msg)
-          ? 'Este login/e-mail já está em uso. Escolha outro.'
-          : msg,
-        'error'
-      );
-    }finally{
-      activationSubmit.disabled=false;
-      activationSubmit.textContent='Criar minha conta';
-    }
+      const loginInput=document.getElementById('loginEmail'),loginError=document.getElementById('loginError');
+      if(loginInput)loginInput.value=created.login||login;
+      if(loginError){loginError.textContent='Conta criada com sucesso. Entre com o login e a senha que você acabou de definir.';loginError.style.color='#287b58';}
+    }catch(e){setActivationStatus(String(e?.message||e||'Não foi possível criar a conta.'),'error');}
+    finally{activationSubmit.disabled=false;activationSubmit.textContent='Criar minha conta';}
   });
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',openActivationFromUrl,{once:true});
@@ -9861,5 +9732,9 @@ applyV42BrandingAndLayout();
 })();
 </script>
 
+
+<script id="aghu-v57-release-marker">
+window.AGHU_NOTES_RELEASE=Object.freeze({version:'v57',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
+</script>
 </body>
 </html>

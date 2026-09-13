@@ -1,19 +1,12 @@
 {
-  "id": "./",
-  "name": "AGHU Notes",
+  "name": "AGHU Notes — Anotações Gerais de Histórias e Unidades",
   "short_name": "AGHU Notes",
-  "description": "Aplicativo particular de anotações sincronizadas.",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ],
   "background_color": "#ffffff",
-  "theme_color": "#ffffff",
-  "orientation": "any",
-  "prefer_related_applications": false,
+  "theme_color": "#0b4fc8",
   "icons": [
     {
       "src": "./icon-192-v16.png",
