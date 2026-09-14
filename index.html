@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- AGHU Notes CLOUD v59: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
+<!-- AGHU Notes CLOUD v59.3.2: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -6225,7 +6225,7 @@
         <summary>Configuração técnica do Google Docs</summary>
         <label>
           OAuth Client ID do aplicativo <span style="font-weight:400">(não é o seu e-mail)</span>
-          <input id="googleClientIdInput" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+          <input id="googleClientIdInput" type="text" placeholder="Cole aqui o OAuth Client ID real (.apps.googleusercontent.com)" autocomplete="off">
         </label>
         <small>Esse identificador é configurado uma única vez para o aplicativo e precisa terminar em <strong>.apps.googleusercontent.com</strong>.</small>
       </details>
@@ -6341,7 +6341,26 @@
   };
   const enc=new TextEncoder(),dec=new TextDecoder(),MAGIC=enc.encode('AGHUIMG1'),ENC='AGHUENC1:';
   let dataKey=null,legacy210Key=null,currentProfile=null,activeExclusiveSessionId=null,sharePrivateKey=null;
+  let ownerNoteDeletePermitDepth=0;
   const accountListeners=new Set();
+
+  async function withOwnerAuthorizedNoteDelete(fn){
+    if(!currentProfile?.user_id)throw Error('Usuário indisponível para exclusão.');
+    ownerNoteDeletePermitDepth++;
+    try{return await fn()}
+    finally{ownerNoteDeletePermitDepth=Math.max(0,ownerNoteDeletePermitDepth-1)}
+  }
+
+  function assertOwnNote(row){
+    if(!currentProfile?.user_id)throw Error('Usuário indisponível.');
+    if(!row||row.user_id!==currentProfile.user_id){
+      throw Error('Operação bloqueada: somente o proprietário pode alterar ou excluir esta nota.');
+    }
+  }
+
+  window.AGhuDataSafety=Object.freeze({
+    withOwnerAuthorizedNoteDelete
+  });
   const b64=b=>{let s='',a=new Uint8Array(b);for(let i=0;i<a.length;i+=32768)s+=String.fromCharCode(...a.subarray(i,i+32768));return btoa(s)};
   const unb64=s=>{const b=atob(String(s||'')),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a};
   const clone=v=>{try{return structuredClone(v)}catch{return JSON.parse(JSON.stringify(v))}};
@@ -6394,7 +6413,39 @@
   async function fetchLogical(kind,enrich=false){const vs=await vaultRows(kind),out=[];for(const v of vs){try{out.push(await decodeVaultRow(v))}catch(e){console.error('Falha ao descriptografar',kind,v.record_id,e);throw e}}if(kind==='notes'&&enrich){const [nls,labels,atts]=await Promise.all([fetchLogical('note_labels'),fetchLogical('labels'),fetchLogical('attachments')]);const lm=new Map(labels.map(x=>[x.id,x]));for(const n of out){n.note_labels=nls.filter(x=>x.note_id===n.id).map(x=>({label_id:x.label_id,labels:lm.has(x.label_id)?{id:x.label_id,name:lm.get(x.label_id).name}:null}));n.attachments=atts.filter(x=>x.note_id===n.id)}}return out}
   function matches(row,filters){for(const [op,k,v] of filters){const rv=row?.[k];if(op==='eq'&&rv!==v)return false;if(op==='in'&&!(v||[]).includes(rv))return false}return true}
   function sortRows(rows,ord){if(!ord)return rows;const[k,asc]=ord;return rows.sort((a,b)=>{const av=a?.[k],bv=b?.[k];if(av==null&&bv==null)return 0;if(av==null)return 1;if(bv==null)return-1;let c;if(typeof av==='number'&&typeof bv==='number')c=av-bv;else{const ad=Date.parse(av),bd=Date.parse(bv);c=Number.isFinite(ad)&&Number.isFinite(bd)?ad-bd:String(av).localeCompare(String(bv),'pt-BR',{numeric:true,sensitivity:'base'})}return asc?c:-c})}
-  async function deleteLogicalRows(kind,rows){for(const row of rows){const vid=row.__vault_id;if(vid){const r=await raw.from('vault_records').delete().eq('id',vid);if(r.error)throw r.error}else{const r=await raw.from('vault_records').delete().eq('user_id',currentProfile.user_id).eq('kind',kind).eq('record_id',row.id);if(r.error)throw r.error}if(kind==='notes'){const dep=await raw.from('vault_records').delete().eq('user_id',currentProfile.user_id).in('kind',['note_labels','note_versions','attachments']).eq('note_id',row.id);if(dep.error)throw dep.error}else if(kind==='labels'){const dep=await raw.from('vault_records').delete().eq('user_id',currentProfile.user_id).eq('kind','note_labels').eq('ref_id',row.id);if(dep.error)throw dep.error}}}
+  async function deleteLogicalRows(kind,rows){
+    if(kind==='notes'&&ownerNoteDeletePermitDepth<=0){
+      throw Error('Exclusão de nota bloqueada: é necessária uma ação explícita do proprietário.');
+    }
+    for(const row of rows){
+      if(kind==='notes')assertOwnNote(row);
+      const vid=row.__vault_id;
+      if(vid){
+        let q=raw.from('vault_records').delete().eq('id',vid).eq('user_id',currentProfile.user_id);
+        const r=await q;
+        if(r.error)throw r.error;
+      }else{
+        const r=await raw.from('vault_records').delete()
+          .eq('user_id',currentProfile.user_id)
+          .eq('kind',kind)
+          .eq('record_id',row.id);
+        if(r.error)throw r.error;
+      }
+      if(kind==='notes'){
+        const dep=await raw.from('vault_records').delete()
+          .eq('user_id',currentProfile.user_id)
+          .in('kind',['note_labels','note_versions','attachments'])
+          .eq('note_id',row.id);
+        if(dep.error)throw dep.error;
+      }else if(kind==='labels'){
+        const dep=await raw.from('vault_records').delete()
+          .eq('user_id',currentProfile.user_id)
+          .eq('kind','note_labels')
+          .eq('ref_id',row.id);
+        if(dep.error)throw dep.error;
+      }
+    }
+  }
 
   class Q{
     constructor(t){this.t=t;this.op='select';this.p=null;this.f=[];this.ord=null;this.lim=null;this.cols='*';this.ret=false;this.mode=null}
@@ -6410,12 +6461,50 @@
         if(this.op==='select'){const all=await fetchLogical(this.t,enrich),filtered=all.filter(r=>matches(r,this.f));return this.finish(filtered)}
         if(this.op==='insert'){
           const many=Array.isArray(this.p),items=many?this.p:[this.p],saved=[];
-          for(const input of items){const row={...clone(input)};if(!row.id)row.id=crypto.randomUUID();if(!row.user_id)row.user_id=currentProfile?.user_id;const exists=await raw.from('vault_records').select('id').eq('user_id',row.user_id).eq('kind',this.t).eq('record_id',row.id).limit(1).maybeSingle();if(exists.error)throw exists.error;if(exists.data){const er=new Error('duplicate logical record');er.code='23505';throw er;}const vr=await encodeVaultRow(this.t,row);const r=await raw.from('vault_records').insert(vr).select('*').single();if(r.error)throw r.error;saved.push(await decodeVaultRow(r.data))}
+          for(const input of items){
+            const row={...clone(input)};
+            if(!row.id)row.id=crypto.randomUUID();
+            if(this.t==='notes'){
+              if(row.user_id&&row.user_id!==currentProfile?.user_id)throw Error('Não é permitido criar uma nota em nome de outro usuário.');
+              row.user_id=currentProfile?.user_id;
+            }else if(!row.user_id){
+              row.user_id=currentProfile?.user_id;
+            }
+            const exists=await raw.from('vault_records').select('id').eq('user_id',row.user_id).eq('kind',this.t).eq('record_id',row.id).limit(1).maybeSingle();
+            if(exists.error)throw exists.error;
+            if(exists.data){const er=new Error('duplicate logical record');er.code='23505';throw er;}
+            const vr=await encodeVaultRow(this.t,row);
+            const r=await raw.from('vault_records').insert(vr).select('*').single();
+            if(r.error)throw r.error;
+            saved.push(await decodeVaultRow(r.data));
+          }
           const result=many?saved:saved[0];if(this.ret||this.mode){const arr=Array.isArray(result)?result:[result];return this.finish(arr)}return{data:null,error:null}
         }
         const all=await fetchLogical(this.t,false),matched=all.filter(r=>matches(r,this.f));
         if(this.op==='update'){
-          const saved=[];for(const old of matched){const merged={...old,...clone(this.p)};if(!('updated_at'in this.p))merged.updated_at=new Date().toISOString();const vr=await encodeVaultRow(this.t,merged,old.__vault_id);const r=await raw.from('vault_records').update({payload:vr.payload,note_id:vr.note_id,ref_id:vr.ref_id,updated_at:vr.updated_at}).eq('id',old.__vault_id).select('*').single();if(r.error)throw r.error;saved.push(await decodeVaultRow(r.data))}if(this.ret||this.mode)return this.finish(saved);return{data:null,error:null}
+          const saved=[];
+          for(const old of matched){
+            if(this.t==='notes'){
+              assertOwnNote(old);
+              if(this.p&&Object.prototype.hasOwnProperty.call(this.p,'user_id')&&this.p.user_id!==currentProfile.user_id){
+                throw Error('Não é permitido transferir a propriedade de uma nota.');
+              }
+            }
+            const merged={...old,...clone(this.p)};
+            if(this.t==='notes')merged.user_id=currentProfile.user_id;
+            if(!('updated_at'in this.p))merged.updated_at=new Date().toISOString();
+            const vr=await encodeVaultRow(this.t,merged,old.__vault_id);
+            const r=await raw.from('vault_records').update({
+              payload:vr.payload,note_id:vr.note_id,ref_id:vr.ref_id,updated_at:vr.updated_at
+            }).eq('id',old.__vault_id).eq('user_id',currentProfile.user_id).select('*').single();
+            if(r.error)throw r.error;
+            saved.push(await decodeVaultRow(r.data));
+          }
+          if(this.ret||this.mode)return this.finish(saved);
+          return{data:null,error:null}
+        }
+        if(this.t==='notes'&&ownerNoteDeletePermitDepth<=0){
+          throw Error('Exclusão de nota bloqueada: somente uma ação explícita do proprietário pode excluir.');
         }
         await deleteLogicalRows(this.t,matched);return{data:null,error:null}
       }catch(e){console.error(e);return{data:null,error:{message:e?.message||String(e),code:e?.code}}}
@@ -6494,6 +6583,8 @@
     search: '',
     label: '',
     saveTimer: null,
+    saveRetryTimer: null,
+    draftWriteChains: new Map(),
     isDirty: false,
     versionTimer: null,
     selectedId: null,
@@ -6896,7 +6987,7 @@
 
   function setAutosave(text,mode=''){
     els.autosave.textContent=text;
-    els.autosave.classList.remove('local-saved','local-saved','save-error');
+    els.autosave.classList.remove('local-saved','cloud-saved','save-error');
     if(mode)els.autosave.classList.add(mode);
   }
 
@@ -6931,9 +7022,44 @@
     };
   }
 
+  function queueDraftWrite(d){
+    if(!d||!state.localPersistenceReady||!state.user)return Promise.resolve(false);
+    const noteId=d.id;
+    const snapshot=JSON.parse(JSON.stringify(d));
+    const previous=state.draftWriteChains.get(noteId)||Promise.resolve();
+
+    const current=previous
+      .catch(()=>{})
+      .then(()=>idbPut('drafts',{
+        key:draftId(noteId),
+        userId:state.user.id,
+        noteId,
+        data:snapshot,
+        updatedAt:Date.now()
+      }))
+      .catch(err=>{
+        persistenceError(err);
+        return false;
+      });
+
+    state.draftWriteChains.set(noteId,current);
+    current.finally(()=>{
+      if(state.draftWriteChains.get(noteId)===current){
+        state.draftWriteChains.delete(noteId);
+      }
+    });
+    return current;
+  }
+
+  async function waitDraftWrite(noteId){
+    const p=state.draftWriteChains.get(noteId);
+    if(!p)return true;
+    try{await p;return true}catch{return false}
+  }
+
   function persistDraftNow(){
     const d=buildDraft();
-    if(!d)return;
+    if(!d)return null;
 
     state.localDrafts.set(d.id,d);
 
@@ -6948,10 +7074,9 @@
     cacheNotes();
 
     if(state.localPersistenceReady){
-      idbPut('drafts',{
-        key:draftId(d.id),userId:state.user.id,noteId:d.id,data:d,updatedAt:Date.now()
-      }).catch(persistenceError);
+      queueDraftWrite(d);
     }
+    return d;
   }
 
   function getDraft(noteId){
@@ -6961,7 +7086,18 @@
   function clearDraft(noteId){
     state.localDrafts.delete(noteId);
     if(state.localPersistenceReady&&state.user){
-      idbDelete('drafts',draftId(noteId)).catch(err=>console.warn('Falha ao limpar rascunho local:',err));
+      const previous=state.draftWriteChains.get(noteId)||Promise.resolve();
+      const current=previous
+        .catch(()=>{})
+        .then(()=>idbDelete('drafts',draftId(noteId)))
+        .catch(err=>console.warn('Falha ao limpar rascunho local:',err));
+
+      state.draftWriteChains.set(noteId,current);
+      current.finally(()=>{
+        if(state.draftWriteChains.get(noteId)===current){
+          state.draftWriteChains.delete(noteId);
+        }
+      });
     }
   }
 
@@ -7615,12 +7751,7 @@
   }
 
   function passwordResetRedirectUrl(){
-    try{
-      const u=new URL('./',location.href);
-      u.search='';u.hash='';
-      u.searchParams.set('password-reset','1');
-      return u.toString();
-    }catch{return 'https://appcarlosfranca.github.io/aghu/?password-reset=1'}
+    return 'https://appcarlosfranca.github.io/aghu/?password-reset=1';
   }
 
   els.forgotPasswordBtn?.addEventListener('click',()=>{
@@ -7658,6 +7789,14 @@
   window.AGhuCloudRaw?.auth?.onAuthStateChange?.((event,session)=>{
     if(event==='PASSWORD_RECOVERY')openNewPasswordRecoveryDialog();
   });
+
+  try{
+    const h=new URLSearchParams((location.hash||'').replace(/^#/,''));
+    const code=h.get('error_code');
+    if(code==='otp_expired'){
+      setTimeout(()=>showAuth('O link de redefinição expirou ou já foi utilizado. Solicite um novo link em “Redefinir senha”.'),250);
+    }
+  }catch{}
 
   if(new URLSearchParams(location.search).get('password-reset')==='1'){
     setTimeout(async()=>{
@@ -8501,27 +8640,47 @@
   });
 
   async function moveToTrash(id){
-    // Mantém a nota recuperável, mas remove o histórico antigo para economizar espaço imediatamente.
+    const own=state.notes.find(n=>n.id===id);
+    if(!own||!state.user?.id||own.user_id!==state.user.id){
+      showToast('Somente o proprietário pode excluir esta nota.');
+      return;
+    }
+    // Exclusão lógica: a nota continua recuperável na Lixeira.
     setSyncStatus('syncing');
-    await supabase.from('note_versions').delete().eq('note_id',id);
-    const {error}=await supabase.from('notes').update({
+    const result=await supabase.from('notes').update({
       deleted:true,
       archived:false,
       updated_at:new Date().toISOString()
-    }).eq('id',id);
-    if(error){setSyncStatus('ok');return;}
-    if(state.current?.id===id) state.current.deleted=true;
+    }).eq('id',id).eq('user_id',state.user.id).select('id').maybeSingle();
+
+    if(result.error||!result.data){
+      showToast('Não foi possível mover a nota para a lixeira.');
+      setSyncStatus('ok');
+      return;
+    }
+    if(state.current?.id===id)state.current.deleted=true;
     await loadNotes();
     renderNotes();
     setSyncStatus('ok');
   }
 
   async function restoreNote(id){
+    const own=state.notes.find(n=>n.id===id);
+    if(!own||!state.user?.id||own.user_id!==state.user.id){
+      showToast('Somente o proprietário pode restaurar esta nota.');
+      return;
+    }
     setSyncStatus('syncing');
-    await supabase.from('notes').update({
+    const result=await supabase.from('notes').update({
       deleted:false,
       updated_at:new Date().toISOString()
-    }).eq('id',id);
+    }).eq('id',id).eq('user_id',state.user.id).select('id').maybeSingle();
+
+    if(result.error||!result.data){
+      showToast('Não foi possível restaurar a nota.');
+      setSyncStatus('ok');
+      return;
+    }
     state.selectedId=null;
     await loadNotes();
     renderNotes();
@@ -8536,19 +8695,31 @@
   }
 
   async function deleteNoteForever(note,ask=true){
-    if(!note) return;
-    if(note.user_id && state.user?.id && note.user_id!==state.user.id){showToast('Somente o criador desta nota pode excluí-la.');return;}
-    if(ask && !confirm('Excluir definitivamente esta nota? Esta ação não poderá ser desfeita.')) return;
-    clearDraft(note.id);
-    try{await deleteLocalAttachmentsForNote(note.id);}catch{}
+    if(!note)return;
+    if(!state.user?.id||note.user_id!==state.user.id){
+      showToast('Somente o proprietário desta nota pode excluí-la.');
+      return;
+    }
+    if(ask&&!confirm('Excluir definitivamente esta nota? Esta ação não poderá ser desfeita.'))return;
+
     setSyncStatus('syncing');
-    await removeStorageFiles(note);
-    const {error}=await supabase.from('notes').delete().eq('id',note.id);
-    if(error){
+    const result=await window.AGhuDataSafety.withOwnerAuthorizedNoteDelete(()=>
+      supabase.from('notes').delete()
+        .eq('id',note.id)
+        .eq('user_id',state.user.id)
+    );
+
+    if(result?.error){
       alert('Não foi possível excluir definitivamente a nota.');
       setSyncStatus('ok');
       return;
     }
+
+    // A limpeza local e dos arquivos só ocorre depois da exclusão remota autorizada.
+    clearDraft(note.id);
+    try{await deleteLocalAttachmentsForNote(note.id)}catch{}
+    try{await removeStorageFiles(note)}catch{}
+
     state.selectedId=null;
     if(state.current?.id===note.id){
       state.current=null;
@@ -8561,21 +8732,30 @@
   }
 
   els.emptyTrash.addEventListener('click',async()=>{
-    const trashed=state.notes.filter(n=>n.deleted);
-    if(!trashed.length) return;
-    if(!confirm(`Esvaziar a lixeira e excluir definitivamente ${trashed.length} nota(s)? Esta ação não poderá ser desfeita.`)) return;
+    if(!state.user?.id)return;
+    const trashed=state.notes.filter(n=>n.deleted&&n.user_id===state.user.id);
+    if(!trashed.length)return;
+    if(!confirm(`Esvaziar a lixeira e excluir definitivamente ${trashed.length} nota(s)? Esta ação não poderá ser desfeita.`))return;
+
     setSyncStatus('syncing');
-    for(const note of trashed){
-      clearDraft(note.id);
-      try{await deleteLocalAttachmentsForNote(note.id);}catch{}
-      await removeStorageFiles(note);
-    }
-    const {error}=await supabase.from('notes').delete().eq('deleted',true);
-    if(error){
+    const result=await window.AGhuDataSafety.withOwnerAuthorizedNoteDelete(()=>
+      supabase.from('notes').delete()
+        .eq('deleted',true)
+        .eq('user_id',state.user.id)
+    );
+
+    if(result?.error){
       alert('Não foi possível esvaziar a lixeira.');
       setSyncStatus('ok');
       return;
     }
+
+    for(const note of trashed){
+      clearDraft(note.id);
+      try{await deleteLocalAttachmentsForNote(note.id)}catch{}
+      try{await removeStorageFiles(note)}catch{}
+    }
+
     state.selectedId=null;
     await Promise.all([loadNotes(),loadLabels()]);
     renderNotes();
@@ -8882,7 +9062,8 @@
     if(!state.current||!state.isDirty)return;
 
     // O rascunho local só é apagado DEPOIS da confirmação do armazenamento local.
-    persistDraftNow();
+    const localDraftSnapshot=persistDraftNow();
+    if(localDraftSnapshot)await waitDraftWrite(localDraftSnapshot.id);
 
     if(!true){
       state.isDirty=true;
@@ -8907,7 +9088,7 @@
       await Promise.all([loadNotes(),loadLabels()]);
       const fresh=state.notes.find(n=>n.id===d.id);
       if(fresh)state.current=JSON.parse(JSON.stringify(fresh));
-      setAutosave(`Salvo e sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'local-saved');
+      setAutosave(`Salvo e sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'cloud-saved');
       setSyncStatus('ok');
       scheduleGoogleBackup(d.id);
       return;
@@ -8934,14 +9115,50 @@
       }
     }
 
-    const {error}=await supabase.from('notes').update(patch).eq('id',state.current.id);
-    if(error){
+    let cloudSave=await supabase.from('notes')
+      .update(patch)
+      .eq('id',state.current.id)
+      .eq('user_id',state.user.id)
+      .select('id,updated_at')
+      .maybeSingle();
+
+    // Nunca considera "salvo" se nenhuma linha real foi confirmada.
+    // Se a nota por algum motivo não existir mais no vault remoto,
+    // recria a linha usando o mesmo ID antes de apagar o rascunho local.
+    if(!cloudSave.error&&!cloudSave.data){
+      const recreated={
+        id:state.current.id,
+        user_id:state.user.id,
+        title:patch.title,
+        content_html:patch.content_html,
+        color:patch.color,
+        reminder_at:patch.reminder_at,
+        patient_meta:patch.patient_meta||{},
+        google_doc_id:patch.google_doc_id||null,
+        pinned:!!state.current.pinned,
+        archived:!!state.current.archived,
+        deleted:!!state.current.deleted,
+        synthetic_local:state.current.synthetic_local||null,
+        synthetic_age:state.current.synthetic_age||null,
+        synthetic_record:state.current.synthetic_record||null,
+        created_at:state.current.created_at||new Date().toISOString(),
+        updated_at:patch.updated_at
+      };
+      cloudSave=await supabase.from('notes').insert(recreated).select('id,updated_at').maybeSingle();
+    }
+
+    if(cloudSave.error||!cloudSave.data){
       state.isDirty=true;
       persistDraftNow();
-      setAutosave('Salvamento local pendente','local-saved');
+      setAutosave('Salvo neste aparelho • sincronização pendente','local-saved');
       setSyncStatus(true?'syncing':'offline');
+      clearTimeout(state.saveRetryTimer);
+      state.saveRetryTimer=setTimeout(()=>flushSave(),2500);
       return;
     }
+
+    clearTimeout(state.saveRetryTimer);
+    state.saveRetryTimer=null;
 
     await syncLabels(state.current.id);
     Object.assign(state.current,patch);
@@ -8951,7 +9168,7 @@
 
     clearDraft(state.current.id);
     state.isDirty=false;
-    setAutosave(`Salvo e sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'local-saved');
+    setAutosave(`Salvo e sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'cloud-saved');
     await loadLabels();
     setSyncStatus('ok');
     scheduleGoogleBackup(state.current.id);
@@ -8982,7 +9199,7 @@
     const n=state.notes.find(x=>x.id===state.current.id) || state.current;
     await deleteNoteForever(n,true);
   });
-  async function quickCurrent(p){if(!state.current)return;setSyncStatus('syncing');const{error}=await supabase.from('notes').update({...p,updated_at:new Date().toISOString()}).eq('id',state.current.id);if(error){showToast('Não foi possível atualizar a nota.');setSyncStatus('ok');return;}Object.assign(state.current,p);const local=state.notes.find(n=>n.id===state.current.id);if(local)Object.assign(local,p);updateActionLabels();setSyncStatus('ok');}
+  async function quickCurrent(p){if(!state.current||!state.user?.id)return;if(state.current.user_id!==state.user.id){showToast('Somente o proprietário pode alterar esta nota.');return;}setSyncStatus('syncing');const{error}=await supabase.from('notes').update({...p,updated_at:new Date().toISOString()}).eq('id',state.current.id).eq('user_id',state.user.id);if(error){showToast('Não foi possível atualizar a nota.');setSyncStatus('ok');return;}Object.assign(state.current,p);const local=state.notes.find(n=>n.id===state.current.id);if(local)Object.assign(local,p);updateActionLabels();setSyncStatus('ok');}
 
   els.duplicate.addEventListener('click',async()=>{
     await flushSave();const source=state.current;const m=randomMeta();
@@ -9170,7 +9387,11 @@
     return (els.googleAccountInput?.value||(googleAccountKey()?localStorage.getItem(googleAccountKey()):'')||'').trim();
   }
   function isValidGoogleClientId(value){
-    return /^[0-9A-Za-z._-]+\.apps\.googleusercontent\.com$/.test(String(value||'').trim());
+    const v=String(value||'').trim();
+    if(!/^[0-9A-Za-z._-]+\.apps\.googleusercontent\.com$/.test(v))return false;
+    if(/^x{4,}[0-9A-Za-z._-]*\.apps\.googleusercontent\.com$/i.test(v))return false;
+    if(/^example[0-9A-Za-z._-]*\.apps\.googleusercontent\.com$/i.test(v))return false;
+    return true;
   }
   function googleClientId(){
     const configured=String(cfg.GOOGLE_CLIENT_ID||'').trim();
@@ -9225,7 +9446,7 @@
     }
 
     const clientId=googleClientId();
-    if(els.googleConnect)els.googleConnect.disabled=!clientId;
+    if(els.googleConnect)els.googleConnect.disabled=false;
 
     if(clientId){
       setGoogleStatus(
@@ -9236,7 +9457,7 @@
       );
     }else{
       setGoogleStatus(
-        'Acesso direto disponível em “Abrir Google Docs”. Para sincronização automática, configure um OAuth Client ID do aplicativo.',
+        'Clique em “Conectar Google”. Sem um OAuth Client ID real, o app abrirá o Google Docs em modo direto; a sincronização automática exige um Client ID válido.',
         ''
       );
     }
@@ -9436,10 +9657,7 @@
     }
   }
 
-  els.copyDocs?.addEventListener('click',openGoogleDocsSettings);
-  els.googleDocsClose?.addEventListener('click',()=>els.googleDocsDialog.close());
-  els.googleDocsCancel?.addEventListener('click',()=>els.googleDocsDialog.close());
-  els.googleOpenDirect?.addEventListener('click',async()=>{
+  async function openGoogleDocsDirect(){
     const opened=window.open('https://docs.new','_blank');
     try{if(opened)opened.opener=null}catch{}
     let copied=false;
@@ -9452,8 +9670,20 @@
         if(text){await navigator.clipboard.writeText(text);copied=true;}
       }
     }catch{}
-    if(!opened){setGoogleStatus('O navegador bloqueou a abertura do Google Docs. Permita pop-ups para este site.','error');return;}
-    setGoogleStatus(copied?'Google Docs aberto. O texto da nota foi copiado; cole no documento com Ctrl+V.':'Google Docs aberto em uma nova aba.','ok');
+    if(!opened)throw new Error('O navegador bloqueou a abertura do Google Docs. Permita pop-ups para este site.');
+    return {opened:true,copied};
+  }
+
+  els.copyDocs?.addEventListener('click',openGoogleDocsSettings);
+  els.googleDocsClose?.addEventListener('click',()=>els.googleDocsDialog.close());
+  els.googleDocsCancel?.addEventListener('click',()=>els.googleDocsDialog.close());
+  els.googleOpenDirect?.addEventListener('click',async()=>{
+    try{
+      const r=await openGoogleDocsDirect();
+      setGoogleStatus(r.copied?'Google Docs aberto. O texto da nota foi copiado; cole no documento com Ctrl+V.':'Google Docs aberto em uma nova aba.','ok');
+    }catch(err){
+      setGoogleStatus(err.message||'Não foi possível abrir o Google Docs.','error');
+    }
   });
   els.copyGoogleOrigin?.addEventListener('click',async()=>{
     const origin=location.protocol==='file:'?'https://appcarlosfranca.github.io':location.origin;
@@ -9478,12 +9708,44 @@
     const key=googleAutoKey();if(key)localStorage.setItem(key,els.googleAutoBackup.checked?'1':'0');
   });
   els.googleConnect?.addEventListener('click',async()=>{
+    const clientId=googleClientId();
+
+    // Sem OAuth Client ID real, o botão continua funcional:
+    // abre o Google Docs e leva o conteúdo da nota pela área de transferência.
+    if(!clientId){
+      try{
+        const r=await openGoogleDocsDirect();
+        setGoogleStatus(
+          r.copied
+            ? 'Google Docs aberto em modo direto. O conteúdo da nota foi copiado para colar com Ctrl+V. Para sincronização automática, configure um OAuth Client ID real.'
+            : 'Google Docs aberto em modo direto. Para sincronização automática, configure um OAuth Client ID real.',
+          'ok'
+        );
+      }catch(err){
+        setGoogleStatus(err.message||'Não foi possível abrir o Google Docs.','error');
+      }
+      return;
+    }
+
     setGoogleStatus('Abrindo autorização segura do Google...');
     try{
       await requestGoogleToken(true);
-      const key=googleAutoKey();if(key)localStorage.setItem(key,els.googleAutoBackup.checked?'1':'0');
+      const key=googleAutoKey();
+      if(key)localStorage.setItem(key,els.googleAutoBackup.checked?'1':'0');
       if(state.current)await syncNoteToGoogle(state.current.id);
-    }catch(err){setGoogleStatus(err.message||'Não foi possível conectar ao Google.','error')}
+    }catch(err){
+      // Se a configuração OAuth estiver incorreta, não deixa o botão "morto":
+      // oferece automaticamente o modo direto como fallback.
+      try{
+        const r=await openGoogleDocsDirect();
+        setGoogleStatus(
+          `${err.message||'A autorização Google não foi concluída.'} Modo direto aberto${r.copied?' e conteúdo copiado para Ctrl+V':''}.`,
+          'error'
+        );
+      }catch{
+        setGoogleStatus(err.message||'Não foi possível conectar ao Google.','error');
+      }
+    }
   });
   els.googleSyncNow?.addEventListener('click',async()=>{
     if(!state.current){setGoogleStatus('Abra uma nota antes de copiar.','error');return}
