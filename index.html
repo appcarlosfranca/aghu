@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- AGHU Notes CLOUD v57.5: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
+<!-- AGHU Notes CLOUD v58: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -1444,7 +1444,31 @@
     .notes-table td[data-label="Nome"],.notes-table td[data-label="Nome"] strong{color:#111!important;-webkit-text-fill-color:#111!important;opacity:1!important}
     .notes-group-row td{display:table-cell!important;height:30px!important;padding:6px 10px!important;background:#edf2f7!important;border-top:1px solid #bfc6cc!important;border-bottom:1px solid #c9ced3!important;color:#4d5963!important;font-weight:700!important;font-size:11px!important}.notes-group-row.pinned-group td{background:#e8f2fb!important;color:#355f88!important}
     .word-toolbar{position:sticky!important;top:0!important;z-index:35!important;display:flex!important;align-items:center;gap:5px;flex-wrap:wrap;padding:5px!important;background:#f7f8f9!important;border:1px solid #cfd4d9!important;box-shadow:0 1px 2px rgba(0,0,0,.07)}body.keep-focus-mode #editorPage .word-toolbar{top:51px!important}.word-group{display:flex;align-items:center;gap:3px;padding-right:5px;margin-right:2px;border-right:1px solid #d7dadd}.word-group:last-child{border-right:0}.word-group select{height:29px;border:1px solid #c8cdd2;background:#fff;color:#222;font:11px Arial,Helvetica,sans-serif;padding:0 5px}#paragraphStyleSelect{width:105px}#fontNameSelect{width:135px}#fontSizeSelect{width:55px}#lineSpacingSelect{width:72px}.word-toolbar button{min-width:30px!important;height:29px!important;padding:0 6px!important;border:1px solid #cfd3d7!important;border-radius:2px!important;background:#fff!important;color:#222!important;font:12px Arial,Helvetica,sans-serif!important}.word-toolbar button:hover{background:#eaf1f8!important}.word-color-tool{position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:29px;border:1px solid #cfd3d7;background:#fff;cursor:pointer;font:700 13px Arial}.word-color-tool input{position:absolute;left:3px;bottom:2px;width:28px;height:5px;padding:0;border:0}.word-highlight-tool span{padding:1px 3px;background:#fff59d;font-weight:400;font-size:10px}.note-body{line-height:normal!important}
-    .admin-access-link{display:block;margin:8px auto 0;padding:2px 6px;border:0;background:transparent;color:#aaa;font-size:9px;cursor:pointer}.admin-access-link:hover{color:#777;text-decoration:underline}.admin-shell{min-height:100vh;display:grid;grid-template-columns:220px minmax(0,1fr);background:#f1f1f1}.admin-shell.hidden{display:none!important}.admin-main{min-width:0}.admin-top-title{display:flex!important;align-items:center;color:#555;font-size:12px}.admin-page{margin:0;min-height:calc(100vh - 145px);background:#fff}.admin-create-form{display:grid;grid-template-columns:minmax(230px,1fr) minmax(180px,280px) auto;gap:10px;align-items:end;padding:15px 14px 18px;border:1px solid #c9ced3;border-top:0;background:#fff}.admin-create-form label{display:flex;flex-direction:column;gap:5px;color:#555;font-size:11px}.admin-create-form input{height:34px;padding:0 9px;border:1px solid #c7cbd0;background:#fff;color:#222;font:12px Arial}.admin-inline-status{grid-column:1/-1;min-height:14px;color:#6c7a86;font-size:10px}.admin-users-title{margin-top:16px}.admin-users-wrap{min-height:260px;background:#fff}.admin-users-table{min-width:720px!important}.admin-users-table td{height:40px!important;color:#222!important;background:#fff!important}.admin-password{font-family:Consolas,monospace;font-size:11px}.admin-user-actions{display:flex;gap:5px;justify-content:center}.admin-user-actions button{height:26px;padding:0 7px;border:1px solid #c8ccd0;background:#fff;color:#444;font-size:10px;cursor:pointer}.admin-user-actions .danger{color:#a3262e;border-color:#d6b1b4}.admin-local-warning{margin-top:12px;color:#999;font-size:9px}.admin-login-dialog{width:min(430px,calc(100vw - 24px))}.admin-login-form{padding:14px}.admin-login-form label{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;color:#555;font-size:11px}.admin-login-form input{height:34px;padding:0 9px;border:1px solid #c7cbd0;font:12px Arial}.admin-setup-help{margin-bottom:12px;color:#777;font-size:10px;line-height:1.45}@media(max-width:900px){.word-group-selects{width:100%;border-right:0}.admin-shell{grid-template-columns:180px minmax(0,1fr)}.admin-create-form{grid-template-columns:1fr 1fr}}@media(max-width:700px){.word-group{max-width:100%;overflow-x:auto}.word-group-selects{display:grid;grid-template-columns:1fr 1fr 70px}.admin-shell{display:block}.admin-sidebar{display:none}.admin-create-form{grid-template-columns:1fr}}
+    .admin-access-link{display:block;margin:8px auto 0;padding:2px 6px;border:0;background:transparent;color:#aaa;font-size:9px;cursor:pointer}.admin-access-link:hover{color:#777;text-decoration:underline}.admin-shell{min-height:100vh;display:grid;grid-template-columns:220px minmax(0,1fr);background:#f1f1f1}.admin-shell.hidden{display:none!important}.admin-main{min-width:0}.admin-top-title{display:flex!important;align-items:center;color:#555;font-size:12px}.admin-page{margin:0;min-height:calc(100vh - 145px);background:#fff}.admin-create-form{display:grid;grid-template-columns:minmax(230px,1fr) minmax(180px,280px) auto;gap:10px;align-items:end;padding:15px 14px 18px;border:1px solid #c9ced3;border-top:0;background:#fff}.admin-create-form label{display:flex;flex-direction:column;gap:5px;color:#555;font-size:11px}.admin-create-form input{height:34px;padding:0 9px;border:1px solid #c7cbd0;background:#fff;color:#222;font:12px Arial}.admin-inline-status{grid-column:1/-1;min-height:14px;color:#6c7a86;font-size:10px}.admin-users-title{margin-top:16px}.admin-users-wrap{min-height:260px;background:#fff}.admin-users-table{min-width:720px!important}.admin-users-table td{height:40px!important;color:#222!important;background:#fff!important}.admin-password{font-family:Consolas,monospace;font-size:11px}.admin-user-actions{display:flex;gap:5px;justify-content:center}.admin-user-actions button{height:26px;padding:0 7px;border:1px solid #c8ccd0;background:#fff;color:#444;font-size:10px;cursor:pointer}.admin-user-actions .danger{color:#a3262e;border-color:#d6b1b4}.admin-local-warning{margin-top:12px;color:#999;font-size:9px}
+.admin-test-page{padding:0 14px 22px}
+.admin-test-intro{margin:14px 0;padding:12px 14px;border:1px solid #b9c7d3;background:#f7fbfe;color:#44535e;font-size:11px;line-height:1.5}
+.admin-test-intro strong{color:#123c67}
+.admin-test-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,420px);gap:14px;align-items:start}
+.admin-test-card{border:1px solid #c9d1d8;background:#fff;padding:14px}
+.admin-test-card h4{margin:0 0 10px;color:#23425d;font-size:13px}
+.admin-test-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.admin-test-fields label{display:grid;gap:4px;color:#555;font-size:10px}
+.admin-test-fields input{height:34px;padding:0 9px;border:1px solid #c7cbd0;background:#fff;color:#222;font:12px Arial}
+.admin-test-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.admin-test-actions button{min-height:32px}
+.admin-test-meta{margin-top:11px;padding:9px;border:1px dashed #c7d0d7;background:#fbfdff;font:10px Consolas,monospace;color:#495c69;white-space:pre-wrap;overflow-wrap:anywhere}
+.admin-test-status{min-height:18px;margin-top:9px;font-size:10px;line-height:1.45;color:#5b6c77}
+.admin-test-status.ok{color:#23714e}.admin-test-status.error{color:#ae2730}
+.admin-test-checklist{display:grid;gap:7px;margin:0;padding:0;list-style:none}
+.admin-test-checklist li{display:flex;align-items:center;gap:8px;padding:8px 9px;border:1px solid #d9dfe4;background:#fafcfd;color:#555;font-size:10px}
+.admin-test-checklist .dot{width:10px;height:10px;border-radius:50%;background:#b9c0c6;box-shadow:0 0 0 2px #eef1f3}
+.admin-test-checklist li.ok .dot{background:#2ca56b;box-shadow:0 0 7px rgba(44,165,107,.45)}
+.admin-test-checklist li.warn .dot{background:#d8a52e;box-shadow:0 0 7px rgba(216,165,46,.35)}
+.admin-test-verdict{margin-top:12px;padding:10px 12px;border:1px solid #d0d7dd;background:#f7f9fb;color:#667782;font-size:11px;font-weight:700}
+.admin-test-verdict.ok{border-color:#89c7aa;background:#f0fbf5;color:#1d7049}
+.admin-test-verdict.warn{border-color:#dec684;background:#fffaf0;color:#806116}
+@media(max-width:900px){.admin-test-grid{grid-template-columns:1fr}.admin-test-fields{grid-template-columns:1fr}}
+.admin-login-dialog{width:min(430px,calc(100vw - 24px))}.admin-login-form{padding:14px}.admin-login-form label{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;color:#555;font-size:11px}.admin-login-form input{height:34px;padding:0 9px;border:1px solid #c7cbd0;font:12px Arial}.admin-setup-help{margin-bottom:12px;color:#777;font-size:10px;line-height:1.45}@media(max-width:900px){.word-group-selects{width:100%;border-right:0}.admin-shell{grid-template-columns:180px minmax(0,1fr)}.admin-create-form{grid-template-columns:1fr 1fr}}@media(max-width:700px){.word-group{max-width:100%;overflow-x:auto}.word-group-selects{display:grid;grid-template-columns:1fr 1fr 70px}.admin-shell{display:block}.admin-sidebar{display:none}.admin-create-form{grid-template-columns:1fr}}
   </style>
 
   <style id="aghu-v23-menu-google-security">
@@ -5508,11 +5532,82 @@
 
 
   <div id="adminPanel" class="admin-shell hidden">
-    <aside class="sidebar admin-sidebar"><div class="sidebar-brand"><div class="aghu-notes-logo sidebar-aghu-logo"><div class="aghu-cross"></div><div class="aghu-word"><strong>AGHU<em>Notes</em></strong><small>Anotações Gerais de Histórias e Unidades</small></div></div></div><nav class="side-menu"><button class="menu-item active" type="button"><span>♟</span>Usuários e acessos</button><button id="adminExitBtn" class="menu-item" type="button"><span>↪</span>Sair</button></nav></aside>
-    <div class="admin-main"><header class="topbar"><div class="search-menu admin-top-title">Administrador</div><div class="top-actions"><span class="session-box">Gestão local de contas</span></div></header><main class="workspace"><div class="tabs"><button class="tab active" type="button">♟ Usuários e acessos</button></div><section class="page admin-page">
-      <div class="panel-title">Criar novo acesso</div><form id="adminCreateUserForm" class="admin-create-form" autocomplete="off"><label>Login / e-mail<input id="adminNewEmail" type="text" placeholder="ex.: usuario ou usuario@email.com" required></label><label>Senha<input id="adminNewPassword" type="text" minlength="6" required></label><button class="btn btn-primary" type="submit">Criar acesso</button><div id="adminCreateUserStatus" class="admin-inline-status"></div></form>
-      <div class="panel-title admin-users-title">Contas cadastradas</div><div class="table-wrap admin-users-wrap"><table class="notes-table admin-users-table"><thead><tr><th>Login</th><th>Senha</th><th>Criado em</th><th>Status</th><th>Ações</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div><div class="admin-local-warning">Contas, credenciais e notas permanecem na nuvem entre atualizações. O Administrador pode bloquear ou reativar acessos, mas não excluir contas, senhas ou notas.</div>
-    </section></main></div>
+    <aside class="sidebar admin-sidebar">
+      <div class="sidebar-brand"><div class="aghu-notes-logo sidebar-aghu-logo"><div class="aghu-cross"></div><div class="aghu-word"><strong>AGHU<em>Notes</em></strong><small>Anotações Gerais de Histórias e Unidades</small></div></div></div>
+      <nav class="side-menu">
+        <button id="adminUsersMenuBtn" class="menu-item active" type="button"><span>♟</span>Usuários e acessos</button>
+        <button id="adminSalesTestMenuBtn" class="menu-item" type="button"><span>✓</span>Teste de vendas</button>
+        <button id="adminExitBtn" class="menu-item" type="button"><span>↪</span>Sair</button>
+      </nav>
+    </aside>
+    <div class="admin-main">
+      <header class="topbar"><div id="adminTopTitle" class="search-menu admin-top-title">Administrador — Usuários e acessos</div><div class="top-actions"><span class="session-box">Gestão e homologação</span></div></header>
+      <main class="workspace">
+        <div class="tabs">
+          <button id="adminUsersTabBtn" class="tab active" type="button">♟ Usuários e acessos</button>
+          <button id="adminSalesTestTabBtn" class="tab" type="button">✓ Homologação de vendas</button>
+        </div>
+
+        <section id="adminUsersPage" class="page admin-page">
+          <div class="panel-title">Criar novo acesso</div>
+          <form id="adminCreateUserForm" class="admin-create-form" autocomplete="off">
+            <label>Login / e-mail<input id="adminNewEmail" type="text" placeholder="ex.: usuario ou usuario@email.com" required></label>
+            <label>Senha<input id="adminNewPassword" type="text" minlength="6" required></label>
+            <button class="btn btn-primary" type="submit">Criar acesso</button>
+            <div id="adminCreateUserStatus" class="admin-inline-status"></div>
+          </form>
+          <div class="panel-title admin-users-title">Contas cadastradas</div>
+          <div class="table-wrap admin-users-wrap"><table class="notes-table admin-users-table"><thead><tr><th>Login</th><th>Senha</th><th>Criado em</th><th>Status</th><th>Ações</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div>
+          <div class="admin-local-warning">Contas, credenciais e notas permanecem na nuvem entre atualizações. O Administrador pode bloquear ou reativar acessos, mas não excluir contas, senhas ou notas.</div>
+        </section>
+
+        <section id="adminSalesTestPage" class="page admin-page admin-test-page hidden">
+          <div class="panel-title">Homologação de vendas e login — R$ 0,00</div>
+          <div class="admin-test-intro">
+            <strong>Ambiente interno de teste.</strong> Não cria cobrança no Mercado Pago e não movimenta dinheiro.
+            Ele simula apenas a confirmação do pagamento e, a partir daí, usa o mesmo fluxo de ativação da produção:
+            token de uso único → criação da conta → perfil ativo → login real no Supabase.
+          </div>
+          <div class="admin-test-grid">
+            <div class="admin-test-card">
+              <h4>Novo ciclo de homologação</h4>
+              <div class="admin-test-fields">
+                <label>Nome do comprador de teste
+                  <input id="adminTestBuyerName" type="text" value="Homologação AGHU Notes">
+                </label>
+                <label>E-mail de referência
+                  <input id="adminTestBuyerEmail" type="email" placeholder="teste+data@exemplo.com">
+                </label>
+              </div>
+              <div class="admin-test-actions">
+                <button id="adminTestCreateBtn" class="btn btn-primary" type="button">1. Criar venda teste</button>
+                <button id="adminTestApproveBtn" class="btn btn-light" type="button" disabled>2. Simular pagamento aprovado</button>
+                <button id="adminTestOpenActivationBtn" class="btn btn-light" type="button" disabled>3. Abrir criação de login</button>
+                <button id="adminTestCopyActivationBtn" class="btn btn-light" type="button" disabled>Copiar link</button>
+                <button id="adminTestRefreshBtn" class="btn btn-light" type="button" disabled>Atualizar diagnóstico</button>
+              </div>
+              <div id="adminTestMeta" class="admin-test-meta">Nenhum ciclo de teste iniciado.</div>
+              <div id="adminTestStatus" class="admin-test-status"></div>
+            </div>
+
+            <div class="admin-test-card">
+              <h4>Checklist automático</h4>
+              <ul id="adminTestChecklist" class="admin-test-checklist">
+                <li data-check="order_created"><span class="dot"></span>Ordem de teste criada</li>
+                <li data-check="payment_approved"><span class="dot"></span>Pagamento aprovado (simulado)</li>
+                <li data-check="token_issued"><span class="dot"></span>Token de ativação gerado</li>
+                <li data-check="account_created"><span class="dot"></span>Conta criada pelo fluxo real de ativação</li>
+                <li data-check="single_use_enforced"><span class="dot"></span>Token invalidado após uso</li>
+                <li data-check="profile_active"><span class="dot"></span>Perfil da nova conta ativo</li>
+                <li data-check="login_verified"><span class="dot"></span>Novo login utilizado com sucesso ao menos uma vez</li>
+              </ul>
+              <div id="adminTestVerdict" class="admin-test-verdict warn">Aguardando início do teste.</div>
+              <div class="admin-local-warning">Após criar a conta de teste, entre uma vez com ela em uma janela anônima. Em seguida volte ao Administrador e clique em “Atualizar diagnóstico”.</div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
   </div>
 
   <div id="appShell" class="app-shell hidden">
@@ -6111,7 +6206,7 @@
     async deleteUser(id){await adminFunction('set_active',{user_id:id,active:false});notify();return true},onUsersChanged(cb){accountListeners.add(cb);return()=>accountListeners.delete(cb)}
   };
   raw.channel('aghu-admin-profiles').on('postgres_changes',{event:'*',schema:'public',table:'profiles'},notify).subscribe();
-  window.AGhuCloud={createClient:()=>client,raw};window.AGhuCloudRaw=raw;window.AGhuLocalAdmin=admin;
+  window.AGhuCloud={createClient:()=>client,raw};window.AGhuCloudRaw=raw;window.AGhuCloudConfig=Object.freeze({SUPABASE_URL:cfg.SUPABASE_URL,SUPABASE_ANON_KEY:cfg.SUPABASE_ANON_KEY});window.AGhuLocalAdmin=admin;
   window.AGhuLocalCrypto={ready:()=>!!dataKey,userId:()=>currentProfile?.user_id||null,encryptJson:v=>encryptObject(v),decryptJson:decryptPayload,encryptBlob,decryptBlob};
 })();
 
@@ -6163,6 +6258,8 @@
   const els = {
     auth: $('authScreen'), app: $('appShell'), login: $('loginForm'), loginEmail: $('loginEmail'), loginPassword: $('loginPassword'), loginError: $('loginError'),
     adminAccess:$('adminAccessBtn'), adminPanel:$('adminPanel'), adminExit:$('adminExitBtn'), adminLoginDialog:$('adminLoginDialog'), adminLoginTitle:$('adminLoginTitle'), adminSetupHelp:$('adminSetupHelp'), adminLoginForm:$('adminLoginForm'), adminIdentifier:$('adminIdentifierInput'), adminPasswordInput:$('adminPasswordInput'), adminPasswordConfirm:$('adminPasswordConfirm'), adminConfirmWrap:$('adminConfirmWrap'), adminLoginError:$('adminLoginError'), adminLoginSubmit:$('adminLoginSubmitBtn'), adminLoginClose:$('adminLoginCloseBtn'), adminLoginCancel:$('adminLoginCancelBtn'), adminCreateUserForm:$('adminCreateUserForm'), adminNewEmail:$('adminNewEmail'), adminNewPassword:$('adminNewPassword'), adminCreateUserStatus:$('adminCreateUserStatus'), adminUsersBody:$('adminUsersBody'),
+    adminUsersMenuBtn:$('adminUsersMenuBtn'), adminSalesTestMenuBtn:$('adminSalesTestMenuBtn'), adminUsersTabBtn:$('adminUsersTabBtn'), adminSalesTestTabBtn:$('adminSalesTestTabBtn'), adminUsersPage:$('adminUsersPage'), adminSalesTestPage:$('adminSalesTestPage'), adminTopTitle:$('adminTopTitle'),
+    adminTestBuyerName:$('adminTestBuyerName'), adminTestBuyerEmail:$('adminTestBuyerEmail'), adminTestCreateBtn:$('adminTestCreateBtn'), adminTestApproveBtn:$('adminTestApproveBtn'), adminTestOpenActivationBtn:$('adminTestOpenActivationBtn'), adminTestCopyActivationBtn:$('adminTestCopyActivationBtn'), adminTestRefreshBtn:$('adminTestRefreshBtn'), adminTestMeta:$('adminTestMeta'), adminTestStatus:$('adminTestStatus'), adminTestChecklist:$('adminTestChecklist'), adminTestVerdict:$('adminTestVerdict'),
     calculatorMenu: $('calculatorMenuBtn'), calculatorEditor: $('calculatorEditorBtn'), calculatorDialog: $('calculatorDialog'),
     calculatorClose: $('calculatorCloseBtn'), calculatorDisplay: $('calculatorDisplay'),
     calculatorExpression: $('calculatorExpression'), calculatorKeys: $('calculatorKeys'),
@@ -6960,7 +7057,148 @@
     els.adminUsersBody.innerHTML=us.map(u=>`<tr><td>${esc(u.email)}</td><td class="admin-password">••••••</td><td>${u.createdAt?new Date(u.createdAt).toLocaleString('pt-BR'):'-'}</td><td>${u.active?'Ativo':'Bloqueado'}</td><td><div class="admin-user-actions"><button data-toggle-user="${u.id}">${u.active?'Bloquear':'Ativar'}</button></div></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;padding:25px;color:#888">Nenhum login cadastrado.</td></tr>';
     els.adminUsersBody.querySelectorAll('[data-toggle-user]').forEach(b=>b.onclick=async()=>{try{await AGhuLocalAdmin.toggleUser(b.dataset.toggleUser);await renderAdminUsers()}catch(e){alert(e.message||String(e))}});
   }
-  async function enterAdmin(){state.adminActive=true;els.auth.classList.add('hidden');els.app.classList.add('hidden');els.adminPanel.classList.remove('hidden');await renderAdminUsers()}
+
+  let adminSalesTest=null;
+
+  async function adminSalesTestFunction(action,payload={}){
+    const raw=window.AGhuCloudRaw;
+    if(!raw)throw Error('Conexão Supabase indisponível.');
+    const s=await raw.auth.getSession();
+    const token=s.data?.session?.access_token;
+    if(!token)throw Error('Sessão do Administrador expirada.');
+    const cfg=window.AGhuCloudConfig||{};
+    const base=cfg.SUPABASE_URL||'https://imwwqdgovfxhntsdkxlz.supabase.co';
+    const key=cfg.SUPABASE_ANON_KEY||'';
+    const r=await fetch(`${base}/functions/v1/test-sales`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':key,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({action,...payload})
+    });
+    let d={};try{d=await r.json()}catch{}
+    if(!r.ok)throw Error(d.error||`Falha HTTP ${r.status}`);
+    return d;
+  }
+
+  function showAdminPage(which){
+    const users=which!=='sales';
+    els.adminUsersPage?.classList.toggle('hidden',!users);
+    els.adminSalesTestPage?.classList.toggle('hidden',users);
+    els.adminUsersMenuBtn?.classList.toggle('active',users);
+    els.adminSalesTestMenuBtn?.classList.toggle('active',!users);
+    els.adminUsersTabBtn?.classList.toggle('active',users);
+    els.adminSalesTestTabBtn?.classList.toggle('active',!users);
+    if(els.adminTopTitle)els.adminTopTitle.textContent=users?'Administrador — Usuários e acessos':'Administrador — Homologação de vendas';
+  }
+
+  function setAdminTestStatus(message,type=''){
+    if(!els.adminTestStatus)return;
+    els.adminTestStatus.textContent=message||'';
+    els.adminTestStatus.className=`admin-test-status${type?` ${type}`:''}`;
+  }
+
+  function renderAdminTest(data=adminSalesTest){
+    if(!data){
+      els.adminTestMeta.textContent='Nenhum ciclo de teste iniciado.';
+      els.adminTestApproveBtn.disabled=true;
+      els.adminTestOpenActivationBtn.disabled=true;
+      els.adminTestCopyActivationBtn.disabled=true;
+      els.adminTestRefreshBtn.disabled=true;
+      els.adminTestChecklist?.querySelectorAll('li').forEach(li=>li.classList.remove('ok','warn'));
+      els.adminTestVerdict.textContent='Aguardando início do teste.';
+      els.adminTestVerdict.className='admin-test-verdict warn';
+      return;
+    }
+    adminSalesTest={...(adminSalesTest||{}),...data};
+    const d=adminSalesTest;
+    els.adminTestMeta.textContent=[
+      `Ambiente: TESTE / R$ 0,00`,
+      `Ordem: ${d.order_id||'-'}`,
+      `Status: ${d.status||'-'} / ${d.provider_status||'-'}`,
+      `Login ativado: ${d.activated_login||'-'}`,
+      `Criado: ${d.created_at?new Date(d.created_at).toLocaleString('pt-BR'):'-'}`
+    ].join('\n');
+
+    els.adminTestApproveBtn.disabled=!d.order_id||!!d.checks?.payment_approved;
+    els.adminTestOpenActivationBtn.disabled=!d.activation_url||!!d.activated;
+    els.adminTestCopyActivationBtn.disabled=!d.activation_url||!!d.activated;
+    els.adminTestRefreshBtn.disabled=!d.order_id;
+
+    const checks=d.checks||{};
+    els.adminTestChecklist?.querySelectorAll('li[data-check]').forEach(li=>{
+      li.classList.remove('ok','warn');
+      if(checks[li.dataset.check]===true)li.classList.add('ok');
+      else if(d.order_id)li.classList.add('warn');
+    });
+
+    if(d.homologated_core){
+      els.adminTestVerdict.textContent='NÚCLEO VENDAS/LOGIN HOMOLOGADO: aprovação → token → conta → uso único → perfil → login.';
+      els.adminTestVerdict.className='admin-test-verdict ok';
+    }else if(d.checks?.account_created&&!d.checks?.login_verified){
+      els.adminTestVerdict.textContent='Conta criada. Falta apenas entrar uma vez com o novo login e atualizar o diagnóstico.';
+      els.adminTestVerdict.className='admin-test-verdict warn';
+    }else{
+      els.adminTestVerdict.textContent='Teste em andamento. Complete as etapas até todos os itens ficarem verdes.';
+      els.adminTestVerdict.className='admin-test-verdict warn';
+    }
+  }
+
+  async function refreshAdminSalesTest(){
+    if(!adminSalesTest?.order_id)return;
+    setAdminTestStatus('Atualizando diagnóstico...');
+    try{
+      const d=await adminSalesTestFunction('status',{order_id:adminSalesTest.order_id});
+      renderAdminTest(d);
+      setAdminTestStatus('Diagnóstico atualizado.','ok');
+    }catch(e){setAdminTestStatus(e.message||String(e),'error')}
+  }
+
+  els.adminUsersMenuBtn?.addEventListener('click',()=>showAdminPage('users'));
+  els.adminSalesTestMenuBtn?.addEventListener('click',()=>showAdminPage('sales'));
+  els.adminUsersTabBtn?.addEventListener('click',()=>showAdminPage('users'));
+  els.adminSalesTestTabBtn?.addEventListener('click',()=>showAdminPage('sales'));
+
+  els.adminTestCreateBtn?.addEventListener('click',async()=>{
+    setAdminTestStatus('Criando ciclo de homologação...');
+    els.adminTestCreateBtn.disabled=true;
+    try{
+      const stamp=new Date().toISOString().replace(/\D/g,'').slice(0,14);
+      const email=(els.adminTestBuyerEmail.value||'').trim()||`homologacao+${stamp}@aghu-notes.test`;
+      const name=(els.adminTestBuyerName.value||'').trim()||'Homologação AGHU Notes';
+      const d=await adminSalesTestFunction('create',{buyer_name:name,buyer_email:email});
+      adminSalesTest=d;
+      renderAdminTest(d);
+      setAdminTestStatus('Venda de teste criada. Nenhum dinheiro foi movimentado.','ok');
+    }catch(e){setAdminTestStatus(e.message||String(e),'error')}
+    finally{els.adminTestCreateBtn.disabled=false}
+  });
+
+  els.adminTestApproveBtn?.addEventListener('click',async()=>{
+    if(!adminSalesTest?.order_id)return;
+    setAdminTestStatus('Simulando confirmação do pagamento...');
+    els.adminTestApproveBtn.disabled=true;
+    try{
+      const d=await adminSalesTestFunction('approve',{order_id:adminSalesTest.order_id});
+      renderAdminTest(d);
+      setAdminTestStatus('Pagamento de teste aprovado. Token real de ativação foi emitido.','ok');
+    }catch(e){setAdminTestStatus(e.message||String(e),'error');els.adminTestApproveBtn.disabled=false}
+  });
+
+  els.adminTestOpenActivationBtn?.addEventListener('click',()=>{
+    if(!adminSalesTest?.activation_url)return;
+    window.open(adminSalesTest.activation_url,'_blank','noopener,noreferrer');
+  });
+
+  els.adminTestCopyActivationBtn?.addEventListener('click',async()=>{
+    const url=adminSalesTest?.activation_url;
+    if(!url)return;
+    try{await navigator.clipboard.writeText(url);setAdminTestStatus('Link copiado. Para isolar a sessão do Administrador, abra-o de preferência em janela anônima.','ok')}
+    catch{setAdminTestStatus('Não foi possível copiar automaticamente. Use “Abrir criação de login”.','error')}
+  });
+
+  els.adminTestRefreshBtn?.addEventListener('click',refreshAdminSalesTest);
+
+  async function enterAdmin(){state.adminActive=true;els.auth.classList.add('hidden');els.app.classList.add('hidden');els.adminPanel.classList.remove('hidden');showAdminPage('users');await renderAdminUsers()}
+
   window.AGhuLocalAdmin?.onUsersChanged?.(()=>{if(state.adminActive)renderAdminUsers().catch(()=>{})});
 
   function exitAdmin(){AGhuLocalAdmin.logout();state.adminActive=false;state.user=null;els.adminPanel.classList.add('hidden');els.app.classList.add('hidden');els.auth.classList.remove('hidden')}
@@ -9829,7 +10067,7 @@ applyV42BrandingAndLayout();
 
 
 <script id="aghu-v57-release-marker">
-window.AGHU_NOTES_RELEASE=Object.freeze({version:'v57',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
+window.AGHU_NOTES_RELEASE=Object.freeze({version:'v58',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
 </script>
 </body>
 </html>
