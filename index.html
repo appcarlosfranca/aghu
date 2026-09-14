@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- AGHU Notes CLOUD v59.3.2: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
+<!-- AGHU Notes CLOUD v59.4.2: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -6484,19 +6484,14 @@
         if(this.op==='update'){
           const saved=[];
           for(const old of matched){
-            if(this.t==='notes'){
-              assertOwnNote(old);
-              if(this.p&&Object.prototype.hasOwnProperty.call(this.p,'user_id')&&this.p.user_id!==currentProfile.user_id){
-                throw Error('Não é permitido transferir a propriedade de uma nota.');
-              }
-            }
             const merged={...old,...clone(this.p)};
-            if(this.t==='notes')merged.user_id=currentProfile.user_id;
+            // A propriedade nunca é transferida por UPDATE.
+            if(this.t==='notes')merged.user_id=old.user_id||currentProfile?.user_id;
             if(!('updated_at'in this.p))merged.updated_at=new Date().toISOString();
             const vr=await encodeVaultRow(this.t,merged,old.__vault_id);
             const r=await raw.from('vault_records').update({
               payload:vr.payload,note_id:vr.note_id,ref_id:vr.ref_id,updated_at:vr.updated_at
-            }).eq('id',old.__vault_id).eq('user_id',currentProfile.user_id).select('*').single();
+            }).eq('id',old.__vault_id).select('*').single();
             if(r.error)throw r.error;
             saved.push(await decodeVaultRow(r.data));
           }
@@ -8880,6 +8875,22 @@
     state.saveTimer=setTimeout(flushSave,200);
   }
   [els.title,els.body,els.color,els.reminder,els.labelsInput].forEach(el=>el.addEventListener('input',markDirty));
+
+  // Ao trocar de aba, minimizar, instalar uma nova versão ou fechar o app,
+  // dispara imediatamente a gravação local e inicia o flush remoto.
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='hidden'&&state.current&&state.isDirty){
+      persistDraftNow();
+      flushSave().catch(()=>{});
+    }
+  });
+  window.addEventListener('pagehide',()=>{
+    if(state.current&&state.isDirty){
+      persistDraftNow();
+      flushSave().catch(()=>{});
+    }
+  });
+
   els.color.addEventListener('change',()=>{els.editorPage.style.background=els.color.value;markDirty();});
   els.reminder.addEventListener('change',async()=>{if(els.reminder.value&&'Notification'in window&&Notification.permission==='default'){try{await Notification.requestPermission();}catch{}}markDirty();});
 
@@ -8942,6 +8953,33 @@
     }
   }
 
+  function sameSavedNote(remote,d){
+    if(!remote||!d)return false;
+    const titleA=compactTitleForStorage(remote.title||'');
+    const titleB=compactTitleForStorage(d.title||'');
+    const htmlA=compactHtmlForStorage(remote.content_html||'');
+    const htmlB=compactHtmlForStorage(d.content_html||'');
+    const colorA=String(remote.color||'#ffffff').toLowerCase();
+    const colorB=String(d.color||'#ffffff').toLowerCase();
+    const reminderA=remote.reminder_at||null;
+    const reminderB=d.reminder_at||null;
+    return titleA===titleB&&htmlA===htmlB&&colorA===colorB&&reminderA===reminderB;
+  }
+
+  async function confirmRemoteDraft(d){
+    if(!d?.id)return false;
+    const {data,error}=await supabase.from('notes')
+      .select('id,title,content_html,color,reminder_at,patient_meta,updated_at')
+      .eq('id',d.id)
+      .maybeSingle();
+    if(error||!data)return false;
+
+    if(d.metadata_only){
+      return JSON.stringify(data.patient_meta||{})===JSON.stringify(d.patient_meta||{});
+    }
+    return sameSavedNote(data,d);
+  }
+
   async function syncDraftRecord(d){
     if(!true||!state.user)return false;
 
@@ -8966,6 +9004,11 @@
       const confirmed=JSON.stringify(data?.patient_meta||{});
       if(expected!==confirmed){
         console.warn('Identificação não confirmada pelo armazenamento local.');
+        return false;
+      }
+
+      if(!await confirmRemoteDraft(d)){
+        console.warn('Identificação ainda não confirmada por releitura.');
         return false;
       }
 
@@ -9006,6 +9049,13 @@
       await supabase.from('note_labels').insert(ids.map(label_id=>({
         note_id:d.id,label_id,user_id:state.user.id
       })));
+    }
+
+    // Nunca apaga o rascunho local apenas porque INSERT/UPDATE retornou sem erro.
+    // Primeiro relê a nota do vault e confirma que o conteúdo persistido é o mesmo.
+    if(!await confirmRemoteDraft(d)){
+      console.warn('Salvamento remoto não confirmado; mantendo rascunho local.');
+      return false;
     }
 
     clearDraft(d.id);
@@ -9118,7 +9168,6 @@
     let cloudSave=await supabase.from('notes')
       .update(patch)
       .eq('id',state.current.id)
-      .eq('user_id',state.user.id)
       .select('id,updated_at')
       .maybeSingle();
 
@@ -9152,6 +9201,18 @@
       persistDraftNow();
       setAutosave('Salvo neste aparelho • sincronização pendente','local-saved');
       setSyncStatus(true?'syncing':'offline');
+      clearTimeout(state.saveRetryTimer);
+      state.saveRetryTimer=setTimeout(()=>flushSave(),2500);
+      return;
+    }
+
+    // Confirma por releitura antes de considerar a nota definitivamente salva.
+    const verifiedDraft={...d,...patch,id:state.current.id};
+    if(!await confirmRemoteDraft(verifiedDraft)){
+      state.isDirty=true;
+      persistDraftNow();
+      setAutosave('Salvo neste aparelho • aguardando confirmação da nuvem','local-saved');
+      setSyncStatus('syncing');
       clearTimeout(state.saveRetryTimer);
       state.saveRetryTimer=setTimeout(()=>flushSave(),2500);
       return;
@@ -9199,7 +9260,7 @@
     const n=state.notes.find(x=>x.id===state.current.id) || state.current;
     await deleteNoteForever(n,true);
   });
-  async function quickCurrent(p){if(!state.current||!state.user?.id)return;if(state.current.user_id!==state.user.id){showToast('Somente o proprietário pode alterar esta nota.');return;}setSyncStatus('syncing');const{error}=await supabase.from('notes').update({...p,updated_at:new Date().toISOString()}).eq('id',state.current.id).eq('user_id',state.user.id);if(error){showToast('Não foi possível atualizar a nota.');setSyncStatus('ok');return;}Object.assign(state.current,p);const local=state.notes.find(n=>n.id===state.current.id);if(local)Object.assign(local,p);updateActionLabels();setSyncStatus('ok');}
+  async function quickCurrent(p){if(!state.current||!state.user?.id)return;if(state.current.user_id&&state.current.user_id!==state.user.id){showToast('Somente o proprietário pode alterar esta nota.');return;}setSyncStatus('syncing');const{error}=await supabase.from('notes').update({...p,updated_at:new Date().toISOString()}).eq('id',state.current.id);if(error){showToast('Não foi possível atualizar a nota.');setSyncStatus('ok');return;}Object.assign(state.current,p);const local=state.notes.find(n=>n.id===state.current.id);if(local)Object.assign(local,p);updateActionLabels();setSyncStatus('ok');}
 
   els.duplicate.addEventListener('click',async()=>{
     await flushSave();const source=state.current;const m=randomMeta();
