@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- AGHU Notes CLOUD v58: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
+<!-- AGHU Notes CLOUD v59: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -5415,6 +5415,235 @@
   }
 </style>
 
+
+<style id="aghu-v59-surgical-layout-fixes">
+  /* v59 — ajustes cirúrgicos solicitados. */
+
+  /* 1. Modo Linhas: sem barramento/caixa com rolagem interna. As notas fluem na página. */
+  #keepPage.notes-view-rows .notes-grid-area{overflow:visible!important;min-width:0!important}
+  #keepPage.notes-view-rows .table-wrap{
+    width:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    height:auto!important;
+    overflow:visible!important;
+    border:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    background:transparent!important;
+  }
+  #keepPage.notes-view-rows .table-wrap::before,
+  #keepPage.notes-view-rows .table-wrap::after{display:none!important;content:none!important}
+  #keepPage.notes-view-rows .notes-table{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    table-layout:fixed!important;
+    border-collapse:collapse!important;
+    background:transparent!important;
+  }
+  #keepPage.notes-view-rows .notes-table th:first-child,
+  #keepPage.notes-view-rows .notes-table td:first-child{width:auto!important;min-width:0!important}
+  #keepPage.notes-view-rows .notes-table th:nth-child(n+2),
+  #keepPage.notes-view-rows .notes-table td:nth-child(n+2){width:38px!important;min-width:38px!important;max-width:38px!important}
+  #keepPage.notes-view-rows .notes-table tbody{overflow:visible!important}
+  #keepPage.notes-view-rows .notes-table tr{overflow:visible!important}
+  #keepPage.notes-view-rows .empty-state{border:0!important;background:transparent!important}
+
+  /* 2 e 3. A janela da nota usa a cor escolhida pelo usuário e apenas uma linha fina/neon. */
+  #keepPage.notes-view-cards .notes-table tr[data-id]{
+    --note-accent:#171717;
+    background:var(--note-bg,#fff)!important;
+    border:1px solid color-mix(in srgb,var(--note-accent) 68%,#cfd5da)!important;
+    box-shadow:0 2px 7px rgba(0,0,0,.055)!important;
+    overflow:visible!important;
+    isolation:isolate!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id]::before{
+    content:""!important;
+    position:absolute!important;
+    inset:-1px!important;
+    padding:1px!important;
+    border:0!important;
+    border-image:none!important;
+    border-radius:inherit!important;
+    background:conic-gradient(
+      from 0turn,
+      transparent 0deg 316deg,
+      color-mix(in srgb,var(--note-accent) 18%,transparent) 326deg,
+      color-mix(in srgb,var(--note-accent) 62%,white) 338deg,
+      #fff 344deg,
+      var(--note-accent) 350deg,
+      color-mix(in srgb,var(--note-accent) 30%,transparent) 358deg,
+      transparent 360deg
+    )!important;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;
+    -webkit-mask-composite:xor!important;
+    mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;
+    mask-composite:exclude!important;
+    filter:drop-shadow(0 0 3px var(--note-accent))!important;
+    opacity:.72!important;
+    z-index:0!important;
+    pointer-events:none!important;
+    animation:aghuV59AccentOrbit 6.6s linear infinite!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id]::after{
+    content:""!important;
+    position:absolute!important;
+    inset:0!important;
+    padding:0!important;
+    border:0!important;
+    border-image:none!important;
+    background:none!important;
+    box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--note-accent) 20%,transparent)!important;
+    filter:none!important;
+    opacity:.55!important;
+    animation:none!important;
+    pointer-events:none!important;
+    z-index:0!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id]:hover{
+    border-color:color-mix(in srgb,var(--note-accent) 82%,#bcc5cd)!important;
+    box-shadow:0 4px 10px rgba(0,0,0,.07),0 0 7px color-mix(in srgb,var(--note-accent) 16%,transparent)!important;
+  }
+  #keepPage.notes-view-cards .notes-table tr[data-id].selected{
+    border-color:var(--note-accent)!important;
+    box-shadow:0 0 0 1px color-mix(in srgb,var(--note-accent) 22%,white),0 4px 10px rgba(0,0,0,.07)!important;
+    background:var(--note-bg,#fff)!important;
+  }
+  #keepPage.notes-view-cards .note-card-idbar,
+  #keepPage.notes-view-cards .notes-table tr[data-id] > td.row-action{
+    background:color-mix(in srgb,var(--note-bg,#fff) 90%,#f3f5f7)!important;
+    border-color:color-mix(in srgb,var(--note-accent) 14%,#e4e8eb)!important;
+  }
+  @keyframes aghuV59AccentOrbit{to{transform:rotate(1turn)}}
+
+  /* 4. Login: linha preta fina e brilho colorido discreto circulando o perímetro. */
+  #authScreen .auth-card{
+    border:1px solid #171717!important;
+    border-radius:4px!important;
+    box-shadow:0 7px 20px rgba(0,0,0,.08)!important;
+    overflow:visible!important;
+    isolation:isolate!important;
+  }
+  #authScreen .auth-card::before{
+    content:""!important;
+    position:absolute!important;
+    inset:-1px!important;
+    border:1px solid rgba(0,0,0,.82)!important;
+    border-image:none!important;
+    border-radius:inherit!important;
+    background:none!important;
+    box-shadow:none!important;
+    opacity:1!important;
+    z-index:-1!important;
+    pointer-events:none!important;
+  }
+  #authScreen .auth-card::after{
+    content:""!important;
+    position:absolute!important;
+    inset:-2px!important;
+    padding:1px!important;
+    border:0!important;
+    border-image:none!important;
+    border-radius:6px!important;
+    background:conic-gradient(
+      from 0turn,
+      transparent 0deg 318deg,
+      rgba(21,151,255,.18) 326deg,
+      rgba(52,197,255,.72) 337deg,
+      rgba(184,92,255,.70) 345deg,
+      rgba(255,190,80,.62) 352deg,
+      transparent 360deg
+    )!important;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;
+    -webkit-mask-composite:xor!important;
+    mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0)!important;
+    mask-composite:exclude!important;
+    filter:drop-shadow(0 0 3px rgba(21,151,255,.22))!important;
+    opacity:.72!important;
+    animation:aghuV59LoginOrbit 8s linear infinite!important;
+    pointer-events:none!important;
+    z-index:2!important;
+  }
+  #authScreen .auth-card > *{position:relative;z-index:3}
+  @keyframes aghuV59LoginOrbit{to{transform:rotate(1turn)}}
+
+  /* 5. Google Docs: janela sempre centralizada e utilizável em telas menores. */
+  .google-docs-dialog[open]{
+    position:fixed!important;
+    inset:50% auto auto 50%!important;
+    transform:translate(-50%,-50%)!important;
+    margin:0!important;
+    width:min(590px,calc(100vw - 24px))!important;
+    max-height:min(88dvh,760px)!important;
+    overflow:auto!important;
+  }
+  .google-docs-direct-help{margin:8px 0 0;color:#6b7780;font-size:9px;line-height:1.35}
+
+  /* 6. Aviso fixo, somente na tela de login. */
+  #campaignJK.campaign-jk{
+    display:none!important;
+    position:fixed!important;
+    left:50%!important;
+    right:auto!important;
+    bottom:16px!important;
+    transform:translateX(-50%)!important;
+    width:auto!important;
+    max-width:calc(100vw - 28px)!important;
+    min-height:0!important;
+    padding:6px 12px!important;
+    border:1px solid #c7cbd0!important;
+    border-radius:12px!important;
+    background:rgba(255,255,255,.96)!important;
+    color:#3e4850!important;
+    font:10px/1.3 Arial,Helvetica,sans-serif!important;
+    text-align:center!important;
+    white-space:nowrap!important;
+    box-shadow:0 3px 12px rgba(0,0,0,.08)!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:none!important;
+    transition:none!important;
+    z-index:65000!important;
+  }
+  #campaignJK.campaign-jk.campaign-login-active{display:block!important}
+  #campaignJK.campaign-jk::before,
+  #campaignJK.campaign-jk::after{display:none!important;content:none!important}
+  #campaignJK .campaign-jk-label{display:none!important}
+
+  /* 7. Redefinição de senha. */
+  .forgot-password-btn{
+    display:block;
+    margin:6px auto 0;
+    padding:2px 4px;
+    border:0;
+    background:transparent;
+    color:#64727e;
+    font-size:9px;
+    cursor:pointer;
+    text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .forgot-password-btn:hover{color:#1a4f7d}
+  .password-reset-dialog{width:min(430px,calc(100vw - 24px));border:1px solid #aeb5bc;padding:0}
+  .password-reset-body{padding:14px}
+  .password-reset-body p{margin:0 0 12px;color:#68747d;font-size:10px;line-height:1.45}
+  .password-reset-body label{display:grid;gap:5px;margin-bottom:10px;color:#555;font-size:10px;font-weight:700}
+  .password-reset-body input{height:34px;padding:0 9px;border:1px solid #c7cdd2;background:#fff;color:#222}
+  .password-reset-status{min-height:16px;margin:8px 0;color:#667784;font-size:10px;line-height:1.4}
+  .password-reset-status.ok{color:#277553}.password-reset-status.error{color:#ae2730}
+  .password-reset-actions{display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+
+  @media(max-width:520px){
+    #campaignJK.campaign-jk{white-space:normal!important;width:calc(100vw - 30px)!important}
+  }
+  @media(prefers-reduced-motion:reduce){
+    #keepPage.notes-view-cards .notes-table tr[data-id]::before,
+    #authScreen .auth-card::after{animation:none!important}
+  }
+</style>
+
 </head>
 <body>
   <div id="authScreen" class="auth-screen">
@@ -5440,6 +5669,7 @@
         <div class="login-memory-hint">Contas online são cadastradas pelo Administrador e podem ser acessadas em qualquer dispositivo.</div>
         <div id="loginError" class="form-error"></div>
       </form>
+      <button id="forgotPasswordBtn" class="forgot-password-btn" type="button">Redefinir senha</button>
 
       <button id="purchaseAccessBtn" class="purchase-access-btn" type="button">
         ◈ Adquirir acesso — R$ 50,00
@@ -5456,6 +5686,46 @@
       Bloco de notas particular • dados isolados por usuário neste aparelho • sem Supabase
     </div>
   </div>
+
+
+  <dialog id="forgotPasswordDialog" class="password-reset-dialog">
+    <div class="dialog-head">
+      <h3>Redefinir senha</h3>
+      <button id="forgotPasswordCloseBtn" class="icon-btn" type="button" aria-label="Fechar">×</button>
+    </div>
+    <div class="password-reset-body">
+      <p>Informe o e-mail usado como login. O AGHU Notes enviará automaticamente o link seguro para criar uma nova senha.</p>
+      <form id="forgotPasswordForm" autocomplete="on">
+        <label>E-mail da conta
+          <input id="forgotPasswordEmail" type="email" autocomplete="email" placeholder="seuemail@exemplo.com" required>
+        </label>
+        <div id="forgotPasswordStatus" class="password-reset-status" aria-live="polite"></div>
+        <div class="password-reset-actions">
+          <button id="forgotPasswordCancelBtn" class="btn btn-light" type="button">Cancelar</button>
+          <button id="forgotPasswordSendBtn" class="btn btn-primary" type="submit">Enviar link</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="newPasswordDialog" class="password-reset-dialog">
+    <div class="dialog-head"><h3>Criar nova senha</h3></div>
+    <div class="password-reset-body">
+      <p>Defina a nova senha para concluir a recuperação da conta.</p>
+      <form id="newPasswordForm" autocomplete="off">
+        <label>Nova senha
+          <input id="newPasswordInput" type="password" minlength="6" autocomplete="new-password" required>
+        </label>
+        <label>Confirmar nova senha
+          <input id="newPasswordConfirm" type="password" minlength="6" autocomplete="new-password" required>
+        </label>
+        <div id="newPasswordStatus" class="password-reset-status" aria-live="polite"></div>
+        <div class="password-reset-actions">
+          <button id="newPasswordSaveBtn" class="btn btn-primary" type="submit">Salvar nova senha</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
 
 
   <dialog id="purchaseAccessDialog" class="purchase-dialog">
@@ -5975,10 +6245,12 @@
 <div id="googleDocsStatus" class="google-docs-status">Google não conectado.</div>
 
       <div class="dialog-actions">
+        <button id="googleOpenDirectBtn" class="btn btn-light" type="button">Abrir Google Docs</button>
         <button id="googleConnectBtn" class="btn btn-primary" type="button">Conectar Google</button>
         <button id="googleSyncNowBtn" class="btn btn-light" type="button">Copiar nota agora</button>
         <button id="googleDocsCancelBtn" class="btn btn-light" type="button">Fechar</button>
       </div>
+      <div class="google-docs-direct-help">“Abrir Google Docs” funciona sem OAuth. A sincronização automática continua disponível quando um OAuth Client ID válido estiver configurado.</div>
     </div>
   </dialog>
 
@@ -6051,14 +6323,7 @@
   </div>
 
 
-  <div id="campaignJK" class="campaign-jk" role="note" aria-label="Campanha JK" aria-hidden="true">
-    <span class="campaign-jk-label">Campanha JK:</span>
-    Garanta <strong>5 anos de acesso ilimitado</strong> por apenas <strong>R$ 50,00</strong>!
-    Para ativar sua conta, faça o Pix no valor de R$ 50,00 para <strong>79 99863-5602</strong>
-    e envie para o WhatsApp
-    <a href="https://wa.me/5579998635602?text=Ol%C3%A1%21%20Quero%20ativar%20minha%20conta%20do%20AGHU%20Notes%20pela%20Campanha%20JK.%20Vou%20enviar%20o%20comprovante%20de%20pagamento%2C%20o%20e-mail%20para%20Login%20e%20uma%20sugest%C3%A3o%20de%20Senha." target="_blank" rel="noopener noreferrer"><strong>(79) 99863-5602</strong></a>
-    o seu comprovante de pagamento, o e-mail que deseja utilizar como Login e uma sugestão de Senha.
-  </div>
+  <div id="campaignJK" class="campaign-jk" role="note" aria-label="Aviso de acesso" aria-hidden="false">R$ 50,00 garante o acesso por 1 ano</div>
 
 
   <input id="quickImageInput" type="file" accept="image/*" multiple hidden>
@@ -6257,6 +6522,8 @@
 
   const els = {
     auth: $('authScreen'), app: $('appShell'), login: $('loginForm'), loginEmail: $('loginEmail'), loginPassword: $('loginPassword'), loginError: $('loginError'),
+    forgotPasswordBtn:$('forgotPasswordBtn'), forgotPasswordDialog:$('forgotPasswordDialog'), forgotPasswordForm:$('forgotPasswordForm'), forgotPasswordEmail:$('forgotPasswordEmail'), forgotPasswordStatus:$('forgotPasswordStatus'), forgotPasswordClose:$('forgotPasswordCloseBtn'), forgotPasswordCancel:$('forgotPasswordCancelBtn'), forgotPasswordSend:$('forgotPasswordSendBtn'),
+    newPasswordDialog:$('newPasswordDialog'), newPasswordForm:$('newPasswordForm'), newPasswordInput:$('newPasswordInput'), newPasswordConfirm:$('newPasswordConfirm'), newPasswordStatus:$('newPasswordStatus'), newPasswordSave:$('newPasswordSaveBtn'),
     adminAccess:$('adminAccessBtn'), adminPanel:$('adminPanel'), adminExit:$('adminExitBtn'), adminLoginDialog:$('adminLoginDialog'), adminLoginTitle:$('adminLoginTitle'), adminSetupHelp:$('adminSetupHelp'), adminLoginForm:$('adminLoginForm'), adminIdentifier:$('adminIdentifierInput'), adminPasswordInput:$('adminPasswordInput'), adminPasswordConfirm:$('adminPasswordConfirm'), adminConfirmWrap:$('adminConfirmWrap'), adminLoginError:$('adminLoginError'), adminLoginSubmit:$('adminLoginSubmitBtn'), adminLoginClose:$('adminLoginCloseBtn'), adminLoginCancel:$('adminLoginCancelBtn'), adminCreateUserForm:$('adminCreateUserForm'), adminNewEmail:$('adminNewEmail'), adminNewPassword:$('adminNewPassword'), adminCreateUserStatus:$('adminCreateUserStatus'), adminUsersBody:$('adminUsersBody'),
     adminUsersMenuBtn:$('adminUsersMenuBtn'), adminSalesTestMenuBtn:$('adminSalesTestMenuBtn'), adminUsersTabBtn:$('adminUsersTabBtn'), adminSalesTestTabBtn:$('adminSalesTestTabBtn'), adminUsersPage:$('adminUsersPage'), adminSalesTestPage:$('adminSalesTestPage'), adminTopTitle:$('adminTopTitle'),
     adminTestBuyerName:$('adminTestBuyerName'), adminTestBuyerEmail:$('adminTestBuyerEmail'), adminTestCreateBtn:$('adminTestCreateBtn'), adminTestApproveBtn:$('adminTestApproveBtn'), adminTestOpenActivationBtn:$('adminTestOpenActivationBtn'), adminTestCopyActivationBtn:$('adminTestCopyActivationBtn'), adminTestRefreshBtn:$('adminTestRefreshBtn'), adminTestMeta:$('adminTestMeta'), adminTestStatus:$('adminTestStatus'), adminTestChecklist:$('adminTestChecklist'), adminTestVerdict:$('adminTestVerdict'),
@@ -6277,7 +6544,7 @@
     noteMenuBtn:$('noteMenuBtn'), noteActionsMenu:$('noteActionsMenu'),
     googleDocsDialog:$('googleDocsDialog'), googleDocsClose:$('googleDocsCloseBtn'), googleDocsCancel:$('googleDocsCancelBtn'),
     googleAccountInput:$('googleAccountInput'), googleClientIdInput:$('googleClientIdInput'), googleAutoBackup:$('googleAutoBackupToggle'),
-    googleDocsStatus:$('googleDocsStatus'), googleConnect:$('googleConnectBtn'), googleSyncNow:$('googleSyncNowBtn'),
+    googleDocsStatus:$('googleDocsStatus'), googleConnect:$('googleConnectBtn'), googleSyncNow:$('googleSyncNowBtn'), googleOpenDirect:$('googleOpenDirectBtn'),
     googleOAuthOrigin:$('googleOAuthOrigin'), copyGoogleOrigin:$('copyGoogleOriginBtn'),
     history: $('historyBtn'), historyDialog: $('historyDialog'), historyList: $('historyList'), imageInput: $('imageInput'), imageGallery: $('imageGallery'),
     quickImageInput:$('quickImageInput'), quickImageViewer:$('quickImageViewerDialog'),
@@ -7341,6 +7608,86 @@
   const rememberedEmail=localStorage.getItem('aghuNotes.lastLogin')||localStorage.getItem('aghuNotes.lastEmail')||'';
   if(rememberedEmail) els.loginEmail.value=rememberedEmail;
 
+  function setPasswordResetStatus(target,text,type=''){
+    if(!target)return;
+    target.textContent=text||'';
+    target.className=`password-reset-status${type?` ${type}`:''}`;
+  }
+
+  function passwordResetRedirectUrl(){
+    try{
+      const u=new URL('./',location.href);
+      u.search='';u.hash='';
+      u.searchParams.set('password-reset','1');
+      return u.toString();
+    }catch{return 'https://appcarlosfranca.github.io/aghu/?password-reset=1'}
+  }
+
+  els.forgotPasswordBtn?.addEventListener('click',()=>{
+    const current=String(els.loginEmail?.value||'').trim();
+    els.forgotPasswordEmail.value=current.includes('@')?current:'';
+    setPasswordResetStatus(els.forgotPasswordStatus,'');
+    els.forgotPasswordDialog.showModal();
+  });
+  els.forgotPasswordClose?.addEventListener('click',()=>els.forgotPasswordDialog.close());
+  els.forgotPasswordCancel?.addEventListener('click',()=>els.forgotPasswordDialog.close());
+  els.forgotPasswordForm?.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const email=String(els.forgotPasswordEmail.value||'').trim().toLowerCase();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+      setPasswordResetStatus(els.forgotPasswordStatus,'Informe um e-mail válido.','error');return;
+    }
+    els.forgotPasswordSend.disabled=true;
+    setPasswordResetStatus(els.forgotPasswordStatus,'Enviando link seguro...');
+    try{
+      const {error}=await window.AGhuCloudRaw.auth.resetPasswordForEmail(email,{redirectTo:passwordResetRedirectUrl()});
+      if(error)throw error;
+      setPasswordResetStatus(els.forgotPasswordStatus,'Se o e-mail estiver cadastrado, o link para redefinir a senha foi enviado. Verifique também a caixa de spam.','ok');
+    }catch(err){
+      setPasswordResetStatus(els.forgotPasswordStatus,err?.message||'Não foi possível enviar o link de redefinição.','error');
+    }finally{els.forgotPasswordSend.disabled=false;}
+  });
+
+  function openNewPasswordRecoveryDialog(){
+    setPasswordResetStatus(els.newPasswordStatus,'');
+    els.newPasswordInput.value='';
+    els.newPasswordConfirm.value='';
+    if(!els.newPasswordDialog.open)els.newPasswordDialog.showModal();
+  }
+
+  window.AGhuCloudRaw?.auth?.onAuthStateChange?.((event,session)=>{
+    if(event==='PASSWORD_RECOVERY')openNewPasswordRecoveryDialog();
+  });
+
+  if(new URLSearchParams(location.search).get('password-reset')==='1'){
+    setTimeout(async()=>{
+      try{
+        const r=await window.AGhuCloudRaw.auth.getSession();
+        if(r.data?.session)openNewPasswordRecoveryDialog();
+      }catch{}
+    },450);
+  }
+
+  els.newPasswordForm?.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const p=els.newPasswordInput.value;
+    const c=els.newPasswordConfirm.value;
+    if(p.length<6){setPasswordResetStatus(els.newPasswordStatus,'A senha deve ter pelo menos 6 caracteres.','error');return;}
+    if(p!==c){setPasswordResetStatus(els.newPasswordStatus,'As senhas não coincidem.','error');return;}
+    els.newPasswordSave.disabled=true;
+    setPasswordResetStatus(els.newPasswordStatus,'Salvando nova senha...');
+    try{
+      const {error}=await window.AGhuCloudRaw.auth.updateUser({password:p});
+      if(error)throw error;
+      await window.AGhuCloudRaw.auth.signOut({scope:'local'}).catch(()=>{});
+      try{history.replaceState({},document.title,location.pathname)}catch{}
+      els.newPasswordDialog.close();
+      showAuth('Senha redefinida com sucesso. Entre com a nova senha.');
+    }catch(err){
+      setPasswordResetStatus(els.newPasswordStatus,err?.message||'Não foi possível redefinir a senha.','error');
+    }finally{els.newPasswordSave.disabled=false;}
+  });
+
   els.login.addEventListener('submit', async e=>{
     e.preventDefault(); els.loginError.textContent='';els.loginError.style.removeProperty('color');
     const login=els.loginEmail.value.trim(),password=els.loginPassword.value;
@@ -7763,8 +8110,21 @@
     const localKey=cardAccentLocalKey(note?.id);
     const local=localKey?String(localStorage.getItem(localKey)||'').trim():'';
     if(/^#[0-9a-f]{6}$/i.test(local))return local;
-    const raw=String(note?.patient_meta?.cardAccent||'#171717').trim();
-    return /^#[0-9a-f]{6}$/i.test(raw)?raw:'#171717';
+    const explicit=String(note?.patient_meta?.cardAccent||'').trim();
+    if(/^#[0-9a-f]{6}$/i.test(explicit))return explicit;
+    const noteColor=String(note?.color||'').trim();
+    if(/^#[0-9a-f]{6}$/i.test(noteColor)&&noteColor.toLowerCase()!=='#ffffff')return noteColor;
+    return '#171717';
+  }
+  function noteCardBackground(note){
+    const raw=String(note?.color||'#ffffff').trim();
+    const allowed=new Set([
+      '#ffffff','#faafa8','#f39f76','#fff8b8','#e2f6d3','#b4ddd3','#d4e4ed','#aeccdc','#d3bfdb','#f6e2dd','#e9e3d4',
+      'linear-gradient(135deg,#f8fbff 0 50%,#e9f2ff 50% 100%)',
+      'linear-gradient(180deg,#fffef7,#eef8f0)',
+      'repeating-linear-gradient(0deg,#fff 0,#fff 23px,#e8edf3 24px)'
+    ]);
+    return allowed.has(raw)?raw:'#ffffff';
   }
 
   function firstNameFromDisplay(name=''){
@@ -7841,11 +8201,12 @@
         : '';
 
       const accent=noteAccentColor(n);
+      const noteBg=noteCardBackground(n);
       const firstName=firstNameFromDisplay(meta.name);
       const age=safeCardMeta(meta.age);
       const record=safeCardMeta(meta.record);
 
-      return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}" style="--note-accent:${accent}">
+      return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}" style="--note-accent:${accent};--note-bg:${noteBg}">
         <td data-label="Nome" class="patient-name-cell" data-name-cell="${n.id}">
           <div class="note-card-idbar">
             <span class="note-card-firstname" title="${esc(meta.name)}">${esc(firstName)}</span>
@@ -8875,8 +9236,8 @@
       );
     }else{
       setGoogleStatus(
-        'Informe em “Configuração técnica do Google Docs” o OAuth Client ID do aplicativo. O seu e-mail deve ficar somente no campo “Conta Google”.',
-        'error'
+        'Acesso direto disponível em “Abrir Google Docs”. Para sincronização automática, configure um OAuth Client ID do aplicativo.',
+        ''
       );
     }
   }
@@ -9078,6 +9439,22 @@
   els.copyDocs?.addEventListener('click',openGoogleDocsSettings);
   els.googleDocsClose?.addEventListener('click',()=>els.googleDocsDialog.close());
   els.googleDocsCancel?.addEventListener('click',()=>els.googleDocsDialog.close());
+  els.googleOpenDirect?.addEventListener('click',async()=>{
+    const opened=window.open('https://docs.new','_blank');
+    try{if(opened)opened.opener=null}catch{}
+    let copied=false;
+    try{
+      let note=state.current;
+      if(note){
+        const title=compactTitleForStorage(els.title?.value||note.title||'Sem título');
+        const bodyText=htmlToGoogleText(els.body?.innerHTML||note.content_html||'');
+        const text=[title,bodyText].filter(Boolean).join('\n\n');
+        if(text){await navigator.clipboard.writeText(text);copied=true;}
+      }
+    }catch{}
+    if(!opened){setGoogleStatus('O navegador bloqueou a abertura do Google Docs. Permita pop-ups para este site.','error');return;}
+    setGoogleStatus(copied?'Google Docs aberto. O texto da nota foi copiado; cole no documento com Ctrl+V.':'Google Docs aberto em uma nova aba.','ok');
+  });
   els.copyGoogleOrigin?.addEventListener('click',async()=>{
     const origin=location.protocol==='file:'?'https://appcarlosfranca.github.io':location.origin;
     try{
@@ -9543,7 +9920,7 @@ renderNotes=function(){
     const qrefs=quickReferenceAttachments(n);
     const hint=qrefs.length ? `<span class="quick-ref-count" title="Imagens para consulta rápida">${qrefs.length} img</span>` : '';
     const accent=noteAccentColor(n);
-    return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}" style="--note-accent:${accent}">
+    return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}" style="--note-accent:${accent};--note-bg:${noteBg}">
       <td data-label="Nome" class="patient-name-cell" data-name-cell="${n.id}">
         <div class="note-card-idbar">
           <span class="note-card-firstname" title="${esc(title)}">${esc(title)}</span>
@@ -9634,52 +10011,20 @@ renderNotes=function(){
 
 applyV42BrandingAndLayout();
 
-
-  // v47: Campanha JK exclusivamente no login, visível por 10s a cada ciclo de 30s.
-  let campaignJKInterval=null;
-  let campaignJKHideTimer=null;
-
-  function stopCampaignJKLoginCycle(){
-    if(campaignJKInterval){clearInterval(campaignJKInterval);campaignJKInterval=null;}
-    if(campaignJKHideTimer){clearTimeout(campaignJKHideTimer);campaignJKHideTimer=null;}
-    const banner=document.getElementById('campaignJK');
-    if(!banner)return;
-    banner.classList.remove('campaign-visible','campaign-login-active');
-    banner.setAttribute('aria-hidden','true');
-  }
-
-  function showCampaignJKLoginBurst(){
+  // v59: aviso comercial fixo somente enquanto a tela de login estiver visível.
+  function syncAccessNoticeVisibility(){
     const banner=document.getElementById('campaignJK');
     const auth=document.getElementById('authScreen');
-    if(!banner||!auth||auth.classList.contains('hidden'))return;
-    banner.classList.add('campaign-login-active');
-    requestAnimationFrame(()=>banner.classList.add('campaign-visible'));
-    banner.setAttribute('aria-hidden','false');
-    if(campaignJKHideTimer)clearTimeout(campaignJKHideTimer);
-    campaignJKHideTimer=setTimeout(()=>{
-      banner.classList.remove('campaign-visible');
-      banner.setAttribute('aria-hidden','true');
-    },10000);
+    if(!banner||!auth)return;
+    const visible=!auth.classList.contains('hidden');
+    banner.classList.toggle('campaign-login-active',visible);
+    banner.classList.toggle('campaign-visible',visible);
+    banner.setAttribute('aria-hidden',visible?'false':'true');
   }
-
-  function startCampaignJKLoginCycle(){
-    stopCampaignJKLoginCycle();
-    const auth=document.getElementById('authScreen');
-    if(!auth||auth.classList.contains('hidden'))return;
-    showCampaignJKLoginBurst();
-    campaignJKInterval=setInterval(showCampaignJKLoginBurst,30000);
-  }
-
-  const campaignAuthObserver=new MutationObserver(()=>{
-    const auth=document.getElementById('authScreen');
-    if(!auth)return;
-    if(auth.classList.contains('hidden'))stopCampaignJKLoginCycle();
-    else startCampaignJKLoginCycle();
-  });
   const campaignAuthScreen=document.getElementById('authScreen');
   if(campaignAuthScreen){
-    campaignAuthObserver.observe(campaignAuthScreen,{attributes:true,attributeFilter:['class']});
-    if(!campaignAuthScreen.classList.contains('hidden'))startCampaignJKLoginCycle();
+    new MutationObserver(syncAccessNoticeVisibility).observe(campaignAuthScreen,{attributes:true,attributeFilter:['class']});
+    syncAccessNoticeVisibility();
   }
 
   bootstrap();
@@ -10067,7 +10412,7 @@ applyV42BrandingAndLayout();
 
 
 <script id="aghu-v57-release-marker">
-window.AGHU_NOTES_RELEASE=Object.freeze({version:'v58',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
+window.AGHU_NOTES_RELEASE=Object.freeze({version:'v59',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
 </script>
 </body>
 </html>
