@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- AGHU Notes CLOUD v57.2: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
+<!-- AGHU Notes CLOUD v57.5: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -9555,7 +9555,52 @@ applyV42BrandingAndLayout();
   }
 
   function savePendingPurchase(p){
-    try{sessionStorage.setItem('aghuNotes.pendingPix',JSON.stringify(p||null))}catch{}
+    try{
+      if(p) sessionStorage.setItem('aghuNotes.pendingPix',JSON.stringify(p));
+      else sessionStorage.removeItem('aghuNotes.pendingPix');
+    }catch{}
+  }
+
+  function renderStoredPurchase(p){
+    if(!p)return;
+    result.classList.remove('hidden');
+
+    const code=String(p.qr_code||'').trim();
+    pixCode.value=code;
+    if(code) copyBox?.classList.remove('hidden');
+    else copyBox?.classList.add('hidden');
+
+    if(p.qr_code_base64){
+      qr.src=p.qr_code_base64.startsWith('data:')
+        ? p.qr_code_base64
+        : `data:image/png;base64,${p.qr_code_base64}`;
+      qr.classList.remove('hidden');
+    }else{
+      qr.removeAttribute('src');
+      qr.classList.add('hidden');
+    }
+
+    if(p.ticket_url){
+      ticket.href=p.ticket_url;
+      ticket.classList.remove('hidden');
+    }else{
+      ticket.removeAttribute('href');
+      ticket.classList.add('hidden');
+    }
+
+    activateLink.classList.add('hidden');
+    if(p.activation_url&&!p.activated){
+      activateLink.href=p.activation_url;
+      activateLink.classList.remove('hidden');
+    }
+
+    if(p.activated){
+      payState.textContent='Acesso já ativado.';
+    }else if(p.approved||p.status==='approved'){
+      payState.textContent='Pagamento confirmado!';
+    }else{
+      payState.textContent='Consultando pagamento...';
+    }
   }
 
   function cpfDigits(value){
@@ -9585,35 +9630,24 @@ applyV42BrandingAndLayout();
   });
 
   function showPix(p){
-    currentPurchase={order_id:p.order_id,status_token:p.status_token};
+    currentPurchase={
+      order_id:p.order_id,
+      status_token:p.status_token,
+      status:p.status||'pending',
+      qr_code:p.qr_code||'',
+      qr_code_base64:p.qr_code_base64||'',
+      ticket_url:p.ticket_url||'',
+      approved:p.status==='approved'
+    };
     savePendingPurchase(currentPurchase);
+    renderStoredPurchase(currentPurchase);
 
-    result.classList.remove('hidden');
-    activateLink.classList.add('hidden');
-
-    const code=String(p.qr_code||'').trim();
-    pixCode.value=code;
-    if(code) copyBox?.classList.remove('hidden');
-    else copyBox?.classList.add('hidden');
-
-    if(p.qr_code_base64){
-      qr.src=p.qr_code_base64.startsWith('data:')?p.qr_code_base64:`data:image/png;base64,${p.qr_code_base64}`;
-      qr.classList.remove('hidden');
-    }else{
-      qr.removeAttribute('src');
-      qr.classList.add('hidden');
-    }
-
-    if(p.ticket_url){
-      ticket.href=p.ticket_url;
-      ticket.classList.remove('hidden');
-    }else ticket.classList.add('hidden');
-
-    if(!code&&!p.qr_code_base64&&!p.ticket_url){
+    if(!currentPurchase.qr_code&&!currentPurchase.qr_code_base64&&!currentPurchase.ticket_url){
       setPurchaseStatus('O Mercado Pago criou a cobrança, mas não devolveu os dados do Pix. Gere uma nova cobrança e confira o CPF informado.','error');
+    }else{
+      payState.textContent=currentPurchase.approved?'Pagamento confirmado.':'Aguardando confirmação do pagamento...';
     }
 
-    payState.textContent=p.status==='approved'?'Pagamento confirmado.':'Aguardando confirmação do pagamento...';
     startPurchasePolling();
   }
 
@@ -9623,6 +9657,15 @@ applyV42BrandingAndLayout();
       const p=await functionCall('pix-status',currentPurchase);
       if(p.approved){
         stopPurchasePolling();
+        currentPurchase={
+          ...(currentPurchase||{}),
+          status:p.status||'approved',
+          approved:true,
+          activated:!!p.activated,
+          activation_url:p.activation_url||currentPurchase?.activation_url||'',
+          activation_expires_at:p.activation_expires_at||null
+        };
+        renderStoredPurchase(currentPurchase);
         payState.textContent=p.activated?'Acesso já ativado.':'Pagamento confirmado!';
         setPurchaseStatus(
           p.email_sent
@@ -9630,15 +9673,16 @@ applyV42BrandingAndLayout();
             : 'Pagamento aprovado. Seu link de ativação já está disponível.',
           'ok'
         );
-        if(p.activation_url&&!p.activated){
-          activateLink.href=p.activation_url;
-          activateLink.classList.remove('hidden');
+        if(p.activated){
+          savePendingPurchase(null);
+        }else{
+          savePendingPurchase(currentPurchase);
         }
-        savePendingPurchase(null);
       }else if(['rejected','cancelled','expired','error'].includes(p.status)){
         stopPurchasePolling();
         payState.textContent='Pagamento não aprovado.';
         setPurchaseStatus(`Status do pagamento: ${p.status}.`,'error');
+        savePendingPurchase(null);
       }
     }catch(e){
       console.warn('Consulta Pix:',e);
@@ -9660,8 +9704,12 @@ applyV42BrandingAndLayout();
       const pending=JSON.parse(sessionStorage.getItem('aghuNotes.pendingPix')||'null');
       if(pending?.order_id&&pending?.status_token){
         currentPurchase=pending;
-        result.classList.remove('hidden');
-        payState.textContent='Consultando pagamento anterior...';
+        renderStoredPurchase(pending);
+        if(pending.approved&&pending.activation_url&&!pending.activated){
+          setPurchaseStatus('Pagamento aprovado. Seu link de ativação já está disponível.','ok');
+        }else{
+          payState.textContent='Consultando pagamento anterior...';
+        }
         startPurchasePolling();
       }
     }catch{}
