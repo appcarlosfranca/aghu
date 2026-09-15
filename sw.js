@@ -1,4 +1,4 @@
-const CACHE='aghu-notes-v65-1-save-flow-v2';
+const CACHE='aghu-notes-v65-2-render-notes-fix';
 const SHELL=[
   './index.html',
   './manifest.webmanifest',
