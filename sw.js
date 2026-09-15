@@ -1,4 +1,4 @@
-const CACHE='aghu-notes-cloud-v59-6-shell';
+const CACHE='aghu-notes-cloud-v61-restored';
 const SHELL=[
   './manifest.webmanifest',
   './icon-192-v16.png',
