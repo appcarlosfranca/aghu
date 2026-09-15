@@ -1,5 +1,6 @@
-const CACHE='aghu-notes-cloud-v634-save-recovery';
+const CACHE='aghu-notes-v65-1-save-flow-v2';
 const SHELL=[
+  './index.html',
   './manifest.webmanifest',
   './icon-192-v16.png',
   './icon-512-v16.png',
@@ -25,32 +26,24 @@ self.addEventListener('activate',event=>{
 
 self.addEventListener('fetch',event=>{
   const req=event.request;
-  if(req.method!=='GET') return;
+  if(req.method!=='GET')return;
   const url=new URL(req.url);
-
-  // Nunca intercepta Supabase, Mercado Pago ou outros backends.
-  if(url.origin!==self.location.origin) return;
+  if(url.origin!==self.location.origin)return;
 
   if(req.mode==='navigate'){
     event.respondWith(
-      fetch(req,{cache:'no-store'})
-        .then(resp=>{
-          const copy=resp.clone();
-          caches.open(CACHE).then(c=>c.put('./index.html',copy)).catch(()=>{});
-          return resp;
-        })
-        .catch(()=>caches.match('./index.html').then(r=>r||caches.match('./')))
+      fetch(req,{cache:'no-store'}).then(resp=>{
+        if(resp&&resp.ok){const copy=resp.clone();caches.open(CACHE).then(c=>c.put('./index.html',copy)).catch(()=>{});}
+        return resp;
+      }).catch(()=>caches.match('./index.html').then(r=>r||caches.match('./')))
     );
     return;
   }
 
   event.respondWith(
-    caches.match(req).then(cached=>cached||fetch(req).then(resp=>{
-      if(resp && resp.ok){
-        const copy=resp.clone();
-        caches.open(CACHE).then(c=>c.put(req,copy)).catch(()=>{});
-      }
+    fetch(req,{cache:'no-store'}).then(resp=>{
+      if(resp&&resp.ok){const copy=resp.clone();caches.open(CACHE).then(c=>c.put(req,copy)).catch(()=>{});}
       return resp;
-    }))
+    }).catch(()=>caches.match(req))
   );
 });

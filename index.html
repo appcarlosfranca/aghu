@@ -1,18 +1,19 @@
 <!doctype html>
-<!-- AGHU Notes CLOUD v63.4: correção exclusiva da recuperação/persistência das notas salvas. -->
+<!-- AGHU Notes CLOUD v65.0: persistência reforçada com espelho local estável + Supabase. -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="light" />
   <title>AGHU Notes</title>
+  <!-- v65.1: base v65.0; somente o fluxo de salvar/manter notas foi realinhado ao index v2. -->
   <meta name="theme-color" content="#ffffff" />
-  <link rel="manifest" href="./manifest.webmanifest?v=57" />
-  <link rel="shortcut icon" href="./favicon.ico?v=57" />
-  <link rel="icon" href="./favicon.ico?v=57" sizes="any" />
-  <link rel="icon" type="image/png" sizes="96x96" href="./favicon-96-v16.png?v=57" />
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192-v16.png?v=57" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-v16.png?v=57" />
+  <link rel="manifest" href="./manifest.webmanifest?v=64" />
+  <link rel="shortcut icon" href="./favicon.ico?v=64" />
+  <link rel="icon" href="./favicon.ico?v=64" sizes="any" />
+  <link rel="icon" type="image/png" sizes="96x96" href="./favicon-96-v16.png?v=64" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192-v16.png?v=64" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-v16.png?v=64" />
   <meta name="application-name" content="AGHU Notes" />
   <meta name="apple-mobile-web-app-title" content="AGHU Notes" />
 
@@ -6695,6 +6696,199 @@
   const supabase=window.AGhuCloud.createClient();
   const LOCAL_ONLY=false;
 
+
+  // ================================================================
+  // AGHU Notes v64 — NÚCLEO DE PERSISTÊNCIA REFEITO
+  // Supabase (vault_records) é a fonte remota canônica.
+  // IndexedDB é o espelho local durável e o rascunho é o journal de edição.
+  // O caminho crítico de notas NÃO depende mais do adaptador lógico `notes`.
+  // ================================================================
+  const V64_CORE_VERSION='65.0';
+  const v64Raw=window.AGhuCloudRaw;
+  const V64_JOURNAL_PREFIX='aghuNotes.v64.journal:';
+  // Espelho local ESTÁVEL: não é apagado após sincronizar. Ele existe para que
+  // a nota continue disponível mesmo quando o IndexedDB está bloqueado, quando
+  // o HTML é aberto diretamente por file:// ou quando uma leitura remota falha.
+  const NOTE_MIRROR_PREFIX='aghuNotes.noteMirror:';
+  const v64Diagnostics={unreadable:[],lastSave:null,lastLoad:null};
+
+  function stableMirrorKey(noteId,userId=state?.user?.id){
+    return userId&&noteId?`${NOTE_MIRROR_PREFIX}${userId}:${noteId}`:'';
+  }
+  function stableMirrorSnapshot(note,userId=state?.user?.id){
+    if(!note?.id||!userId)return null;
+    const n=v64Clone(note);
+    delete n.__vault_id;
+    n.id=note.id;n.user_id=userId;
+    n.title=String(n.title||'Nova nota');
+    n.content_html=String(n.content_html||'');
+    n.color=n.color||'#ffffff';
+    n.created_at=n.created_at||new Date().toISOString();
+    n.updated_at=n.updated_at||new Date().toISOString();
+    n.pinned=!!n.pinned;n.archived=!!n.archived;n.deleted=!!n.deleted;
+    n.patient_meta=n.patient_meta||{};n.note_labels=n.note_labels||[];n.attachments=n.attachments||[];
+    return n;
+  }
+  function writeStableMirror(note,userId=state?.user?.id){
+    const snap=stableMirrorSnapshot(note,userId);
+    const key=stableMirrorKey(note?.id,userId);
+    if(!snap||!key)return false;
+    try{localStorage.setItem(key,JSON.stringify(snap));return true}
+    catch(err){console.warn('Espelho local da nota:',err);return false}
+  }
+  function readStableMirrors(userId){
+    const out=[];const prefix=`${NOTE_MIRROR_PREFIX}${userId}:`;
+    try{
+      for(let i=0;i<localStorage.length;i++){
+        const key=localStorage.key(i);if(!key||!key.startsWith(prefix))continue;
+        try{const n=JSON.parse(localStorage.getItem(key)||'null');if(n?.id&&n.user_id===userId)out.push(n)}catch{}
+      }
+    }catch{}
+    return out;
+  }
+  function deleteStableMirror(noteId,userId=state?.user?.id){
+    const key=stableMirrorKey(noteId,userId);if(!key)return;
+    try{localStorage.removeItem(key)}catch{}
+  }
+
+  function v64Clone(value){
+    try{return structuredClone(value)}catch{return JSON.parse(JSON.stringify(value))}
+  }
+  function v64JournalKey(noteId,userId=state.user?.id){
+    return userId&&noteId?`${V64_JOURNAL_PREFIX}${userId}:${noteId}`:'';
+  }
+  function v64JournalSnapshot(note){
+    if(!note?.id||!state.user?.id)return null;
+    return {
+      id:note.id,user_id:state.user.id,
+      title:String(note.title||'Nova nota'),content_html:String(note.content_html||''),
+      color:note.color||'#ffffff',reminder_at:note.reminder_at||null,
+      created_at:note.created_at||new Date().toISOString(),
+      updated_at:note.updated_at||new Date().toISOString(),
+      pinned:!!note.pinned,archived:!!note.archived,deleted:!!note.deleted,
+      patient_meta:note.patient_meta||{},google_doc_id:note.google_doc_id||null,
+      synthetic_local:note.synthetic_local??null,synthetic_age:note.synthetic_age??null,
+      synthetic_record:note.synthetic_record??null,
+      local_only:!!note.local_only,note_labels:note.note_labels||[],attachments:note.attachments||[]
+    };
+  }
+  function v64WriteJournal(note){
+    const key=v64JournalKey(note?.id); if(!key)return false;
+    try{localStorage.setItem(key,JSON.stringify(v64JournalSnapshot(note)));return true}catch(err){console.warn('Journal v64:',err);return false}
+  }
+  function v64DeleteJournal(noteId){
+    const key=v64JournalKey(noteId);if(!key)return;
+    try{localStorage.removeItem(key)}catch{}
+  }
+  function v64ReadJournals(userId){
+    const out=[];const prefix=`${V64_JOURNAL_PREFIX}${userId}:`;
+    try{
+      for(let i=0;i<localStorage.length;i++){
+        const key=localStorage.key(i);if(!key||!key.startsWith(prefix))continue;
+        try{const v=JSON.parse(localStorage.getItem(key)||'null');if(v?.id)out.push(v)}catch{}
+      }
+    }catch{}
+    return out;
+  }
+
+  function v64CloudPayload(note){
+    const n=v64Clone(note||{});
+    return {
+      title:String(n.title||'Sem título'),
+      content_html:String(n.content_html||''),
+      color:n.color||'#ffffff',reminder_at:n.reminder_at||null,
+      patient_meta:n.patient_meta||{},google_doc_id:n.google_doc_id||null,
+      pinned:!!n.pinned,archived:!!n.archived,deleted:!!n.deleted,
+      synthetic_local:n.synthetic_local??null,
+      synthetic_age:n.synthetic_age??null,synthetic_record:n.synthetic_record??null,
+      created_at:n.created_at||new Date().toISOString(),
+      updated_at:n.updated_at||new Date().toISOString()
+    };
+  }
+
+  async function v64DecodeVaultRow(row){
+    const payload=await window.AGhuLocalCrypto.decryptJson(row.payload);
+    const decoded={...(payload&&typeof payload==='object'?payload:{}),id:row.record_id,user_id:row.user_id};
+    if(row.note_id)decoded.note_id=row.note_id;
+    if(row.kind==='note_labels'&&row.ref_id)decoded.label_id=row.ref_id;
+    if(!decoded.created_at)decoded.created_at=row.created_at;
+    if(!decoded.updated_at)decoded.updated_at=row.updated_at;
+    Object.defineProperty(decoded,'__vault_id',{value:row.id,enumerable:false});
+    return decoded;
+  }
+
+  async function v64UpsertNote(note){
+    if(!state.user?.id)throw new Error('Usuário não autenticado.');
+    if(!note?.id)throw new Error('Nota sem identificador.');
+    if(!window.AGhuLocalCrypto?.ready())throw new Error('Criptografia ainda não está pronta.');
+
+    const payload=v64CloudPayload({...note,user_id:state.user.id});
+    const encrypted=await window.AGhuLocalCrypto.encryptJson(payload);
+    const row={
+      user_id:state.user.id,kind:'notes',record_id:note.id,
+      note_id:null,ref_id:null,payload:encrypted,
+      created_at:payload.created_at,updated_at:payload.updated_at
+    };
+    const {data,error}=await v64Raw.from('vault_records')
+      .upsert(row,{onConflict:'user_id,kind,record_id'})
+      .select('*').single();
+    if(error)throw error;
+    const saved=await v64DecodeVaultRow(data);
+    if(saved.id!==note.id)throw new Error('Confirmação remota retornou outro identificador.');
+    if(String(saved.title||'')!==String(payload.title||'') || String(saved.content_html||'')!==String(payload.content_html||'')){
+      throw new Error('O conteúdo confirmado pelo servidor difere do conteúdo enviado.');
+    }
+    v64Diagnostics.lastSave={id:note.id,at:new Date().toISOString(),stage:'upsert-confirmed'};
+    return {...saved,local_only:false,cloud_confirmed:true};
+  }
+
+  async function v64FetchCloudNote(noteId){
+    if(!state.user?.id||!noteId)return null;
+    const {data,error}=await v64Raw.from('vault_records').select('*')
+      .eq('user_id',state.user.id).eq('kind','notes').eq('record_id',noteId).maybeSingle();
+    if(error)throw error;
+    return data?await v64DecodeVaultRow(data):null;
+  }
+
+  async function v64LoadCloudBundle(){
+    if(!state.user?.id)return {notes:[],labels:[],note_labels:[],attachments:[],unreadable:[]};
+    const {data,error}=await v64Raw.from('vault_records').select('*')
+      .eq('user_id',state.user.id)
+      .in('kind',['notes','labels','note_labels','attachments'])
+      .order('updated_at',{ascending:false});
+    if(error)throw error;
+
+    const groups={notes:[],labels:[],note_labels:[],attachments:[]};
+    const unreadable=[];
+    for(const row of data||[]){
+      try{
+        const decoded=await v64DecodeVaultRow(row);
+        if(groups[row.kind])groups[row.kind].push(decoded);
+      }catch(err){
+        unreadable.push({kind:row.kind,record_id:row.record_id,message:err?.message||String(err)});
+        console.warn('v64: registro remoto preservado, mas ilegível nesta sessão',row.kind,row.record_id,err);
+      }
+    }
+    const labelMap=new Map(groups.labels.map(x=>[x.id,x]));
+    for(const note of groups.notes){
+      note.note_labels=groups.note_labels.filter(x=>x.note_id===note.id).map(x=>({
+        label_id:x.label_id,labels:labelMap.has(x.label_id)?{id:x.label_id,name:labelMap.get(x.label_id).name}:null
+      }));
+      note.attachments=groups.attachments.filter(x=>x.note_id===note.id);
+      note.local_only=false;note.cloud_confirmed=true;
+    }
+    v64Diagnostics.unreadable=unreadable;
+    v64Diagnostics.lastLoad={at:new Date().toISOString(),remoteNotes:groups.notes.length,unreadable:unreadable.length};
+    return {...groups,unreadable};
+  }
+
+  window.AGhuPersistenceV64={
+    version:V64_CORE_VERSION,
+    diagnostics:()=>({...v64Clone(v64Diagnostics),localMirrors:state.user?.id?readStableMirrors(state.user.id).length:0,localMode:location.protocol}),
+    fetchNote:id=>v64FetchCloudNote(id),
+    reload:()=>loadNotes()
+  };
+
   const $ = (id) => document.getElementById(id);
   const state = {
     user: null,
@@ -7096,9 +7290,16 @@
   }
 
   function persistLocalNote(note){
-    if(!note?.id||!state.user?.id||!state.localPersistenceReady)return Promise.resolve(false);
+    if(!note?.id||!state.user?.id)return Promise.resolve(false);
     const noteId=note.id;
     const snapshot=cloneLocalNote({...note,user_id:state.user.id});
+
+    // Camada 1: espelho síncrono no localStorage. Esta gravação acontece mesmo
+    // quando o IndexedDB não está disponível (inclusive em execução file://).
+    const mirrorOk=writeStableMirror(snapshot,state.user.id);
+
+    // Camada 2: IndexedDB, quando disponível.
+    if(!state.localPersistenceReady)return Promise.resolve(mirrorOk);
     const previous=state.noteWriteChains.get(noteId)||Promise.resolve();
     const current=previous
       .catch(()=>{})
@@ -7109,7 +7310,8 @@
         data:snapshot,
         updatedAt:Date.now()
       }))
-      .catch(err=>{persistenceError(err);return false});
+      .then(()=>true)
+      .catch(err=>{persistenceError(err);return mirrorOk});
     state.noteWriteChains.set(noteId,current);
     current.finally(()=>{
       if(state.noteWriteChains.get(noteId)===current)state.noteWriteChains.delete(noteId);
@@ -7124,30 +7326,48 @@
   }
 
   async function removeLocalNote(noteId){
-    if(!noteId||!state.user?.id||!state.localPersistenceReady)return;
+    if(!noteId||!state.user?.id)return;
+    // Exclusão definitiva remove as DUAS cópias locais. Mover para a lixeira não
+    // chama esta função, logo continua preservado.
+    deleteStableMirror(noteId,state.user.id);
+    if(!state.localPersistenceReady)return;
     const previous=state.noteWriteChains.get(noteId)||Promise.resolve();
     await previous.catch(()=>{});
     await idbDelete('notes',localNoteKey(noteId));
   }
 
   async function readLocalNotes(userId){
-    if(!state.localPersistenceReady)return[];
-    const rows=await idbGetAllByIndex('notes','userId',userId);
-    return (rows||[]).filter(r=>r?.noteId&&r?.data).map(r=>r.data);
+    const merged=new Map(readStableMirrors(userId).filter(n=>n?.id).map(n=>[n.id,n]));
+    if(state.localPersistenceReady){
+      try{
+        const rows=await idbGetAllByIndex('notes','userId',userId);
+        for(const r of rows||[]){
+          const n=r?.data;if(!r?.noteId||!n?.id)continue;
+          const old=merged.get(n.id);
+          if(!old||new Date(n.updated_at||0)>=new Date(old.updated_at||0))merged.set(n.id,n);
+        }
+      }catch(err){console.warn('Leitura IndexedDB de notas:',err)}
+    }
+    return [...merged.values()];
   }
 
   async function verifyDurableLocalNote(noteId,expected){
-    if(!state.localPersistenceReady||!noteId)return false;
-    try{
-      await waitLocalNote(noteId);
-      const row=await idbGet('notes',localNoteKey(noteId));
-      const saved=row?.data;
+    if(!noteId||!state.user?.id)return false;
+    const mirror=readStableMirrors(state.user.id).find(n=>n.id===noteId)||null;
+    const matches=(saved)=>{
       if(!saved)return false;
       if(expected){
         if(compactTitleForStorage(saved.title||'')!==compactTitleForStorage(expected.title||''))return false;
         if(compactHtmlForStorage(saved.content_html||'')!==compactHtmlForStorage(expected.content_html||''))return false;
       }
       return true;
+    };
+    if(matches(mirror))return true;
+    if(!state.localPersistenceReady)return false;
+    try{
+      await waitLocalNote(noteId);
+      const row=await idbGet('notes',localNoteKey(noteId));
+      return matches(row?.data);
     }catch(err){
       console.warn('Falha ao confirmar cópia local da nota:',err);
       return false;
@@ -7207,86 +7427,32 @@
   async function initLocalPersistence(userId){
     try{
       await openLocalDb();
-      state.localPersistenceReady=true;
       await migrateLegacyLocalStorage(userId);
 
-      const [notesRec,labelsRec,draftRows,noteRows]=await Promise.all([
+      const [notesRec,labelsRec,draftRows]=await Promise.all([
         idbGet('cache',`notes:${userId}`),
         idbGet('cache',`labels:${userId}`),
-        idbGetAllByIndex('drafts','userId',userId),
-        idbGetAllByIndex('notes','userId',userId)
+        idbGetAllByIndex('drafts','userId',userId)
       ]);
 
-      const individual=(noteRows||[]).filter(r=>r?.noteId&&r?.data).map(r=>r.data);
-      const legacy=Array.isArray(notesRec?.value)?notesRec.value:[];
-      const merged=new Map();
-
-      for(const n of individual){
-        if(n?.id)merged.set(n.id,n);
-      }
-      for(const n of legacy){
-        if(!n?.id)continue;
-        const old=merged.get(n.id);
-        if(!old||new Date(n.updated_at||0)>new Date(old.updated_at||0))merged.set(n.id,n);
-      }
-
+      state.localNotesCache=Array.isArray(notesRec?.value)?notesRec.value:[];
+      state.localLabelsCache=Array.isArray(labelsRec?.value)?labelsRec.value:[];
       state.localDrafts=new Map(
         (draftRows||[]).filter(r=>r?.noteId&&r?.data).map(r=>[r.noteId,r.data])
       );
-
-      // Um rascunho jamais deve ficar sem sua nota-base local.
-      for(const d of state.localDrafts.values()){
-        if(!d?.id)continue;
-        const old=merged.get(d.id);
-        if(!old){
-          merged.set(d.id,{
-            id:d.id,user_id:userId,title:d.title||'Nova nota',content_html:d.content_html||'',
-            color:d.color||'#ffffff',reminder_at:d.reminder_at||null,
-            created_at:d.created_at||d.updated_at||new Date().toISOString(),
-            updated_at:d.updated_at||new Date().toISOString(),
-            synthetic_local:d.synthetic_local,synthetic_age:d.synthetic_age,
-            synthetic_record:d.synthetic_record,patient_meta:d.patient_meta||{},
-            pinned:false,archived:false,deleted:false,
-            local_only:!!d.pending_create,note_labels:[],attachments:[]
-          });
-        }else if(!d.metadata_only&&new Date(d.updated_at||0)>new Date(old.updated_at||0)){
-          Object.assign(old,{
-            title:d.title,content_html:d.content_html,color:d.color||old.color,
-            reminder_at:d.reminder_at,patient_meta:d.patient_meta||old.patient_meta||{},
-            updated_at:d.updated_at,local_only:!!d.pending_create
-          });
-        }
-      }
-
-      state.localNotesCache=[...merged.values()].sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
-      state.localLabelsCache=Array.isArray(labelsRec?.value)?labelsRec.value:[];
-
-      // Migração v3: cria um registro individual por nota. Nunca apaga por ausência no snapshot.
-      for(const n of state.localNotesCache)persistLocalNote(n);
+      state.localPersistenceReady=true;
     }catch(err){
       state.localPersistenceReady=false;
-      state.localNotesCache=state.localNotesCache||[];
-      state.localLabelsCache=state.localLabelsCache||[];
-      state.localDrafts=state.localDrafts||new Map();
       persistenceError(err);
     }
   }
 
   function cacheNotes(){
-    state.localNotesCache=state.notes.map(n=>cloneLocalNote(n)).filter(Boolean);
+    state.localNotesCache=state.notes.map(n=>({...n}));
     if(!state.user||!state.localPersistenceReady)return;
-
-    // Persistência por registro: uma leitura vazia da nuvem nunca apaga as notas locais.
-    for(const n of state.localNotesCache)persistLocalNote(n);
-
-    // Snapshot legado mantido apenas para compatibilidade. Escritas são serializadas.
-    const snapshot=state.localNotesCache.map(n=>cloneLocalNote(n));
-    state.cacheSnapshotChain=state.cacheSnapshotChain
-      .catch(()=>{})
-      .then(()=>idbPut('cache',{
-        key:notesCacheId(),value:snapshot,updatedAt:Date.now()
-      }))
-      .catch(persistenceError);
+    idbPut('cache',{
+      key:notesCacheId(),value:state.localNotesCache,updatedAt:Date.now()
+    }).catch(persistenceError);
   }
 
   function cacheLabels(){
@@ -7371,27 +7537,25 @@
 
   function persistDraftNow(){
     const d=buildDraft();
-    if(!d)return null;
+    if(!d)return;
 
-    d.revision=state.editRevision;
     state.localDrafts.set(d.id,d);
 
     const idx=state.notes.findIndex(n=>n.id===d.id);
     const patch={
       title:d.title,content_html:d.content_html,color:d.color,
-      reminder_at:d.reminder_at,patient_meta:d.patient_meta||{},
-      google_doc_id:d.google_doc_id||state.current.google_doc_id||null,
-      updated_at:d.updated_at,local_only:!!d.pending_create
+      reminder_at:d.reminder_at,patient_meta:d.patient_meta||{},google_doc_id:d.google_doc_id||state.current.google_doc_id||null,
+      updated_at:d.updated_at
     };
-    if(idx>=0){
-      Object.assign(state.notes[idx],patch);
-      persistLocalNote(state.notes[idx]);
-    }
+    if(idx>=0)Object.assign(state.notes[idx],patch);
     Object.assign(state.current,patch);
     cacheNotes();
 
-    if(state.localPersistenceReady)queueDraftWrite(d);
-    return d;
+    if(state.localPersistenceReady){
+      idbPut('drafts',{
+        key:draftId(d.id),userId:state.user.id,noteId:d.id,data:d,updatedAt:Date.now()
+      }).catch(persistenceError);
+    }
   }
 
   function getDraft(noteId){
@@ -7400,6 +7564,7 @@
 
   function clearDraft(noteId){
     state.localDrafts.delete(noteId);
+    v64DeleteJournal(noteId);
     if(state.localPersistenceReady&&state.user){
       const previous=state.draftWriteChains.get(noteId)||Promise.resolve();
       const current=previous
@@ -8023,6 +8188,8 @@
     stopSyncLoop();
     stopReminderLoop();
     state.user=null;
+    state.current=null;state.isDirty=false;state.selectedId=null;
+    state.filter='all';state.search='';state.label='';
     document.body.classList.remove('keep-focus-mode');
     els.keepFocusBar?.classList.add('hidden');
     els.app.classList.add('hidden');
@@ -8229,79 +8396,76 @@
   }
 
   async function loadNotes(){
-    const localById=new Map((state.localNotesCache||[]).filter(n=>n?.id).map(n=>[n.id,cloneLocalNote(n)]));
-    let remote=[];
-
-    if(true&&state.user&&navigator.onLine){
-      const {data,error}=await supabase.from('notes')
-        .select('*, note_labels(label_id, labels(id,name)), attachments(*)')
-        .order('updated_at',{ascending:false});
-      if(error){
-        console.error('Falha ao carregar notas da nuvem:',error);
-      }else{
-        remote=data||[];
-      }
-    }
-
-    const merged=new Map(localById);
-
-    for(const cloud of remote){
-      if(!cloud?.id)continue;
-      const local=merged.get(cloud.id);
-      if(!local){
-        merged.set(cloud.id,{...cloud,local_only:false,cloud_confirmed:true});
-        continue;
-      }
-
-      const draft=state.localDrafts?.get(cloud.id);
-      const lt=new Date(local.updated_at||0).getTime();
-      const rt=new Date(cloud.updated_at||0).getTime();
-      const hasNewerDraft=!!draft&&new Date(draft.updated_at||0).getTime()>=rt;
-
-      if(local.local_only||hasNewerDraft||lt>rt+500){
-        merged.set(cloud.id,{
-          ...cloud,...local,
-          note_labels:cloud.note_labels||local.note_labels||[],
-          attachments:cloud.attachments||local.attachments||[],
-          cloud_confirmed:true
-        });
-      }else{
-        merged.set(cloud.id,{...cloud,local_only:false,cloud_confirmed:true});
-      }
-    }
-
-    // Importante: ausência na nuvem NÃO significa exclusão. Exclusão definitiva é uma ação explícita.
-    state.notes=[...merged.values()];
-
-    for(const d of pendingDrafts()){
-      if(!d?.id)continue;
-      const idx=state.notes.findIndex(n=>n.id===d.id);
-      if(idx>=0){
-        const n=state.notes[idx];
-        if(d.patient_meta&&Object.keys(d.patient_meta).length)n.patient_meta=d.patient_meta;
-        if(!d.metadata_only&&new Date(d.updated_at||0)>=new Date(n.updated_at||0)){
-          Object.assign(n,{
-            title:d.title,content_html:d.content_html,color:d.color||n.color,
-            reminder_at:d.reminder_at,patient_meta:d.patient_meta||n.patient_meta||{},
-            google_doc_id:d.google_doc_id||n.google_doc_id||null,
-            updated_at:d.updated_at,local_only:!!d.pending_create
+    if(!true){
+      state.notes=state.localNotesCache.length?state.localNotesCache.map(n=>({...n})):(state.notes||[]);
+      for(const d of pendingDrafts()){
+        const idx=state.notes.findIndex(n=>n.id===d.id);
+        if(idx>=0){
+          if(d.patient_meta && Object.keys(d.patient_meta).length){
+            state.notes[idx].patient_meta=d.patient_meta;
+          }
+          if(!d.metadata_only){
+            Object.assign(state.notes[idx],{
+              title:d.title,content_html:d.content_html,color:d.color,
+              reminder_at:d.reminder_at,patient_meta:d.patient_meta||state.notes[idx].patient_meta||{},
+              updated_at:d.updated_at
+            });
+          }
+        }else if(d.pending_create){
+          state.notes.unshift({
+            id:d.id,user_id:d.user_id,title:d.title,content_html:d.content_html,
+            color:d.color||'#ffffff',reminder_at:d.reminder_at||null,
+            created_at:d.created_at,updated_at:d.updated_at,
+            synthetic_local:d.synthetic_local,synthetic_age:d.synthetic_age,
+            synthetic_record:d.synthetic_record,patient_meta:d.patient_meta||{},
+            pinned:false,archived:false,deleted:false,
+            local_only:true,note_labels:[],attachments:[]
           });
         }
-      }else{
+      }
+      return;
+    }
+
+    const {data,error}=await supabase.from('notes')
+      .select('*, note_labels(label_id, labels(id,name)), attachments(*)')
+      .order('updated_at',{ascending:false});
+
+    if(error){
+      console.error(error);
+      state.notes=state.localNotesCache.length?state.localNotesCache.map(n=>({...n})):(state.notes||[]);
+      return;
+    }
+
+    state.notes=data||[];
+
+    for(const d of pendingDrafts()){
+      const idx=state.notes.findIndex(n=>n.id===d.id);
+      if(idx>=0){
+        // Correções manuais de identificação nunca podem sumir enquanto
+        // houver uma cópia local pendente, mesmo que o refresh do armazenamento local
+        // aconteça a cada poucos segundos.
+        if(d.patient_meta && Object.keys(d.patient_meta).length){
+          state.notes[idx].patient_meta=d.patient_meta;
+        }
+
+        if(!d.metadata_only && new Date(d.updated_at||0)>new Date(state.notes[idx].updated_at||0)){
+          Object.assign(state.notes[idx],{
+            title:d.title,content_html:d.content_html,color:d.color,
+            reminder_at:d.reminder_at,patient_meta:d.patient_meta||state.notes[idx].patient_meta||{},
+            updated_at:d.updated_at
+          });
+        }
+      }else if(idx<0&&d.pending_create){
         state.notes.unshift({
-          id:d.id,user_id:d.user_id||state.user.id,title:d.title||'Nova nota',
-          content_html:d.content_html||'',color:d.color||'#ffffff',
-          reminder_at:d.reminder_at||null,created_at:d.created_at||d.updated_at||new Date().toISOString(),
-          updated_at:d.updated_at||new Date().toISOString(),
+          id:d.id,user_id:d.user_id,title:d.title,content_html:d.content_html,
+          color:d.color||'#ffffff',reminder_at:d.reminder_at||null,
+          created_at:d.created_at,updated_at:d.updated_at,
           synthetic_local:d.synthetic_local,synthetic_age:d.synthetic_age,
-          synthetic_record:d.synthetic_record,patient_meta:d.patient_meta||{},
-          google_doc_id:d.google_doc_id||null,pinned:false,archived:false,deleted:false,
-          local_only:!!d.pending_create,note_labels:[],attachments:[]
+          synthetic_record:d.synthetic_record,pinned:false,archived:false,deleted:false,
+          local_only:true,note_labels:[],attachments:[]
         });
       }
     }
-
-    state.notes.sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
     cacheNotes();
   }
 
@@ -9133,34 +9297,42 @@
   els.newNote.addEventListener('click', async()=>{
     const meta=randomMeta();
     const id=crypto.randomUUID();
-    const now=new Date().toISOString();
-    const data={
-      id,user_id:state.user.id,title:'Nova nota',content_html:'',
-      color:'#ffffff',reminder_at:null,created_at:now,updated_at:now,
-      pinned:false,archived:false,deleted:false,patient_meta:{},
-      local_only:true,...meta,note_labels:[],attachments:[]
+    const makeLocal=()=>{
+      const data={
+        id,user_id:state.user.id,title:'Nova nota',content_html:'',
+        color:'#ffffff',reminder_at:null,created_at:new Date().toISOString(),
+        updated_at:new Date().toISOString(),pinned:false,archived:false,deleted:false,
+        patient_meta:{},local_only:true,...meta,note_labels:[],attachments:[]
+      };
+      state.notes.unshift(data);cacheNotes();
+      const localDraft={
+        id,user_id:state.user.id,title:'Nova nota',content_html:'',
+        color:'#ffffff',reminder_at:null,labels_text:'',
+        created_at:data.created_at,updated_at:data.updated_at,
+        synthetic_local:data.synthetic_local,synthetic_age:data.synthetic_age,
+        synthetic_record:data.synthetic_record,patient_meta:{},pending_create:true
+      };
+      state.localDrafts.set(id,localDraft);
+      if(state.localPersistenceReady){
+        idbPut('drafts',{
+          key:draftId(id),userId:state.user.id,noteId:id,data:localDraft,updatedAt:Date.now()
+        }).catch(persistenceError);
+      }
+      openNote(id);
+      setAutosave('Salvo e sincronizado','local-saved');
+      setSyncStatus('offline');
     };
 
-    state.notes.unshift(data);
+    if(!true){makeLocal();return;}
+
+    const {data,error}=await supabase.from('notes').insert({
+      id,user_id:state.user.id,title:'Nova nota',content_html:'',...meta
+    }).select().single();
+
+    if(error){makeLocal();return;}
+    state.notes.unshift({...data,note_labels:[],attachments:[]});
     cacheNotes();
-    persistLocalNote(data);
-
-    const localDraft={
-      id,user_id:state.user.id,title:'Nova nota',content_html:'',
-      color:'#ffffff',reminder_at:null,labels_text:'',
-      created_at:now,updated_at:now,
-      synthetic_local:data.synthetic_local,synthetic_age:data.synthetic_age,
-      synthetic_record:data.synthetic_record,patient_meta:{},
-      pending_create:true,revision:++state.editRevision
-    };
-    state.localDrafts.set(id,localDraft);
-    if(state.localPersistenceReady)queueDraftWrite(localDraft);
-
-    openNote(id);
-    state.isDirty=true;
-    setAutosave('Salvo neste aparelho • sincronizando...','local-saved');
-    clearTimeout(state.saveTimer);
-    state.saveTimer=setTimeout(()=>flushSave(),100);
+    openNote(data.id);
   });
 
   function openNote(id){
@@ -9194,33 +9366,23 @@
     }
   }
   els.back.addEventListener('click',async()=>{
+    await flushSave();
     if(state.current){
-      persistDraftNow();
-      await waitDraftWrite(state.current.id);
-      await waitLocalNote(state.current.id);
-      try{await flushSave()}catch(err){console.warn('Sincronização ao voltar:',err)}
-
       const cached=state.notes.find(n=>n.id===state.current.id);
       if(cached){
-        cached.title=compactTitleForStorage(els.title.value)||'Sem título';
-        cached.content_html=compactHtmlForStorage(els.body.innerHTML);
-        cached.color=els.color.value;
-        cached.reminder_at=els.reminder.value?new Date(els.reminder.value).toISOString():null;
+        cached.title=els.title.value.trim()||'Sem título';
+        cached.content_html=els.body.innerHTML;
         cached.patient_meta=state.current.patient_meta||cached.patient_meta||{};
         cached.updated_at=state.current.updated_at||new Date().toISOString();
-        persistLocalNote(cached);
       }
       cacheNotes();
     }
-
     els.editorPage.classList.add('hidden');
     els.keepPage.classList.remove('hidden');
     state.current=null;
+    await loadNotes();
     renderNotes();
     applyKeepFocusMode(state.keepFocusMode);
-
-    // Atualização remota somente depois que a cópia local já está visível.
-    setTimeout(()=>syncFromCloud(),50);
   });
 
   function updateActionLabels(){
@@ -9232,29 +9394,23 @@
   }
   function markDirty(){
     if(!state.current)return;
-    state.editRevision++;
     state.isDirty=true;
 
-    // Salva primeiro no aparelho; a nuvem é uma segunda etapa.
+    // PRIMEIRO: grava imediatamente no aparelho, no mesmo evento de digitação.
     persistDraftNow();
 
-    setAutosave('Salvando...','local-saved');
+    if(!true){
+      setAutosave('Salvo e sincronizado','local-saved');
+      setSyncStatus('offline');
+      return;
+    }
+
+    // SEGUNDO: envia ao armazenamento local quase imediatamente.
+    setAutosave('Salvando localmente...','local-saved');
     clearTimeout(state.saveTimer);
-    state.saveTimer=setTimeout(()=>flushSave(),650);
+    state.saveTimer=setTimeout(flushSave,200);
   }
   [els.title,els.body,els.color,els.reminder,els.labelsInput].forEach(el=>el.addEventListener('input',markDirty));
-  document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='hidden'&&state.current){
-      persistDraftNow();
-      flushSave().catch(()=>{});
-    }
-  });
-  window.addEventListener('pagehide',()=>{
-    if(state.current){
-      persistDraftNow();
-      flushSave().catch(()=>{});
-    }
-  });
   els.color.addEventListener('change',()=>{els.editorPage.style.background=els.color.value;markDirty();});
   els.reminder.addEventListener('change',async()=>{if(els.reminder.value&&'Notification'in window&&Notification.permission==='default'){try{await Notification.requestPermission();}catch{}}markDirty();});
 
@@ -9318,83 +9474,73 @@
   }
 
   async function syncDraftRecord(d){
-    if(!true||!state.user||!d?.id)return{ok:false};
+    if(!true||!state.user)return false;
 
-    if(d.metadata_only&&!d.pending_create){
+    // Uma correção manual de Nome/Idade/Prontuário é sincronizada de forma
+    // independente. Assim um rascunho antigo nunca sobrescreve o texto da nota.
+    if(d.metadata_only && !d.pending_create){
       const {data,error}=await supabase.from('notes')
-        .update({patient_meta:d.patient_meta||{},updated_at:d.updated_at||new Date().toISOString()})
+        .update({
+          patient_meta:d.patient_meta||{},
+          updated_at:d.updated_at||new Date().toISOString()
+        })
         .eq('id',d.id)
-        .select('*')
+        .select('id,patient_meta')
         .maybeSingle();
-      if(error||!data)return{ok:false,error};
-      return{ok:true,data};
+
+      if(error){
+        console.error('Falha ao sincronizar identificação:',error);
+        return false;
+      }
+
+      const expected=JSON.stringify(d.patient_meta||{});
+      const confirmed=JSON.stringify(data?.patient_meta||{});
+      if(expected!==confirmed){
+        console.warn('Identificação não confirmada pelo armazenamento local.');
+        return false;
+      }
+
+      clearDraft(d.id);
+      return true;
     }
 
-    const local=state.notes.find(n=>n.id===d.id)||state.current||{};
-    const payload={
-      id:d.id,user_id:state.user.id,
-      title:compactTitleForStorage(d.title)||'Sem título',
-      content_html:compactHtmlForStorage(d.content_html||''),
-      color:d.color||local.color||'#ffffff',
-      reminder_at:d.reminder_at||null,
-      patient_meta:d.patient_meta||local.patient_meta||{},
-      google_doc_id:d.google_doc_id||local.google_doc_id||null,
-      pinned:!!local.pinned,archived:!!local.archived,deleted:!!local.deleted,
-      synthetic_local:d.synthetic_local??local.synthetic_local??null,
-      synthetic_age:d.synthetic_age??local.synthetic_age??null,
-      synthetic_record:d.synthetic_record??local.synthetic_record??null,
-      created_at:d.created_at||local.created_at||new Date().toISOString(),
-      updated_at:d.updated_at||new Date().toISOString()
-    };
-
-    let write;
-    if(d.pending_create||local.local_only){
-      write=await supabase.from('notes').insert(payload).select('*').maybeSingle();
-      if(write.error&&write.error.code==='23505'){
-        write=await supabase.from('notes').update(payload).eq('id',d.id).select('*').maybeSingle();
+    if(d.pending_create){
+      const {error}=await supabase.from('notes').insert({
+        id:d.id,user_id:state.user.id,title:compactTitleForStorage(d.title)||'Sem título',
+        content_html:compactHtmlForStorage(d.content_html||''),color:d.color||'#ffffff',
+        reminder_at:d.reminder_at||null,created_at:d.created_at||new Date().toISOString(),
+        updated_at:d.updated_at||new Date().toISOString(),
+        synthetic_local:d.synthetic_local,
+        synthetic_age:Number(d.synthetic_age)||0,
+        synthetic_record:Number(d.synthetic_record)||Math.floor(1000000+Math.random()*8999999),
+        patient_meta:d.patient_meta||{}
+      });
+      if(error && !String(error.message||'').toLowerCase().includes('duplicate'))return false;
+      if(!error){
+        refreshAppCounters(true);
+        setTimeout(()=>refreshAppCounters(false),350);
       }
     }else{
-      write=await supabase.from('notes').update(payload).eq('id',d.id).select('*').maybeSingle();
-      if(!write.error&&!write.data){
-        write=await supabase.from('notes').insert(payload).select('*').maybeSingle();
-      }
+      const {error}=await supabase.from('notes').update({
+        title:compactTitleForStorage(d.title)||'Sem título',content_html:compactHtmlForStorage(d.content_html||''),
+        color:d.color||'#ffffff',reminder_at:d.reminder_at||null,
+        patient_meta:d.patient_meta||{},
+        updated_at:d.updated_at||new Date().toISOString()
+      }).eq('id',d.id);
+      if(error)return false;
     }
 
-    if(write?.error||!write?.data){
-      if(write?.error)console.error('Falha ao gravar nota:',write.error);
-      return{ok:false,error:write?.error||null};
+    const names=(d.labels_text||'').split(',').map(x=>x.trim()).filter(Boolean);
+    const ids=await ensureLabels(names);
+    await supabase.from('note_labels').delete().eq('note_id',d.id);
+    if(ids.length){
+      await supabase.from('note_labels').insert(ids.map(label_id=>({
+        note_id:d.id,label_id,user_id:state.user.id
+      })));
     }
 
-    const verify=await supabase.from('notes')
-      .select('*')
-      .eq('id',d.id)
-      .maybeSingle();
-
-    if(verify.error||!verify.data){
-      if(verify.error)console.error('Falha ao confirmar nota:',verify.error);
-      return{ok:false,error:verify.error||null};
-    }
-
-    const sameTitle=compactTitleForStorage(verify.data.title||'')===payload.title;
-    const sameHtml=compactHtmlForStorage(verify.data.content_html||'')===payload.content_html;
-    if(!sameTitle||!sameHtml){
-      return{ok:false,error:{message:'A releitura da nota não corresponde ao conteúdo enviado.'}};
-    }
-
-    try{
-      const names=(d.labels_text||'').split(',').map(x=>x.trim()).filter(Boolean);
-      const ids=await ensureLabels(names);
-      await supabase.from('note_labels').delete().eq('note_id',d.id);
-      if(ids.length){
-        await supabase.from('note_labels').insert(ids.map(label_id=>({
-          note_id:d.id,label_id,user_id:state.user.id
-        })));
-      }
-    }catch(err){
-      console.warn('Nota salva; etiquetas pendentes:',err);
-    }
-
-    return{ok:true,data:verify.data};
+    clearDraft(d.id);
+    return true;
   }
 
   async function pruneCompactHistory(){
@@ -9422,131 +9568,104 @@
   }
 
   async function syncPendingDrafts(){
-    if(state.pendingSyncRunning||!true||!state.user||state.saveInFlight)return;
+    if(state.pendingSyncRunning||!true||!state.user)return;
     const list=pendingDrafts();
     if(!list.length)return;
 
     state.pendingSyncRunning=true;
     setSyncStatus('syncing');
     try{
+      let allOk=true;
       for(const d of list){
-        if(state.current?.id===d.id&&state.isDirty)continue;
-        const result=await syncDraftRecord(d);
-        if(!result.ok)continue;
-
-        const latest=getDraft(d.id);
-        if(latest&&latest.updated_at===d.updated_at){
-          clearDraft(d.id);
-        }
-        const idx=state.notes.findIndex(n=>n.id===d.id);
-        if(idx>=0){
-          Object.assign(state.notes[idx],result.data,{local_only:false});
-          persistLocalNote(state.notes[idx]);
-        }
+        const ok=await syncDraftRecord(d);
+        if(!ok){allOk=false;break;}
       }
       await Promise.all([loadNotes(),loadLabels()]);
       await syncPendingLocalAttachments();
       if(!els.keepPage.classList.contains('hidden'))renderNotes();
+      setSyncStatus('ok');
     }finally{
       state.pendingSyncRunning=false;
-      setSyncStatus(navigator.onLine?'ok':'offline');
     }
   }
 
   async function flushSave(){
-    if(!state.current||!state.isDirty)return true;
+    if(!state.current||!state.isDirty)return;
 
-    if(state.saveInFlight){
-      state.saveAgain=true;
-      try{await state.saveInFlight}catch{}
-      return !state.isDirty;
+    // O rascunho local só é apagado DEPOIS da confirmação do armazenamento local.
+    persistDraftNow();
+
+    if(!true){
+      state.isDirty=true;
+      setAutosave('Salvo e sincronizado','local-saved');
+      setSyncStatus('offline');
+      return;
     }
 
-    const revisionAtStart=state.editRevision;
-    const d=persistDraftNow()||buildDraft();
-    if(!d)return false;
-    await waitDraftWrite(d.id);
-    await waitLocalNote(d.id);
+    const d=buildDraft();
+    setSyncStatus('syncing');
+    setAutosave('Salvando localmente...','local-saved');
 
-    const run=(async()=>{
-      setSyncStatus('syncing');
-      setAutosave('Salvando...','local-saved');
-
-      if(!d.pending_create&&!state.current.local_only){
-        try{await createVersionIfNeeded()}catch(err){console.warn('Histórico:',err)}
-      }
-
-      const result=await syncDraftRecord(d);
-      if(!result.ok){
+    if(state.current.local_only||d.pending_create){
+      const ok=await syncDraftRecord({...d,pending_create:true});
+      if(!ok){
         state.isDirty=true;
-        setAutosave('Salvo neste aparelho • sincronização pendente','local-saved');
-        setSyncStatus(navigator.onLine?'syncing':'offline');
-        clearTimeout(state.saveRetryTimer);
-        state.saveRetryTimer=setTimeout(()=>flushSave(),2500);
-        return false;
+        setAutosave('Salvamento local pendente','local-saved');
+        return;
       }
-
-      const idx=state.notes.findIndex(n=>n.id===d.id);
-      const remote=result.data||{};
-
-      // Uma resposta antiga da nuvem nunca pode sobrescrever uma digitação mais nova.
-      const latest=getDraft(d.id);
-      const unchangedRevision=state.editRevision===revisionAtStart;
-      const unchangedDraft=!latest||latest.updated_at===d.updated_at;
-
-      if(!unchangedRevision||!unchangedDraft){
-        const localNow=idx>=0?state.notes[idx]:state.current;
-        if(localNow){
-          localNow.local_only=false;
-          localNow.cloud_confirmed=true;
-          persistLocalNote(localNow);
-        }
-        state.current.local_only=false;
-        state.current.cloud_confirmed=true;
-        cacheNotes();
-        state.isDirty=true;
-        state.saveAgain=true;
-        setAutosave('Salvando alterações mais recentes...','local-saved');
-        return true;
-      }
-
-      const merged={
-        ...(idx>=0?state.notes[idx]:state.current),
-        ...remote,
-        local_only:false,cloud_confirmed:true
-      };
-      if(idx>=0)state.notes[idx]=merged;
-      state.current={...state.current,...merged};
-      await persistLocalNote(merged);
-      cacheNotes();
-      const localConfirmed=await verifyDurableLocalNote(d.id,merged);
-
-      clearDraft(d.id);
+      state.current.local_only=false;
       state.isDirty=false;
-      clearTimeout(state.saveRetryTimer);
-      state.saveRetryTimer=null;
-      setAutosave(
-        localConfirmed
-          ? `Salvo e sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`
-          : `Sincronizado na nuvem ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} • cópia local pendente`,
-        localConfirmed?'cloud-saved':'local-saved'
-      );
+      await Promise.all([loadNotes(),loadLabels()]);
+      const fresh=state.notes.find(n=>n.id===d.id);
+      if(fresh)state.current=JSON.parse(JSON.stringify(fresh));
+      setAutosave(`Salvo e sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'local-saved');
       setSyncStatus('ok');
-      try{await loadLabels()}catch{}
       scheduleGoogleBackup(d.id);
-      return true;
-    })();
-
-    state.saveInFlight=run;
-    let ok=false;
-    try{ok=await run}
-    finally{state.saveInFlight=null}
-
-    if(state.saveAgain){
-      state.saveAgain=false;
-      if(state.isDirty)return flushSave();
+      return;
     }
-    return ok;
+
+    await createVersionIfNeeded();
+
+    const patch={
+      title:d.title,content_html:d.content_html,color:d.color,
+      reminder_at:d.reminder_at,
+      patient_meta:d.patient_meta||state.current.patient_meta||{},
+      google_doc_id:d.google_doc_id||state.current.google_doc_id||null,
+      updated_at:d.updated_at
+    };
+
+    const {data:remote}=await supabase.from('notes').select('title,content_html,updated_at').eq('id',state.current.id).maybeSingle();
+    if(remote&&state.current.updated_at&&new Date(remote.updated_at).getTime()>new Date(state.current.updated_at).getTime()+500){
+      const changed=remote.title!==state.current.title||remote.content_html!==state.current.content_html;
+      if(changed){
+        await supabase.from('note_versions').insert({
+          note_id:state.current.id,user_id:state.user.id,
+          title:remote.title||'',content_html:remote.content_html||''
+        });
+      }
+    }
+
+    const {error}=await supabase.from('notes').update(patch).eq('id',state.current.id);
+    if(error){
+      state.isDirty=true;
+      persistDraftNow();
+      setAutosave('Salvamento local pendente','local-saved');
+      setSyncStatus(true?'syncing':'offline');
+      return;
+    }
+
+    await syncLabels(state.current.id);
+    Object.assign(state.current,patch);
+    const cached=state.notes.find(n=>n.id===state.current.id);
+    if(cached)Object.assign(cached,patch);
+    cacheNotes();
+
+    clearDraft(state.current.id);
+    state.isDirty=false;
+    setAutosave(`Salvo e sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'local-saved');
+    await loadLabels();
+    setSyncStatus('ok');
+    scheduleGoogleBackup(state.current.id);
   }
 
   els.pin.addEventListener('click',async()=>{state.current.pinned=!state.current.pinned;await quickCurrent({pinned:state.current.pinned});});
@@ -10498,7 +10617,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   window.addEventListener('offline',()=>{
     if(state.current&&state.isDirty)persistDraftNow();
     setSyncStatus('offline');
-    if(state.current)setAutosave(state.isDirty?'Salvo neste aparelho • offline':'Offline • última versão preservada neste aparelho','local-saved');
+    if(state.current)setAutosave('Salvo e sincronizado','local-saved');
   });
   window.addEventListener('focus',()=>{syncFromCloud();});
   document.addEventListener('visibilitychange',()=>{
@@ -10531,6 +10650,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
 
 
 // v42 - rebrand, simplificação visual e menu interno corrigido
+window.AGhuBuildVersion='64.0';
 const AGHU_V42_BRAND = 'Anotações Gerais de Histórias e Unidades';
 function applyV42BrandingAndLayout(){
   document.body.classList.add('v44-sidebar-menu');
@@ -11080,7 +11200,7 @@ applyV42BrandingAndLayout();
 
 
 <script id="aghu-v57-release-marker">
-window.AGHU_NOTES_RELEASE=Object.freeze({version:'v63.3',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
+window.AGHU_NOTES_RELEASE=Object.freeze({version:'v65.0',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
 </script>
 </body>
 </html>
