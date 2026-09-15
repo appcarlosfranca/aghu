@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- AGHU Notes CLOUD v62.2: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
+<!-- AGHU Notes CLOUD v63.4: correção exclusiva da recuperação/persistência das notas salvas. -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -6340,7 +6340,7 @@
     note_versions:['id','user_id','note_id'],attachments:['id','user_id','note_id']
   };
   const enc=new TextEncoder(),dec=new TextDecoder(),MAGIC=enc.encode('AGHUIMG1'),ENC='AGHUENC1:';
-  let dataKey=null,legacy210Key=null,currentProfile=null,activeExclusiveSessionId=null,sharePrivateKey=null;
+  let dataKey=null,legacy180Key=null,legacy210Key=null,currentProfile=null,activeExclusiveSessionId=null,sharePrivateKey=null;
   const accountListeners=new Set();
   const b64=b=>{let s='',a=new Uint8Array(b);for(let i=0;i<a.length;i+=32768)s+=String.fromCharCode(...a.subarray(i,i+32768));return btoa(s)};
   const unb64=s=>{const b=atob(String(s||'')),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a};
@@ -6354,17 +6354,21 @@
   async function deriveKey(password,salt,iterations){const material=await crypto.subtle.importKey('raw',enc.encode(String(password)),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:unb64(salt),iterations:Number(iterations)||180000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
   async function encryptObject(value,key=dataKey){if(!key)throw Error('Chave de criptografia indisponível.');const iv=crypto.getRandomValues(new Uint8Array(12)),cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(JSON.stringify(value)));return{v:1,alg:'AES-GCM',iv:b64(iv),cipher:b64(cipher)}}
   async function decryptObject(box,key){if(!box||!box.iv||!box.cipher||!key)throw Error('Payload criptografado inválido.');const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(box.iv)},key,unb64(box.cipher));return JSON.parse(dec.decode(plain))}
+  function readKeyRing(){
+    return [dataKey,legacy180Key,legacy210Key].filter((key,index,arr)=>key&&arr.indexOf(key)===index);
+  }
+
   async function decryptPayload(payload){
     let box=payload;
     if(typeof box==='string'&&box.startsWith(ENC)){
       const [iv,cipher]=box.slice(ENC.length).split('.');
       const legacy={v:1,iv,cipher};
-      for(const key of [legacy210Key,dataKey]){if(!key)continue;try{return await decryptObject(legacy,key)}catch{}}
+      for(const key of readKeyRing()){try{return await decryptObject(legacy,key)}catch{}}
       throw Error('Não foi possível descriptografar um registro local legado.');
     }
     if(typeof box==='string'){try{box=JSON.parse(box)}catch{}}
     if(box&&typeof box==='object'&&box.iv&&box.cipher){
-      for(const key of [dataKey,legacy210Key]){if(!key)continue;try{return await decryptObject(box,key)}catch{}}
+      for(const key of readKeyRing()){try{return await decryptObject(box,key)}catch{}}
       throw Error('Não foi possível descriptografar os dados desta conta.');
     }
     return clone(payload);
@@ -6372,17 +6376,45 @@
   async function encryptLegacyString(value,key=legacy210Key||dataKey){const box=await encryptObject(value,key);return `${ENC}${box.iv}.${box.cipher}`}
 
   async function chooseDataKey(password,p){
-    const salt=p.encryption_salt||p.crypto_salt;if(!salt)throw Error('Perfil sem chave de criptografia.');
+    const salt=p.encryption_salt||p.crypto_salt;
+    if(!salt)throw Error('Perfil sem chave de criptografia.');
+
+    // A chave de escrita é sempre a configuração atual do perfil. Para leitura,
+    // mantemos também as duas iterações já usadas pelo AGHU Notes. Isso evita que
+    // notas antigas e novas, gravadas em fases diferentes da migração, desapareçam
+    // da lista após recarregar ou entrar novamente.
     const preferred=Number(p.encryption_iterations||180000)||180000;
-    const candidates=[preferred,180000,210000].filter((x,i,a)=>a.indexOf(x)===i);
-    const probe=await raw.from('vault_records').select('payload').eq('user_id',p.id).limit(1).maybeSingle();
+    const iterations=[preferred,180000,210000].filter((x,i,a)=>a.indexOf(x)===i);
+    const keys=new Map();
+    for(const it of iterations)keys.set(it,await deriveKey(password,salt,it));
+
+    dataKey=keys.get(preferred);
+    legacy180Key=keys.get(180000)||null;
+    legacy210Key=keys.get(210000)||null;
+
+    const probe=await raw.from('vault_records')
+      .select('payload')
+      .eq('user_id',p.id)
+      .limit(12);
     if(probe.error)throw probe.error;
-    if(!probe.data){dataKey=await deriveKey(password,salt,preferred);legacy210Key=preferred===210000?dataKey:await deriveKey(password,salt,210000);return preferred}
-    for(const it of candidates){
-      const k=await deriveKey(password,salt,it);
-      try{await decryptObject(probe.data.payload,k);dataKey=k;legacy210Key=it===210000?k:await deriveKey(password,salt,210000);return it}catch{}
+    const rows=probe.data||[];
+    if(!rows.length)return preferred;
+
+    // Basta uma amostra ser legível para confirmar a senha; cada registro será
+    // depois aberto com o anel completo de chaves, sem depender de qual linha o
+    // Supabase retornou primeiro.
+    let readable=false;
+    for(const row of rows){
+      for(const key of readKeyRing()){
+        try{await decryptObject(row.payload,key);readable=true;break}catch{}
+      }
+      if(readable)break;
     }
-    throw Error('Senha aceita, mas não foi possível abrir os dados criptografados desta conta. Não alteramos nenhuma nota.');
+    if(!readable){
+      dataKey=null;legacy180Key=null;legacy210Key=null;
+      throw Error('Senha aceita, mas não foi possível abrir os dados criptografados desta conta. Não alteramos nenhuma nota.');
+    }
+    return preferred;
   }
 
   function normalizeProfile(p){if(!p)return null;return{...p,user_id:p.id,login:displayLogin(p.email,p.login),crypto_salt:p.encryption_salt}}
@@ -6391,34 +6423,213 @@
   async function vaultRows(kind){if(!currentProfile?.user_id)return[];const r=await raw.from('vault_records').select('*').eq('user_id',currentProfile.user_id).eq('kind',kind);if(r.error)throw r.error;return r.data||[]}
   async function decodeVaultRow(v){const payload=await decryptPayload(v.payload);const row={...(payload&&typeof payload==='object'?payload:{}),id:v.record_id,user_id:v.user_id};if(v.note_id)row.note_id=v.note_id;if(v.kind==='note_labels'&&v.ref_id)row.label_id=v.ref_id;if(!row.created_at)row.created_at=v.created_at;if(!row.updated_at)row.updated_at=v.updated_at;Object.defineProperty(row,'__vault_id',{value:v.id,enumerable:false});return row}
   async function encodeVaultRow(kind,row,wrapperId=null){const now=new Date().toISOString(),id=row.id||crypto.randomUUID(),userId=row.user_id||currentProfile?.user_id;if(!userId)throw Error('Usuário indisponível.');const keep=new Set(OPEN[kind]||['id','user_id']),payload={};for(const [k,v] of Object.entries({...row,id,user_id:userId})){if(!keep.has(k)&&!k.startsWith('__'))payload[k]=v}if(!('created_at'in payload))payload.created_at=row.created_at||now;if(!('updated_at'in payload))payload.updated_at=row.updated_at||now;return{id:wrapperId||crypto.randomUUID(),user_id:userId,kind,record_id:id,note_id:row.note_id||null,ref_id:kind==='note_labels'?(row.label_id||null):null,payload:await encryptObject(payload),created_at:row.created_at||now,updated_at:row.updated_at||now}}
-  async function fetchLogical(kind,enrich=false){const vs=await vaultRows(kind),out=[];for(const v of vs){try{out.push(await decodeVaultRow(v))}catch(e){console.error('Falha ao descriptografar',kind,v.record_id,e);throw e}}if(kind==='notes'&&enrich){const [nls,labels,atts]=await Promise.all([fetchLogical('note_labels'),fetchLogical('labels'),fetchLogical('attachments')]);const lm=new Map(labels.map(x=>[x.id,x]));for(const n of out){n.note_labels=nls.filter(x=>x.note_id===n.id).map(x=>({label_id:x.label_id,labels:lm.has(x.label_id)?{id:x.label_id,name:lm.get(x.label_id).name}:null}));n.attachments=atts.filter(x=>x.note_id===n.id)}}return out}
+  async function fetchLogical(kind,enrich=false){
+    const vs=await vaultRows(kind),out=[];
+    for(const v of vs){
+      try{
+        out.push(await decodeVaultRow(v));
+      }catch(e){
+        // Um registro isolado não pode derrubar a lista inteira. Com o anel de
+        // chaves acima, registros 180k/210k continuam legíveis após novas versões.
+        console.warn('Registro do cofre não pôde ser aberto',kind,v.record_id,e);
+      }
+    }
+
+    if(kind==='notes'&&enrich){
+      const settled=await Promise.allSettled([
+        fetchLogical('note_labels'),
+        fetchLogical('labels'),
+        fetchLogical('attachments')
+      ]);
+      const nls=settled[0].status==='fulfilled'?settled[0].value:[];
+      const labels=settled[1].status==='fulfilled'?settled[1].value:[];
+      const atts=settled[2].status==='fulfilled'?settled[2].value:[];
+      const lm=new Map(labels.map(x=>[x.id,x]));
+      for(const n of out){
+        n.note_labels=nls.filter(x=>x.note_id===n.id).map(x=>({
+          label_id:x.label_id,
+          labels:lm.has(x.label_id)?{id:x.label_id,name:lm.get(x.label_id).name}:null
+        }));
+        n.attachments=atts.filter(x=>x.note_id===n.id);
+      }
+    }
+    return out;
+  }
   function matches(row,filters){for(const [op,k,v] of filters){const rv=row?.[k];if(op==='eq'&&rv!==v)return false;if(op==='in'&&!(v||[]).includes(rv))return false}return true}
   function sortRows(rows,ord){if(!ord)return rows;const[k,asc]=ord;return rows.sort((a,b)=>{const av=a?.[k],bv=b?.[k];if(av==null&&bv==null)return 0;if(av==null)return 1;if(bv==null)return-1;let c;if(typeof av==='number'&&typeof bv==='number')c=av-bv;else{const ad=Date.parse(av),bd=Date.parse(bv);c=Number.isFinite(ad)&&Number.isFinite(bd)?ad-bd:String(av).localeCompare(String(bv),'pt-BR',{numeric:true,sensitivity:'base'})}return asc?c:-c})}
-  async function deleteLogicalRows(kind,rows){for(const row of rows){const vid=row.__vault_id;if(vid){const r=await raw.from('vault_records').delete().eq('id',vid);if(r.error)throw r.error}else{const r=await raw.from('vault_records').delete().eq('user_id',currentProfile.user_id).eq('kind',kind).eq('record_id',row.id);if(r.error)throw r.error}if(kind==='notes'){const dep=await raw.from('vault_records').delete().eq('user_id',currentProfile.user_id).in('kind',['note_labels','note_versions','attachments']).eq('note_id',row.id);if(dep.error)throw dep.error}else if(kind==='labels'){const dep=await raw.from('vault_records').delete().eq('user_id',currentProfile.user_id).eq('kind','note_labels').eq('ref_id',row.id);if(dep.error)throw dep.error}}}
+  async function deleteLogicalRows(kind,rows){
+    for(const row of rows){
+      if(!currentProfile?.user_id||row.user_id!==currentProfile.user_id){
+        throw Error('Operação bloqueada: registro não pertence ao usuário.');
+      }
+      const vid=row.__vault_id;
+      const r=vid
+        ? await raw.from('vault_records').delete().eq('id',vid).eq('user_id',currentProfile.user_id)
+        : await raw.from('vault_records').delete().eq('user_id',currentProfile.user_id).eq('kind',kind).eq('record_id',row.id);
+      if(r.error)throw r.error;
+
+      if(kind==='notes'){
+        const dep=await raw.from('vault_records').delete()
+          .eq('user_id',currentProfile.user_id)
+          .in('kind',['note_labels','note_versions','attachments'])
+          .eq('note_id',row.id);
+        if(dep.error)throw dep.error;
+      }else if(kind==='labels'){
+        const dep=await raw.from('vault_records').delete()
+          .eq('user_id',currentProfile.user_id)
+          .eq('kind','note_labels')
+          .eq('ref_id',row.id);
+        if(dep.error)throw dep.error;
+      }
+    }
+  }
+
+  function idEqFilter(filters){
+    const f=(filters||[]).find(x=>x[0]==='eq'&&x[1]==='id');
+    return f?f[2]:null;
+  }
+
+  async function fetchLogicalForQuery(kind,filters,enrich=false){
+    const id=idEqFilter(filters);
+    if(!id)return (await fetchLogical(kind,enrich)).filter(r=>matches(r,filters));
+
+    const q=await raw.from('vault_records').select('*')
+      .eq('user_id',currentProfile.user_id)
+      .eq('kind',kind)
+      .eq('record_id',id)
+      .limit(1);
+    if(q.error)throw q.error;
+
+    const rows=[];
+    for(const v of q.data||[]){
+      try{rows.push(await decodeVaultRow(v))}
+      catch(e){console.warn('Registro específico ilegível',kind,id,e)}
+    }
+
+    if(kind==='notes'&&enrich&&rows.length){
+      const [nls,labels,atts]=await Promise.all([
+        fetchLogical('note_labels'),fetchLogical('labels'),fetchLogical('attachments')
+      ]);
+      const lm=new Map(labels.map(x=>[x.id,x]));
+      for(const n of rows){
+        n.note_labels=nls.filter(x=>x.note_id===n.id).map(x=>({
+          label_id:x.label_id,labels:lm.has(x.label_id)?{id:x.label_id,name:lm.get(x.label_id).name}:null
+        }));
+        n.attachments=atts.filter(x=>x.note_id===n.id);
+      }
+    }
+    return rows.filter(r=>matches(r,filters));
+  }
 
   class Q{
     constructor(t){this.t=t;this.op='select';this.p=null;this.f=[];this.ord=null;this.lim=null;this.cols='*';this.ret=false;this.mode=null}
     select(c='*'){this.cols=c||'*';if(this.op==='insert'||this.op==='update')this.ret=true;else this.op='select';return this}
-    insert(p){this.op='insert';this.p=p;return this}update(p){this.op='update';this.p=p;return this}delete(){this.op='delete';return this}
-    eq(k,v){this.f.push(['eq',k,v]);return this}in(k,v){this.f.push(['in',k,[...(v||[])]]);return this}order(k,o={}){this.ord=[k,o.ascending!==false];return this}limit(n){this.lim=Number(n);return this}
-    single(){this.mode='single';return this.execute()}maybeSingle(){this.mode='maybeSingle';return this.execute()}then(a,b){return this.execute().then(a,b)}
-    finish(rows){let r=sortRows(rows,this.ord);if(Number.isFinite(this.lim))r=r.slice(0,this.lim);if(this.mode==='single'){if(r.length!==1)return{data:null,error:{message:`JSON object requested, multiple (or no) rows returned: ${r.length}`}};return{data:r[0],error:null}}if(this.mode==='maybeSingle'){if(r.length>1)return{data:null,error:{message:`JSON object requested, multiple rows returned: ${r.length}`}};return{data:r[0]||null,error:null}}return{data:r,error:null}}
+    insert(p){this.op='insert';this.p=p;return this}
+    update(p){this.op='update';this.p=p;return this}
+    delete(){this.op='delete';return this}
+    eq(k,v){this.f.push(['eq',k,v]);return this}
+    in(k,v){this.f.push(['in',k,[...(v||[])]]);return this}
+    order(k,o={}){this.ord=[k,o.ascending!==false];return this}
+    limit(n){this.lim=Number(n);return this}
+    single(){this.mode='single';return this.execute()}
+    maybeSingle(){this.mode='maybeSingle';return this.execute()}
+    then(a,b){return this.execute().then(a,b)}
+    finish(rows){
+      let r=sortRows(rows,this.ord);
+      if(Number.isFinite(this.lim))r=r.slice(0,this.lim);
+      if(this.mode==='single'){
+        if(r.length!==1)return{data:null,error:{message:`JSON object requested, multiple (or no) rows returned: ${r.length}`}};
+        return{data:r[0],error:null};
+      }
+      if(this.mode==='maybeSingle'){
+        if(r.length>1)return{data:null,error:{message:`JSON object requested, multiple rows returned: ${r.length}`}};
+        return{data:r[0]||null,error:null};
+      }
+      return{data:r,error:null};
+    }
     async execute(){
-      if(!LOGICAL.has(this.t)){let q=raw.from(this.t);if(this.op==='select')q=q.select(this.cols);else if(this.op==='insert'){q=q.insert(this.p);if(this.ret)q=q.select(this.cols)}else if(this.op==='update'){q=q.update(this.p);if(this.ret)q=q.select(this.cols)}else q=q.delete();for(const[op,k,v]of this.f)q=op==='eq'?q.eq(k,v):q.in(k,v);if(this.ord)q=q.order(this.ord[0],{ascending:this.ord[1]});if(Number.isFinite(this.lim))q=q.limit(this.lim);if(this.mode==='single')q=q.single();else if(this.mode==='maybeSingle')q=q.maybeSingle();return await q}
+      if(!LOGICAL.has(this.t)){
+        let q=raw.from(this.t);
+        if(this.op==='select')q=q.select(this.cols);
+        else if(this.op==='insert'){q=q.insert(this.p);if(this.ret)q=q.select(this.cols)}
+        else if(this.op==='update'){q=q.update(this.p);if(this.ret)q=q.select(this.cols)}
+        else q=q.delete();
+        for(const[op,k,v]of this.f)q=op==='eq'?q.eq(k,v):q.in(k,v);
+        if(this.ord)q=q.order(this.ord[0],{ascending:this.ord[1]});
+        if(Number.isFinite(this.lim))q=q.limit(this.lim);
+        if(this.mode==='single')q=q.single();
+        else if(this.mode==='maybeSingle')q=q.maybeSingle();
+        return await q;
+      }
+
       try{
-        const enrich=this.t==='notes'&&this.op==='select';
-        if(this.op==='select'){const all=await fetchLogical(this.t,enrich),filtered=all.filter(r=>matches(r,this.f));return this.finish(filtered)}
+        if(!currentProfile?.user_id)throw Error('Usuário indisponível.');
+
+        const enrich=this.t==='notes'&&this.op==='select'&&(String(this.cols).includes('note_labels')||String(this.cols).includes('attachments'));
+
+        if(this.op==='select'){
+          const filtered=await fetchLogicalForQuery(this.t,this.f,enrich);
+          return this.finish(filtered);
+        }
+
         if(this.op==='insert'){
           const many=Array.isArray(this.p),items=many?this.p:[this.p],saved=[];
-          for(const input of items){const row={...clone(input)};if(!row.id)row.id=crypto.randomUUID();if(!row.user_id)row.user_id=currentProfile?.user_id;const exists=await raw.from('vault_records').select('id').eq('user_id',row.user_id).eq('kind',this.t).eq('record_id',row.id).limit(1).maybeSingle();if(exists.error)throw exists.error;if(exists.data){const er=new Error('duplicate logical record');er.code='23505';throw er;}const vr=await encodeVaultRow(this.t,row);const r=await raw.from('vault_records').insert(vr).select('*').single();if(r.error)throw r.error;saved.push(await decodeVaultRow(r.data))}
-          const result=many?saved:saved[0];if(this.ret||this.mode){const arr=Array.isArray(result)?result:[result];return this.finish(arr)}return{data:null,error:null}
+          for(const input of items){
+            const row={...clone(input)};
+            if(!row.id)row.id=crypto.randomUUID();
+            row.user_id=currentProfile.user_id;
+
+            const exists=await raw.from('vault_records').select('id')
+              .eq('user_id',currentProfile.user_id)
+              .eq('kind',this.t)
+              .eq('record_id',row.id)
+              .limit(1)
+              .maybeSingle();
+            if(exists.error)throw exists.error;
+            if(exists.data){
+              const er=new Error('duplicate logical record');er.code='23505';throw er;
+            }
+
+            const vr=await encodeVaultRow(this.t,row);
+            const r=await raw.from('vault_records').insert(vr).select('*').single();
+            if(r.error)throw r.error;
+            saved.push(await decodeVaultRow(r.data));
+          }
+          const result=many?saved:saved[0];
+          if(this.ret||this.mode){
+            const arr=Array.isArray(result)?result:[result];
+            return this.finish(arr);
+          }
+          return{data:null,error:null};
         }
-        const all=await fetchLogical(this.t,false),matched=all.filter(r=>matches(r,this.f));
+
+        const matched=await fetchLogicalForQuery(this.t,this.f,false);
+
         if(this.op==='update'){
-          const saved=[];for(const old of matched){const merged={...old,...clone(this.p)};if(!('updated_at'in this.p))merged.updated_at=new Date().toISOString();const vr=await encodeVaultRow(this.t,merged,old.__vault_id);const r=await raw.from('vault_records').update({payload:vr.payload,note_id:vr.note_id,ref_id:vr.ref_id,updated_at:vr.updated_at}).eq('id',old.__vault_id).select('*').single();if(r.error)throw r.error;saved.push(await decodeVaultRow(r.data))}if(this.ret||this.mode)return this.finish(saved);return{data:null,error:null}
+          const saved=[];
+          for(const old of matched){
+            if(old.user_id!==currentProfile.user_id)throw Error('Registro não pertence ao usuário.');
+            const patch=clone(this.p)||{};
+            delete patch.user_id;
+            const merged={...old,...patch,user_id:currentProfile.user_id};
+            if(!('updated_at'in patch))merged.updated_at=new Date().toISOString();
+            const vr=await encodeVaultRow(this.t,merged,old.__vault_id);
+            const r=await raw.from('vault_records').update({
+              payload:vr.payload,note_id:vr.note_id,ref_id:vr.ref_id,updated_at:vr.updated_at
+            }).eq('id',old.__vault_id).eq('user_id',currentProfile.user_id).select('*').single();
+            if(r.error)throw r.error;
+            saved.push(await decodeVaultRow(r.data));
+          }
+          if(this.ret||this.mode)return this.finish(saved);
+          return{data:null,error:null};
         }
-        await deleteLogicalRows(this.t,matched);return{data:null,error:null}
-      }catch(e){console.error(e);return{data:null,error:{message:e?.message||String(e),code:e?.code}}}
+
+        await deleteLogicalRows(this.t,matched);
+        return{data:null,error:null};
+      }catch(e){
+        console.error(e);
+        return{data:null,error:{message:e?.message||String(e),code:e?.code}};
+      }
     }
   }
 
@@ -6443,18 +6654,18 @@
     async signInWithPassword({email,password}){
       const login=normalizeLogin(email),r=await raw.auth.signInWithPassword({email:authEmailFor(login),password});if(r.error)return r;
       const pr=await getOwnProfile(r.data.user.id);if(pr.error||!pr.data){await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:null,error:{message:'Perfil da conta não encontrado.'}}}if(!pr.data.active){await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:null,error:{message:'Este acesso está bloqueado pelo Administrador.'}}}
-      currentProfile=pr.data;try{currentProfile.encryption_iterations=await chooseDataKey(password,pr.data)}catch(e){currentProfile=null;dataKey=null;legacy210Key=null;await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:null,error:{message:e.message}}}
+      currentProfile=pr.data;try{currentProfile.encryption_iterations=await chooseDataKey(password,pr.data)}catch(e){currentProfile=null;dataKey=null;legacy180Key=null;legacy210Key=null;await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:null,error:{message:e.message}}}
       try{await ensureShareKeyPair()}catch(e){console.warn('Chaves de compartilhamento:',e)}
-      const sid=crypto.randomUUID(),claimed=await raw.rpc('claim_active_session',{new_session_id:sid,device_label:deviceLabel()});if(claimed.error){dataKey=null;legacy210Key=null;sharePrivateKey=null;currentProfile=null;await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:null,error:{message:'Não foi possível iniciar a sessão exclusiva. Tente novamente.'}}}activeExclusiveSessionId=sid;
+      const sid=crypto.randomUUID(),claimed=await raw.rpc('claim_active_session',{new_session_id:sid,device_label:deviceLabel()});if(claimed.error){dataKey=null;legacy180Key=null;legacy210Key=null;sharePrivateKey=null;currentProfile=null;await raw.auth.signOut({scope:'local'}).catch(()=>{});return{data:null,error:{message:'Não foi possível iniciar a sessão exclusiva. Tente novamente.'}}}activeExclusiveSessionId=sid;
       const first=await raw.rpc('mark_first_access');const u={...r.data.user,login:currentProfile.login,role:currentProfile.role,first_access:first.data===true,exclusive_session_id:sid};return{data:{user:u,session:{...r.data.session,user:u}},error:null}
     },
-    async signOut(options={}){const release=options?.release!==false,sid=activeExclusiveSessionId;if(release&&sid){try{await raw.rpc('release_active_session',{session_id_arg:sid})}catch{}}dataKey=null;legacy210Key=null;sharePrivateKey=null;currentProfile=null;activeExclusiveSessionId=null;return raw.auth.signOut({scope:'local'})},
+    async signOut(options={}){const release=options?.release!==false,sid=activeExclusiveSessionId;if(release&&sid){try{await raw.rpc('release_active_session',{session_id_arg:sid})}catch{}}dataKey=null;legacy180Key=null;legacy210Key=null;sharePrivateKey=null;currentProfile=null;activeExclusiveSessionId=null;return raw.auth.signOut({scope:'local'})},
     onAuthStateChange(cb){return raw.auth.onAuthStateChange((ev,s)=>{if(!s){cb(ev,null);return}if(dataKey)cb(ev,{...s,user:{...s.user,login:currentProfile?.login,role:currentProfile?.role}})})}
   };
 
   async function encryptBlob(blob){if(!dataKey)throw Error('Chave de criptografia indisponível.');const iv=crypto.getRandomValues(new Uint8Array(12)),cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},dataKey,await blob.arrayBuffer())),mime=enc.encode(blob.type||'application/octet-stream'),out=new Uint8Array(8+2+mime.length+12+cipher.length);out.set(MAGIC,0);new DataView(out.buffer).setUint16(8,mime.length);out.set(mime,10);out.set(iv,10+mime.length);out.set(cipher,22+mime.length);return new Blob([out],{type:'application/octet-stream'})}
   async function decryptBlobBinary(blob,key){const a=new Uint8Array(await blob.arrayBuffer()),is=a.length>22&&MAGIC.every((v,i)=>a[i]===v);if(!is)throw Error('not-binary');const ml=new DataView(a.buffer,a.byteOffset,a.byteLength).getUint16(8),mime=dec.decode(a.slice(10,10+ml)),iv=a.slice(10+ml,22+ml),cipher=a.slice(22+ml),plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,cipher);return new Blob([plain],{type:mime||'application/octet-stream'})}
-  async function decryptBlob(blob){for(const key of [dataKey,legacy210Key]){if(!key)continue;try{return await decryptBlobBinary(blob,key)}catch{}}try{const txt=await blob.text(),box=JSON.parse(txt);if(box?.iv&&box?.cipher){for(const key of [dataKey,legacy210Key]){if(!key)continue;try{const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(box.iv)},key,unb64(box.cipher));return new Blob([plain],{type:box.type||'application/octet-stream'})}catch{}}}}catch{}return blob}
+  async function decryptBlob(blob){for(const key of readKeyRing()){try{return await decryptBlobBinary(blob,key)}catch{}}try{const txt=await blob.text(),box=JSON.parse(txt);if(box?.iv&&box?.cipher){for(const key of readKeyRing()){try{const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(box.iv)},key,unb64(box.cipher));return new Blob([plain],{type:box.type||'application/octet-stream'})}catch{}}}}catch{}return blob}
   const storage={from(bucket){const b=raw.storage.from(bucket);return{async upload(path,blob,o={}){try{return await b.upload(path,await encryptBlob(blob),o)}catch(e){return{data:null,error:{message:e.message}}}},async download(path){const r=await b.download(path);if(r.error||!r.data)return r;try{return{data:await decryptBlob(r.data),error:null}}catch(e){return{data:null,error:{message:e.message}}}},remove:p=>b.remove(p),async createSignedUrl(path){const r=await b.download(path);if(r.error||!r.data)return{data:null,error:r.error};try{return{data:{signedUrl:URL.createObjectURL(await decryptBlob(r.data))},error:null}}catch(e){return{data:null,error:{message:e.message}}}}}}};
 
   const client={auth,storage,from:t=>new Q(t),rpc:(n,a)=>raw.rpc(n,a)};
@@ -6494,6 +6705,13 @@
     search: '',
     label: '',
     saveTimer: null,
+    saveRetryTimer: null,
+    draftWriteChains: new Map(),
+    noteWriteChains: new Map(),
+    cacheSnapshotChain: Promise.resolve(),
+    saveInFlight: null,
+    saveAgain: false,
+    editRevision: 0,
     isDirty: false,
     versionTimer: null,
     selectedId: null,
@@ -6517,7 +6735,12 @@
     exclusiveSessionChannel:null,
     exclusiveHeartbeatTimer:null,
     exclusiveCheckTimer:null,
-    forcedSessionLogout:false
+    forcedSessionLogout:false,
+    localPersistenceReady:false,
+    localNotesCache:[],
+    localLabelsCache:[],
+    localDrafts:new Map(),
+    pendingSyncRunning:false
   };
 
   const els = {
@@ -6700,28 +6923,82 @@
 
   function openLocalDb(){
     if(localDbPromise)return localDbPromise;
-    localDbPromise=new Promise((resolve,reject)=>{
-      const req=indexedDB.open('AGHUNotesLocal',2);
-      req.onupgradeneeded=()=>{
-        const db=req.result;
-        if(!db.objectStoreNames.contains('cache')){
-          db.createObjectStore('cache',{keyPath:'key'});
+
+    const DB_NAME='AGHUNotesLocal';
+    const REQUIRED_STORES=['cache','drafts','attachments','notes'];
+
+    function configureSchema(db,tx){
+      if(!db.objectStoreNames.contains('cache')){
+        db.createObjectStore('cache',{keyPath:'key'});
+      }
+
+      for(const storeName of ['drafts','attachments','notes']){
+        let store;
+        if(!db.objectStoreNames.contains(storeName)){
+          store=db.createObjectStore(storeName,{keyPath:storeName==='attachments'?'id':'key'});
+        }else if(tx){
+          store=tx.objectStore(storeName);
         }
-        if(!db.objectStoreNames.contains('drafts')){
-          const s=db.createObjectStore('drafts',{keyPath:'key'});
-          s.createIndex('userId','userId',{unique:false});
-          s.createIndex('noteId','noteId',{unique:false});
+        if(store){
+          if(!store.indexNames.contains('userId'))store.createIndex('userId','userId',{unique:false});
+          if(!store.indexNames.contains('noteId'))store.createIndex('noteId','noteId',{unique:false});
         }
-        if(!db.objectStoreNames.contains('attachments')){
-          const s=db.createObjectStore('attachments',{keyPath:'id'});
-          s.createIndex('userId','userId',{unique:false});
-          s.createIndex('noteId','noteId',{unique:false});
+      }
+    }
+
+    function schemaComplete(db){
+      if(REQUIRED_STORES.some(name=>!db.objectStoreNames.contains(name)))return false;
+      try{
+        const tx=db.transaction(['drafts','attachments','notes'],'readonly');
+        for(const storeName of ['drafts','attachments','notes']){
+          const store=tx.objectStore(storeName);
+          if(!store.indexNames.contains('userId')||!store.indexNames.contains('noteId'))return false;
         }
-      };
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error);
-      req.onblocked=()=>reject(new Error('IndexedDB bloqueado por outra aba.'));
-    });
+        return true;
+      }catch{
+        return false;
+      }
+    }
+
+    function openAnyVersion(){
+      return new Promise((resolve,reject)=>{
+        // Não fixa uma versão antiga. Assim, uma instalação que já possua um
+        // IndexedDB mais novo continua abrindo normalmente, sem VersionError.
+        const req=indexedDB.open(DB_NAME);
+        req.onupgradeneeded=()=>configureSchema(req.result,req.transaction);
+        req.onsuccess=()=>resolve(req.result);
+        req.onerror=()=>reject(req.error);
+        req.onblocked=()=>reject(new Error('IndexedDB bloqueado por outra aba.'));
+      });
+    }
+
+    function repairSchema(db){
+      if(schemaComplete(db))return Promise.resolve(db);
+      const nextVersion=Math.max(1,Number(db.version)||1)+1;
+      db.close();
+      return new Promise((resolve,reject)=>{
+        const req=indexedDB.open(DB_NAME,nextVersion);
+        req.onupgradeneeded=()=>configureSchema(req.result,req.transaction);
+        req.onsuccess=()=>resolve(req.result);
+        req.onerror=()=>reject(req.error);
+        req.onblocked=()=>reject(new Error('IndexedDB bloqueado por outra aba. Feche outras abas do AGHU Notes e tente novamente.'));
+      });
+    }
+
+    localDbPromise=openAnyVersion()
+      .then(repairSchema)
+      .then(db=>{
+        db.onversionchange=()=>{
+          try{db.close()}catch{}
+          localDbPromise=null;
+        };
+        return db;
+      })
+      .catch(err=>{
+        localDbPromise=null;
+        throw err;
+      });
+
     return localDbPromise;
   }
 
@@ -6806,6 +7083,78 @@
     return out;
   }
 
+  function localNoteKey(noteId){
+    return state.user?.id&&noteId?`${state.user.id}:${noteId}`:'';
+  }
+
+  function cloneLocalNote(note){
+    if(!note)return null;
+    let out;
+    try{out=structuredClone(note)}catch{out=JSON.parse(JSON.stringify(note))}
+    delete out.__vault_id;
+    return out;
+  }
+
+  function persistLocalNote(note){
+    if(!note?.id||!state.user?.id||!state.localPersistenceReady)return Promise.resolve(false);
+    const noteId=note.id;
+    const snapshot=cloneLocalNote({...note,user_id:state.user.id});
+    const previous=state.noteWriteChains.get(noteId)||Promise.resolve();
+    const current=previous
+      .catch(()=>{})
+      .then(()=>idbPut('notes',{
+        key:localNoteKey(noteId),
+        userId:state.user.id,
+        noteId,
+        data:snapshot,
+        updatedAt:Date.now()
+      }))
+      .catch(err=>{persistenceError(err);return false});
+    state.noteWriteChains.set(noteId,current);
+    current.finally(()=>{
+      if(state.noteWriteChains.get(noteId)===current)state.noteWriteChains.delete(noteId);
+    });
+    return current;
+  }
+
+  async function waitLocalNote(noteId){
+    const p=state.noteWriteChains.get(noteId);
+    if(!p)return true;
+    try{await p;return true}catch{return false}
+  }
+
+  async function removeLocalNote(noteId){
+    if(!noteId||!state.user?.id||!state.localPersistenceReady)return;
+    const previous=state.noteWriteChains.get(noteId)||Promise.resolve();
+    await previous.catch(()=>{});
+    await idbDelete('notes',localNoteKey(noteId));
+  }
+
+  async function readLocalNotes(userId){
+    if(!state.localPersistenceReady)return[];
+    const rows=await idbGetAllByIndex('notes','userId',userId);
+    return (rows||[]).filter(r=>r?.noteId&&r?.data).map(r=>r.data);
+  }
+
+  async function verifyDurableLocalNote(noteId,expected){
+    if(!state.localPersistenceReady||!noteId)return false;
+    try{
+      await waitLocalNote(noteId);
+      const row=await idbGet('notes',localNoteKey(noteId));
+      const saved=row?.data;
+      if(!saved)return false;
+      if(expected){
+        if(compactTitleForStorage(saved.title||'')!==compactTitleForStorage(expected.title||''))return false;
+        if(compactHtmlForStorage(saved.content_html||'')!==compactHtmlForStorage(expected.content_html||''))return false;
+      }
+      return true;
+    }catch(err){
+      console.warn('Falha ao confirmar cópia local da nota:',err);
+      return false;
+    }
+  }
+
+
   function notesCacheId(){return state.user?`notes:${state.user.id}`:null;}
   function labelsCacheId(){return state.user?`labels:${state.user.id}`:null;}
   function draftId(noteId){return state.user?`${state.user.id}:${noteId}`:null;}
@@ -6858,32 +7207,86 @@
   async function initLocalPersistence(userId){
     try{
       await openLocalDb();
+      state.localPersistenceReady=true;
       await migrateLegacyLocalStorage(userId);
 
-      const [notesRec,labelsRec,draftRows]=await Promise.all([
+      const [notesRec,labelsRec,draftRows,noteRows]=await Promise.all([
         idbGet('cache',`notes:${userId}`),
         idbGet('cache',`labels:${userId}`),
-        idbGetAllByIndex('drafts','userId',userId)
+        idbGetAllByIndex('drafts','userId',userId),
+        idbGetAllByIndex('notes','userId',userId)
       ]);
 
-      state.localNotesCache=Array.isArray(notesRec?.value)?notesRec.value:[];
-      state.localLabelsCache=Array.isArray(labelsRec?.value)?labelsRec.value:[];
+      const individual=(noteRows||[]).filter(r=>r?.noteId&&r?.data).map(r=>r.data);
+      const legacy=Array.isArray(notesRec?.value)?notesRec.value:[];
+      const merged=new Map();
+
+      for(const n of individual){
+        if(n?.id)merged.set(n.id,n);
+      }
+      for(const n of legacy){
+        if(!n?.id)continue;
+        const old=merged.get(n.id);
+        if(!old||new Date(n.updated_at||0)>new Date(old.updated_at||0))merged.set(n.id,n);
+      }
+
       state.localDrafts=new Map(
         (draftRows||[]).filter(r=>r?.noteId&&r?.data).map(r=>[r.noteId,r.data])
       );
-      state.localPersistenceReady=true;
+
+      // Um rascunho jamais deve ficar sem sua nota-base local.
+      for(const d of state.localDrafts.values()){
+        if(!d?.id)continue;
+        const old=merged.get(d.id);
+        if(!old){
+          merged.set(d.id,{
+            id:d.id,user_id:userId,title:d.title||'Nova nota',content_html:d.content_html||'',
+            color:d.color||'#ffffff',reminder_at:d.reminder_at||null,
+            created_at:d.created_at||d.updated_at||new Date().toISOString(),
+            updated_at:d.updated_at||new Date().toISOString(),
+            synthetic_local:d.synthetic_local,synthetic_age:d.synthetic_age,
+            synthetic_record:d.synthetic_record,patient_meta:d.patient_meta||{},
+            pinned:false,archived:false,deleted:false,
+            local_only:!!d.pending_create,note_labels:[],attachments:[]
+          });
+        }else if(!d.metadata_only&&new Date(d.updated_at||0)>new Date(old.updated_at||0)){
+          Object.assign(old,{
+            title:d.title,content_html:d.content_html,color:d.color||old.color,
+            reminder_at:d.reminder_at,patient_meta:d.patient_meta||old.patient_meta||{},
+            updated_at:d.updated_at,local_only:!!d.pending_create
+          });
+        }
+      }
+
+      state.localNotesCache=[...merged.values()].sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
+      state.localLabelsCache=Array.isArray(labelsRec?.value)?labelsRec.value:[];
+
+      // Migração v3: cria um registro individual por nota. Nunca apaga por ausência no snapshot.
+      for(const n of state.localNotesCache)persistLocalNote(n);
     }catch(err){
       state.localPersistenceReady=false;
+      state.localNotesCache=state.localNotesCache||[];
+      state.localLabelsCache=state.localLabelsCache||[];
+      state.localDrafts=state.localDrafts||new Map();
       persistenceError(err);
     }
   }
 
   function cacheNotes(){
-    state.localNotesCache=state.notes.map(n=>({...n}));
+    state.localNotesCache=state.notes.map(n=>cloneLocalNote(n)).filter(Boolean);
     if(!state.user||!state.localPersistenceReady)return;
-    idbPut('cache',{
-      key:notesCacheId(),value:state.localNotesCache,updatedAt:Date.now()
-    }).catch(persistenceError);
+
+    // Persistência por registro: uma leitura vazia da nuvem nunca apaga as notas locais.
+    for(const n of state.localNotesCache)persistLocalNote(n);
+
+    // Snapshot legado mantido apenas para compatibilidade. Escritas são serializadas.
+    const snapshot=state.localNotesCache.map(n=>cloneLocalNote(n));
+    state.cacheSnapshotChain=state.cacheSnapshotChain
+      .catch(()=>{})
+      .then(()=>idbPut('cache',{
+        key:notesCacheId(),value:snapshot,updatedAt:Date.now()
+      }))
+      .catch(persistenceError);
   }
 
   function cacheLabels(){
@@ -6931,29 +7334,64 @@
     };
   }
 
-  
-  
+  function queueDraftWrite(d){
+    if(!d||!state.localPersistenceReady||!state.user)return Promise.resolve(false);
+    const noteId=d.id;
+    const snapshot=JSON.parse(JSON.stringify(d));
+    const previous=state.draftWriteChains.get(noteId)||Promise.resolve();
+
+    const current=previous
+      .catch(()=>{})
+      .then(()=>idbPut('drafts',{
+        key:draftId(noteId),
+        userId:state.user.id,
+        noteId,
+        data:snapshot,
+        updatedAt:Date.now()
+      }))
+      .catch(err=>{
+        persistenceError(err);
+        return false;
+      });
+
+    state.draftWriteChains.set(noteId,current);
+    current.finally(()=>{
+      if(state.draftWriteChains.get(noteId)===current){
+        state.draftWriteChains.delete(noteId);
+      }
+    });
+    return current;
+  }
+
+  async function waitDraftWrite(noteId){
+    const p=state.draftWriteChains.get(noteId);
+    if(!p)return true;
+    try{await p;return true}catch{return false}
+  }
+
   function persistDraftNow(){
     const d=buildDraft();
-    if(!d)return;
+    if(!d)return null;
 
+    d.revision=state.editRevision;
     state.localDrafts.set(d.id,d);
 
     const idx=state.notes.findIndex(n=>n.id===d.id);
     const patch={
       title:d.title,content_html:d.content_html,color:d.color,
-      reminder_at:d.reminder_at,patient_meta:d.patient_meta||{},google_doc_id:d.google_doc_id||state.current.google_doc_id||null,
-      updated_at:d.updated_at
+      reminder_at:d.reminder_at,patient_meta:d.patient_meta||{},
+      google_doc_id:d.google_doc_id||state.current.google_doc_id||null,
+      updated_at:d.updated_at,local_only:!!d.pending_create
     };
-    if(idx>=0)Object.assign(state.notes[idx],patch);
+    if(idx>=0){
+      Object.assign(state.notes[idx],patch);
+      persistLocalNote(state.notes[idx]);
+    }
     Object.assign(state.current,patch);
     cacheNotes();
 
-    if(state.localPersistenceReady){
-      idbPut('drafts',{
-        key:draftId(d.id),userId:state.user.id,noteId:d.id,data:d,updatedAt:Date.now()
-      }).catch(persistenceError);
-    }
+    if(state.localPersistenceReady)queueDraftWrite(d);
+    return d;
   }
 
   function getDraft(noteId){
@@ -6963,7 +7401,18 @@
   function clearDraft(noteId){
     state.localDrafts.delete(noteId);
     if(state.localPersistenceReady&&state.user){
-      idbDelete('drafts',draftId(noteId)).catch(err=>console.warn('Falha ao limpar rascunho local:',err));
+      const previous=state.draftWriteChains.get(noteId)||Promise.resolve();
+      const current=previous
+        .catch(()=>{})
+        .then(()=>idbDelete('drafts',draftId(noteId)))
+        .catch(err=>console.warn('Falha ao limpar rascunho local:',err));
+
+      state.draftWriteChains.set(noteId,current);
+      current.finally(()=>{
+        if(state.draftWriteChains.get(noteId)===current){
+          state.draftWriteChains.delete(noteId);
+        }
+      });
     }
   }
 
@@ -7737,11 +8186,15 @@
   async function syncFromCloud(){
     if(!state.user)return;
     if(!navigator.onLine){setSyncStatus('offline');return;}
-    setSyncStatus('syncing');
-    if(state.isDirty){
-      await flushSave();
+
+    // Nunca recarrega a lista por cima de uma edição/salvamento em andamento.
+    if(state.current||state.isDirty||state.saveInFlight){
+      clearTimeout(state.realtimeDebounce);
+      state.realtimeDebounce=setTimeout(()=>syncFromCloud(),1200);
       return;
     }
+
+    setSyncStatus('syncing');
     await Promise.all([loadNotes(),loadLabels()]);
     if(!els.keepPage.classList.contains('hidden'))renderNotes();
     setSyncStatus('ok');
@@ -7753,8 +8206,15 @@
     state.realtimeChannel=null;
   }
   function startRealtimeSync(){
-    stopRealtimeSync();if(!state.user||!window.AGhuCloudRaw)return;
-    const schedule=()=>{clearTimeout(state.realtimeDebounce);state.realtimeDebounce=setTimeout(()=>syncFromCloud(),280)};
+    stopRealtimeSync();
+    if(!state.user||!window.AGhuCloudRaw)return;
+    const schedule=()=>{
+      clearTimeout(state.realtimeDebounce);
+      state.realtimeDebounce=setTimeout(()=>{
+        if(!state.current&&!state.isDirty&&!state.saveInFlight)syncFromCloud();
+        else state.realtimeDebounce=setTimeout(()=>syncFromCloud(),1200);
+      },450);
+    };
     let ch=window.AGhuCloudRaw.channel(`aghu-notes-${state.user.id}`);
     ch=ch.on('postgres_changes',{event:'*',schema:'public',table:'vault_records',filter:`user_id=eq.${state.user.id}`},schedule);
     state.realtimeChannel=ch.subscribe();
@@ -7769,98 +8229,74 @@
   }
 
   async function loadNotes(){
-    // Sempre parte do cache local do usuário. Atualização de código não o apaga.
-    const localById=new Map((state.localNotesCache||[]).map(n=>[n.id,{...n}]));
+    const localById=new Map((state.localNotesCache||[]).filter(n=>n?.id).map(n=>[n.id,cloneLocalNote(n)]));
+    let remote=[];
 
-    if(!true){
-      state.notes=[...localById.values()];
-      for(const d of pendingDrafts()){
-        const idx=state.notes.findIndex(n=>n.id===d.id);
-        if(idx>=0){
-          if(d.patient_meta&&Object.keys(d.patient_meta).length)state.notes[idx].patient_meta=d.patient_meta;
-          if(!d.metadata_only)Object.assign(state.notes[idx],{
-            title:d.title,content_html:d.content_html,color:d.color,
-            reminder_at:d.reminder_at,patient_meta:d.patient_meta||state.notes[idx].patient_meta||{},
-            updated_at:d.updated_at,local_only:true
-          });
-        }else if(d.pending_create){
-          state.notes.unshift({
-            id:d.id,user_id:d.user_id,title:d.title,content_html:d.content_html,
-            color:d.color||'#ffffff',reminder_at:d.reminder_at||null,
-            created_at:d.created_at,updated_at:d.updated_at,
-            synthetic_local:d.synthetic_local,synthetic_age:d.synthetic_age,
-            synthetic_record:d.synthetic_record,patient_meta:d.patient_meta||{},
-            pinned:false,archived:false,deleted:false,
-            local_only:true,cloud_confirmed:false,note_labels:[],attachments:[]
-          });
-        }
+    if(true&&state.user&&navigator.onLine){
+      const {data,error}=await supabase.from('notes')
+        .select('*, note_labels(label_id, labels(id,name)), attachments(*)')
+        .order('updated_at',{ascending:false});
+      if(error){
+        console.error('Falha ao carregar notas da nuvem:',error);
+      }else{
+        remote=data||[];
       }
-      cacheNotes();
-      return;
     }
 
-    const {data,error}=await supabase.from('notes')
-      .select('*, note_labels(label_id, labels(id,name)), attachments(*)')
-      .order('updated_at',{ascending:false});
+    const merged=new Map(localById);
 
-    if(error){
-      console.error('Falha ao carregar notas da nuvem:',error);
-      state.notes=[...localById.values()];
-    }else{
-      const remote=(data||[]).map(n=>({...n,local_only:false,cloud_confirmed:true}));
-      const merged=new Map();
-
-      // Primeiro: tudo que veio da nuvem.
-      for(const n of remote)merged.set(n.id,n);
-
-      // Depois: cache local nunca desaparece por uma leitura remota vazia/incompleta.
-      for(const [id,local] of localById){
-        const cloud=merged.get(id);
-        if(!cloud){
-          merged.set(id,{...local,cloud_missing:true});
-          continue;
-        }
-        const lt=new Date(local.updated_at||0).getTime();
-        const rt=new Date(cloud.updated_at||0).getTime();
-
-        // Se a cópia local for mais nova, mantém conteúdo local e metadados remotos auxiliares.
-        if(lt>rt){
-          merged.set(id,{
-            ...cloud,
-            ...local,
-            note_labels:cloud.note_labels||local.note_labels||[],
-            attachments:cloud.attachments||local.attachments||[],
-            cloud_confirmed:true
-          });
-        }
+    for(const cloud of remote){
+      if(!cloud?.id)continue;
+      const local=merged.get(cloud.id);
+      if(!local){
+        merged.set(cloud.id,{...cloud,local_only:false,cloud_confirmed:true});
+        continue;
       }
 
-      state.notes=[...merged.values()];
+      const draft=state.localDrafts?.get(cloud.id);
+      const lt=new Date(local.updated_at||0).getTime();
+      const rt=new Date(cloud.updated_at||0).getTime();
+      const hasNewerDraft=!!draft&&new Date(draft.updated_at||0).getTime()>=rt;
+
+      if(local.local_only||hasNewerDraft||lt>rt+500){
+        merged.set(cloud.id,{
+          ...cloud,...local,
+          note_labels:cloud.note_labels||local.note_labels||[],
+          attachments:cloud.attachments||local.attachments||[],
+          cloud_confirmed:true
+        });
+      }else{
+        merged.set(cloud.id,{...cloud,local_only:false,cloud_confirmed:true});
+      }
     }
 
-    // Rascunhos pendentes sempre têm prioridade sobre cache/nuvem.
+    // Importante: ausência na nuvem NÃO significa exclusão. Exclusão definitiva é uma ação explícita.
+    state.notes=[...merged.values()];
+
     for(const d of pendingDrafts()){
+      if(!d?.id)continue;
       const idx=state.notes.findIndex(n=>n.id===d.id);
       if(idx>=0){
-        if(d.patient_meta&&Object.keys(d.patient_meta).length){
-          state.notes[idx].patient_meta=d.patient_meta;
-        }
-        if(!d.metadata_only&&new Date(d.updated_at||0)>=new Date(state.notes[idx].updated_at||0)){
-          Object.assign(state.notes[idx],{
-            title:d.title,content_html:d.content_html,color:d.color,
-            reminder_at:d.reminder_at,patient_meta:d.patient_meta||state.notes[idx].patient_meta||{},
+        const n=state.notes[idx];
+        if(d.patient_meta&&Object.keys(d.patient_meta).length)n.patient_meta=d.patient_meta;
+        if(!d.metadata_only&&new Date(d.updated_at||0)>=new Date(n.updated_at||0)){
+          Object.assign(n,{
+            title:d.title,content_html:d.content_html,color:d.color||n.color,
+            reminder_at:d.reminder_at,patient_meta:d.patient_meta||n.patient_meta||{},
+            google_doc_id:d.google_doc_id||n.google_doc_id||null,
             updated_at:d.updated_at,local_only:!!d.pending_create
           });
         }
-      }else if(d.pending_create){
+      }else{
         state.notes.unshift({
-          id:d.id,user_id:d.user_id,title:d.title,content_html:d.content_html,
-          color:d.color||'#ffffff',reminder_at:d.reminder_at||null,
-          created_at:d.created_at,updated_at:d.updated_at,
+          id:d.id,user_id:d.user_id||state.user.id,title:d.title||'Nova nota',
+          content_html:d.content_html||'',color:d.color||'#ffffff',
+          reminder_at:d.reminder_at||null,created_at:d.created_at||d.updated_at||new Date().toISOString(),
+          updated_at:d.updated_at||new Date().toISOString(),
           synthetic_local:d.synthetic_local,synthetic_age:d.synthetic_age,
           synthetic_record:d.synthetic_record,patient_meta:d.patient_meta||{},
-          pinned:false,archived:false,deleted:false,
-          local_only:true,cloud_confirmed:false,note_labels:[],attachments:[]
+          google_doc_id:d.google_doc_id||null,pinned:false,archived:false,deleted:false,
+          local_only:!!d.pending_create,note_labels:[],attachments:[]
         });
       }
     }
@@ -8349,9 +8785,32 @@
   }
 
   async function quickUpdate(id,patch){
+    const note=state.notes.find(n=>n.id===id);
+    if(!note||note.user_id!==state.user?.id)return;
+
+    const now=new Date().toISOString();
+    Object.assign(note,patch,{updated_at:now});
+    persistLocalNote(note);
+    cacheNotes();
+    renderNotes();
+
     setSyncStatus('syncing');
-    await supabase.from('notes').update({...patch,updated_at:new Date().toISOString()}).eq('id',id);
-    await loadNotes();
+    const {data,error}=await supabase.from('notes')
+      .update({...patch,updated_at:now})
+      .eq('id',id)
+      .select('*')
+      .maybeSingle();
+
+    if(error||!data){
+      if(error)console.error('Falha ao sincronizar atualização rápida:',error);
+      showToast('Alteração salva neste aparelho; sincronização pendente.');
+      setSyncStatus(navigator.onLine?'syncing':'offline');
+      return;
+    }
+
+    Object.assign(note,data,{local_only:false,cloud_confirmed:true});
+    persistLocalNote(note);
+    cacheNotes();
     renderNotes();
     setSyncStatus('ok');
   }
@@ -8533,29 +8992,69 @@
   });
 
   async function moveToTrash(id){
-    // Mantém a nota recuperável, mas remove o histórico antigo para economizar espaço imediatamente.
+    const note=state.notes.find(n=>n.id===id);
+    if(!note||note.user_id!==state.user?.id)return;
+
+    const now=new Date().toISOString();
+    note.deleted=true;
+    note.archived=false;
+    note.updated_at=now;
+    if(state.current?.id===id)Object.assign(state.current,{deleted:true,archived:false,updated_at:now});
+    persistLocalNote(note);
+    cacheNotes();
+    renderNotes();
+
     setSyncStatus('syncing');
-    await supabase.from('note_versions').delete().eq('note_id',id);
-    const {error}=await supabase.from('notes').update({
-      deleted:true,
-      archived:false,
-      updated_at:new Date().toISOString()
-    }).eq('id',id);
-    if(error){setSyncStatus('ok');return;}
-    if(state.current?.id===id) state.current.deleted=true;
-    await loadNotes();
+    try{await supabase.from('note_versions').delete().eq('note_id',id)}catch{}
+    const {data,error}=await supabase.from('notes')
+      .update({deleted:true,archived:false,updated_at:now})
+      .eq('id',id)
+      .select('*')
+      .maybeSingle();
+
+    if(error||!data){
+      if(error)console.error('Falha ao sincronizar lixeira:',error);
+      showToast('Nota movida para a lixeira neste aparelho; sincronização pendente.');
+      setSyncStatus(navigator.onLine?'syncing':'offline');
+      return;
+    }
+
+    Object.assign(note,data,{local_only:false,cloud_confirmed:true});
+    persistLocalNote(note);
+    cacheNotes();
     renderNotes();
     setSyncStatus('ok');
   }
 
   async function restoreNote(id){
-    setSyncStatus('syncing');
-    await supabase.from('notes').update({
-      deleted:false,
-      updated_at:new Date().toISOString()
-    }).eq('id',id);
+    const note=state.notes.find(n=>n.id===id);
+    if(!note||note.user_id!==state.user?.id)return;
+
+    const now=new Date().toISOString();
+    note.deleted=false;
+    note.updated_at=now;
+    persistLocalNote(note);
+    cacheNotes();
     state.selectedId=null;
-    await loadNotes();
+    renderNotes();
+
+    setSyncStatus('syncing');
+    const {data,error}=await supabase.from('notes')
+      .update({deleted:false,updated_at:now})
+      .eq('id',id)
+      .select('*')
+      .maybeSingle();
+
+    if(error||!data){
+      if(error)console.error('Falha ao restaurar na nuvem:',error);
+      showToast('Nota restaurada neste aparelho; sincronização pendente.');
+      setSyncStatus(navigator.onLine?'syncing':'offline');
+      return;
+    }
+
+    Object.assign(note,data,{local_only:false,cloud_confirmed:true});
+    persistLocalNote(note);
+    cacheNotes();
     renderNotes();
     setSyncStatus('ok');
   }
@@ -8568,48 +9067,64 @@
   }
 
   async function deleteNoteForever(note,ask=true){
-    if(!note) return;
-    if(note.user_id && state.user?.id && note.user_id!==state.user.id){showToast('Somente o criador desta nota pode excluí-la.');return;}
-    if(ask && !confirm('Excluir definitivamente esta nota? Esta ação não poderá ser desfeita.')) return;
-    clearDraft(note.id);
-    try{await deleteLocalAttachmentsForNote(note.id);}catch{}
+    if(!note)return;
+    if(!state.user?.id||note.user_id!==state.user.id){
+      showToast('Somente o criador desta nota pode excluí-la.');
+      return;
+    }
+    if(ask&&!confirm('Excluir definitivamente esta nota? Esta ação não poderá ser desfeita.'))return;
+
     setSyncStatus('syncing');
-    await removeStorageFiles(note);
+
+    // Primeiro exclui no cofre. Se falhar, a cópia local permanece intacta.
     const {error}=await supabase.from('notes').delete().eq('id',note.id);
     if(error){
       alert('Não foi possível excluir definitivamente a nota.');
       setSyncStatus('ok');
       return;
     }
+
+    try{await removeStorageFiles(note)}catch{}
+    clearDraft(note.id);
+    try{await deleteLocalAttachmentsForNote(note.id)}catch{}
+    try{await removeLocalNote(note.id)}catch{}
+
+    state.notes=state.notes.filter(n=>n.id!==note.id);
+    state.localNotesCache=(state.localNotesCache||[]).filter(n=>n.id!==note.id);
     state.selectedId=null;
+
     if(state.current?.id===note.id){
       state.current=null;
       els.editorPage.classList.add('hidden');
       els.keepPage.classList.remove('hidden');
     }
-    await Promise.all([loadNotes(),loadLabels()]);
+
+    cacheNotes();
     renderNotes();
     setSyncStatus('ok');
   }
 
   els.emptyTrash.addEventListener('click',async()=>{
-    const trashed=state.notes.filter(n=>n.deleted);
-    if(!trashed.length) return;
-    if(!confirm(`Esvaziar a lixeira e excluir definitivamente ${trashed.length} nota(s)? Esta ação não poderá ser desfeita.`)) return;
+    const trashed=state.notes.filter(n=>n.deleted&&n.user_id===state.user?.id);
+    if(!trashed.length)return;
+    if(!confirm(`Esvaziar a lixeira e excluir definitivamente ${trashed.length} nota(s)? Esta ação não poderá ser desfeita.`))return;
+
     setSyncStatus('syncing');
     for(const note of trashed){
+      const {error}=await supabase.from('notes').delete().eq('id',note.id);
+      if(error){
+        console.warn('Falha ao excluir nota da lixeira',note.id,error);
+        continue;
+      }
+      try{await removeStorageFiles(note)}catch{}
       clearDraft(note.id);
-      try{await deleteLocalAttachmentsForNote(note.id);}catch{}
-      await removeStorageFiles(note);
-    }
-    const {error}=await supabase.from('notes').delete().eq('deleted',true);
-    if(error){
-      alert('Não foi possível esvaziar a lixeira.');
-      setSyncStatus('ok');
-      return;
+      try{await deleteLocalAttachmentsForNote(note.id)}catch{}
+      try{await removeLocalNote(note.id)}catch{}
+      state.notes=state.notes.filter(n=>n.id!==note.id);
+      state.localNotesCache=(state.localNotesCache||[]).filter(n=>n.id!==note.id);
     }
     state.selectedId=null;
-    await Promise.all([loadNotes(),loadLabels()]);
+    cacheNotes();
     renderNotes();
     setSyncStatus('ok');
   });
@@ -8618,42 +9133,34 @@
   els.newNote.addEventListener('click', async()=>{
     const meta=randomMeta();
     const id=crypto.randomUUID();
-    const makeLocal=()=>{
-      const data={
-        id,user_id:state.user.id,title:'Nova nota',content_html:'',
-        color:'#ffffff',reminder_at:null,created_at:new Date().toISOString(),
-        updated_at:new Date().toISOString(),pinned:false,archived:false,deleted:false,
-        patient_meta:{},local_only:true,...meta,note_labels:[],attachments:[]
-      };
-      state.notes.unshift(data);cacheNotes();
-      const localDraft={
-        id,user_id:state.user.id,title:'Nova nota',content_html:'',
-        color:'#ffffff',reminder_at:null,labels_text:'',
-        created_at:data.created_at,updated_at:data.updated_at,
-        synthetic_local:data.synthetic_local,synthetic_age:data.synthetic_age,
-        synthetic_record:data.synthetic_record,patient_meta:{},pending_create:true
-      };
-      state.localDrafts.set(id,localDraft);
-      if(state.localPersistenceReady){
-        idbPut('drafts',{
-          key:draftId(id),userId:state.user.id,noteId:id,data:localDraft,updatedAt:Date.now()
-        }).catch(persistenceError);
-      }
-      openNote(id);
-      setAutosave('Salvo e sincronizado','local-saved');
-      setSyncStatus('offline');
+    const now=new Date().toISOString();
+    const data={
+      id,user_id:state.user.id,title:'Nova nota',content_html:'',
+      color:'#ffffff',reminder_at:null,created_at:now,updated_at:now,
+      pinned:false,archived:false,deleted:false,patient_meta:{},
+      local_only:true,...meta,note_labels:[],attachments:[]
     };
 
-    if(!true){makeLocal();return;}
-
-    const {data,error}=await supabase.from('notes').insert({
-      id,user_id:state.user.id,title:'Nova nota',content_html:'',...meta
-    }).select().single();
-
-    if(error){makeLocal();return;}
-    state.notes.unshift({...data,local_only:false,cloud_confirmed:true,cloud_missing:false,note_labels:[],attachments:[]});
+    state.notes.unshift(data);
     cacheNotes();
-    openNote(data.id);
+    persistLocalNote(data);
+
+    const localDraft={
+      id,user_id:state.user.id,title:'Nova nota',content_html:'',
+      color:'#ffffff',reminder_at:null,labels_text:'',
+      created_at:now,updated_at:now,
+      synthetic_local:data.synthetic_local,synthetic_age:data.synthetic_age,
+      synthetic_record:data.synthetic_record,patient_meta:{},
+      pending_create:true,revision:++state.editRevision
+    };
+    state.localDrafts.set(id,localDraft);
+    if(state.localPersistenceReady)queueDraftWrite(localDraft);
+
+    openNote(id);
+    state.isDirty=true;
+    setAutosave('Salvo neste aparelho • sincronizando...','local-saved');
+    clearTimeout(state.saveTimer);
+    state.saveTimer=setTimeout(()=>flushSave(),100);
   });
 
   function openNote(id){
@@ -8687,28 +9194,33 @@
     }
   }
   els.back.addEventListener('click',async()=>{
-    await flushSave();
     if(state.current){
+      persistDraftNow();
+      await waitDraftWrite(state.current.id);
+      await waitLocalNote(state.current.id);
+      try{await flushSave()}catch(err){console.warn('Sincronização ao voltar:',err)}
+
       const cached=state.notes.find(n=>n.id===state.current.id);
       if(cached){
-        cached.title=els.title.value.trim()||'Sem título';
-        cached.content_html=els.body.innerHTML;
+        cached.title=compactTitleForStorage(els.title.value)||'Sem título';
+        cached.content_html=compactHtmlForStorage(els.body.innerHTML);
+        cached.color=els.color.value;
+        cached.reminder_at=els.reminder.value?new Date(els.reminder.value).toISOString():null;
         cached.patient_meta=state.current.patient_meta||cached.patient_meta||{};
         cached.updated_at=state.current.updated_at||new Date().toISOString();
+        persistLocalNote(cached);
       }
       cacheNotes();
     }
+
     els.editorPage.classList.add('hidden');
     els.keepPage.classList.remove('hidden');
     state.current=null;
-
-    // Mostra imediatamente a cópia durável local; a nuvem é mesclada em seguida.
-    if(state.localNotesCache?.length)state.notes=state.localNotesCache.map(n=>({...n}));
-    renderNotes();
-
-    await loadNotes();
     renderNotes();
     applyKeepFocusMode(state.keepFocusMode);
+
+    // Atualização remota somente depois que a cópia local já está visível.
+    setTimeout(()=>syncFromCloud(),50);
   });
 
   function updateActionLabels(){
@@ -8720,23 +9232,29 @@
   }
   function markDirty(){
     if(!state.current)return;
+    state.editRevision++;
     state.isDirty=true;
 
-    // PRIMEIRO: grava imediatamente no aparelho, no mesmo evento de digitação.
+    // Salva primeiro no aparelho; a nuvem é uma segunda etapa.
     persistDraftNow();
 
-    if(!true){
-      setAutosave('Salvo e sincronizado','local-saved');
-      setSyncStatus('offline');
-      return;
-    }
-
-    // SEGUNDO: envia ao armazenamento local quase imediatamente.
-    setAutosave('Salvando localmente...','local-saved');
+    setAutosave('Salvando...','local-saved');
     clearTimeout(state.saveTimer);
-    state.saveTimer=setTimeout(flushSave,200);
+    state.saveTimer=setTimeout(()=>flushSave(),650);
   }
   [els.title,els.body,els.color,els.reminder,els.labelsInput].forEach(el=>el.addEventListener('input',markDirty));
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='hidden'&&state.current){
+      persistDraftNow();
+      flushSave().catch(()=>{});
+    }
+  });
+  window.addEventListener('pagehide',()=>{
+    if(state.current){
+      persistDraftNow();
+      flushSave().catch(()=>{});
+    }
+  });
   els.color.addEventListener('change',()=>{els.editorPage.style.background=els.color.value;markDirty();});
   els.reminder.addEventListener('change',async()=>{if(els.reminder.value&&'Notification'in window&&Notification.permission==='default'){try{await Notification.requestPermission();}catch{}}markDirty();});
 
@@ -8800,87 +9318,67 @@
   }
 
   async function syncDraftRecord(d){
-    if(!true||!state.user)return false;
+    if(!true||!state.user||!d?.id)return{ok:false};
 
     if(d.metadata_only&&!d.pending_create){
       const {data,error}=await supabase.from('notes')
-        .update({
-          patient_meta:d.patient_meta||{},
-          updated_at:d.updated_at||new Date().toISOString()
-        })
+        .update({patient_meta:d.patient_meta||{},updated_at:d.updated_at||new Date().toISOString()})
         .eq('id',d.id)
-        .select('id,patient_meta,updated_at')
+        .select('*')
         .maybeSingle();
-
-      if(error||!data){
-        if(error)console.error('Falha ao sincronizar identificação:',error);
-        return false;
-      }
-
-      const expected=JSON.stringify(d.patient_meta||{});
-      const confirmed=JSON.stringify(data.patient_meta||{});
-      if(expected!==confirmed)return false;
-
-      clearDraft(d.id);
-      return true;
+      if(error||!data)return{ok:false,error};
+      return{ok:true,data};
     }
 
-    let write;
-    if(d.pending_create){
-      write=await supabase.from('notes').insert({
-        id:d.id,user_id:state.user.id,title:compactTitleForStorage(d.title)||'Sem título',
-        content_html:compactHtmlForStorage(d.content_html||''),color:d.color||'#ffffff',
-        reminder_at:d.reminder_at||null,created_at:d.created_at||new Date().toISOString(),
-        updated_at:d.updated_at||new Date().toISOString(),
-        synthetic_local:d.synthetic_local,
-        synthetic_age:Number(d.synthetic_age)||0,
-        synthetic_record:Number(d.synthetic_record)||Math.floor(1000000+Math.random()*8999999),
-        patient_meta:d.patient_meta||{}
-      }).select('*').maybeSingle();
+    const local=state.notes.find(n=>n.id===d.id)||state.current||{};
+    const payload={
+      id:d.id,user_id:state.user.id,
+      title:compactTitleForStorage(d.title)||'Sem título',
+      content_html:compactHtmlForStorage(d.content_html||''),
+      color:d.color||local.color||'#ffffff',
+      reminder_at:d.reminder_at||null,
+      patient_meta:d.patient_meta||local.patient_meta||{},
+      google_doc_id:d.google_doc_id||local.google_doc_id||null,
+      pinned:!!local.pinned,archived:!!local.archived,deleted:!!local.deleted,
+      synthetic_local:d.synthetic_local??local.synthetic_local??null,
+      synthetic_age:d.synthetic_age??local.synthetic_age??null,
+      synthetic_record:d.synthetic_record??local.synthetic_record??null,
+      created_at:d.created_at||local.created_at||new Date().toISOString(),
+      updated_at:d.updated_at||new Date().toISOString()
+    };
 
-      // Se já existir, não considera sucesso às cegas: atualiza e confirma.
-      if(write.error&&String(write.error.message||'').toLowerCase().includes('duplicate')){
-        write=await supabase.from('notes').update({
-          title:compactTitleForStorage(d.title)||'Sem título',
-          content_html:compactHtmlForStorage(d.content_html||''),
-          color:d.color||'#ffffff',
-          reminder_at:d.reminder_at||null,
-          patient_meta:d.patient_meta||{},
-          updated_at:d.updated_at||new Date().toISOString()
-        }).eq('id',d.id).select('*').maybeSingle();
+    let write;
+    if(d.pending_create||local.local_only){
+      write=await supabase.from('notes').insert(payload).select('*').maybeSingle();
+      if(write.error&&write.error.code==='23505'){
+        write=await supabase.from('notes').update(payload).eq('id',d.id).select('*').maybeSingle();
       }
     }else{
-      write=await supabase.from('notes').update({
-        title:compactTitleForStorage(d.title)||'Sem título',
-        content_html:compactHtmlForStorage(d.content_html||''),
-        color:d.color||'#ffffff',
-        reminder_at:d.reminder_at||null,
-        patient_meta:d.patient_meta||{},
-        updated_at:d.updated_at||new Date().toISOString()
-      }).eq('id',d.id).select('*').maybeSingle();
+      write=await supabase.from('notes').update(payload).eq('id',d.id).select('*').maybeSingle();
+      if(!write.error&&!write.data){
+        write=await supabase.from('notes').insert(payload).select('*').maybeSingle();
+      }
     }
 
     if(write?.error||!write?.data){
       if(write?.error)console.error('Falha ao gravar nota:',write.error);
-      return false;
+      return{ok:false,error:write?.error||null};
     }
 
-    // Releitura independente: evita falso “Salvo e sincronizado”.
     const verify=await supabase.from('notes')
-      .select('id,title,content_html,color,reminder_at,updated_at')
+      .select('*')
       .eq('id',d.id)
       .maybeSingle();
 
     if(verify.error||!verify.data){
       if(verify.error)console.error('Falha ao confirmar nota:',verify.error);
-      return false;
+      return{ok:false,error:verify.error||null};
     }
 
-    const sameTitle=compactTitleForStorage(verify.data.title||'')===(compactTitleForStorage(d.title)||'Sem título');
-    const sameHtml=compactHtmlForStorage(verify.data.content_html||'')===compactHtmlForStorage(d.content_html||'');
+    const sameTitle=compactTitleForStorage(verify.data.title||'')===payload.title;
+    const sameHtml=compactHtmlForStorage(verify.data.content_html||'')===payload.content_html;
     if(!sameTitle||!sameHtml){
-      console.warn('A nuvem respondeu, mas o conteúdo relido não corresponde ao rascunho.');
-      return false;
+      return{ok:false,error:{message:'A releitura da nota não corresponde ao conteúdo enviado.'}};
     }
 
     try{
@@ -8893,14 +9391,10 @@
         })));
       }
     }catch(err){
-      console.warn('Nota salva; etiquetas ficarão para a próxima sincronização:',err);
+      console.warn('Nota salva; etiquetas pendentes:',err);
     }
 
-    const local=state.notes.find(n=>n.id===d.id);
-    if(local)Object.assign(local,write.data,{local_only:false,cloud_confirmed:true,cloud_missing:false});
-    cacheNotes();
-    clearDraft(d.id);
-    return true;
+    return{ok:true,data:verify.data};
   }
 
   async function pruneCompactHistory(){
@@ -8928,128 +9422,131 @@
   }
 
   async function syncPendingDrafts(){
-    if(state.pendingSyncRunning||!true||!state.user)return;
+    if(state.pendingSyncRunning||!true||!state.user||state.saveInFlight)return;
     const list=pendingDrafts();
     if(!list.length)return;
 
     state.pendingSyncRunning=true;
     setSyncStatus('syncing');
     try{
-      let allOk=true;
       for(const d of list){
-        const ok=await syncDraftRecord(d);
-        if(!ok){allOk=false;break;}
+        if(state.current?.id===d.id&&state.isDirty)continue;
+        const result=await syncDraftRecord(d);
+        if(!result.ok)continue;
+
+        const latest=getDraft(d.id);
+        if(latest&&latest.updated_at===d.updated_at){
+          clearDraft(d.id);
+        }
+        const idx=state.notes.findIndex(n=>n.id===d.id);
+        if(idx>=0){
+          Object.assign(state.notes[idx],result.data,{local_only:false});
+          persistLocalNote(state.notes[idx]);
+        }
       }
       await Promise.all([loadNotes(),loadLabels()]);
       await syncPendingLocalAttachments();
       if(!els.keepPage.classList.contains('hidden'))renderNotes();
-      setSyncStatus('ok');
     }finally{
       state.pendingSyncRunning=false;
+      setSyncStatus(navigator.onLine?'ok':'offline');
     }
   }
 
   async function flushSave(){
-    if(!state.current||!state.isDirty)return;
+    if(!state.current||!state.isDirty)return true;
 
-    // O rascunho local só é apagado DEPOIS da confirmação do armazenamento local.
-    persistDraftNow();
-
-    if(!true){
-      state.isDirty=true;
-      setAutosave('Salvo e sincronizado','local-saved');
-      setSyncStatus('offline');
-      return;
+    if(state.saveInFlight){
+      state.saveAgain=true;
+      try{await state.saveInFlight}catch{}
+      return !state.isDirty;
     }
 
-    const d=buildDraft();
-    setSyncStatus('syncing');
-    setAutosave('Salvando localmente...','local-saved');
+    const revisionAtStart=state.editRevision;
+    const d=persistDraftNow()||buildDraft();
+    if(!d)return false;
+    await waitDraftWrite(d.id);
+    await waitLocalNote(d.id);
 
-    if(state.current.local_only||d.pending_create){
-      const ok=await syncDraftRecord({...d,pending_create:true});
-      if(!ok){
+    const run=(async()=>{
+      setSyncStatus('syncing');
+      setAutosave('Salvando...','local-saved');
+
+      if(!d.pending_create&&!state.current.local_only){
+        try{await createVersionIfNeeded()}catch(err){console.warn('Histórico:',err)}
+      }
+
+      const result=await syncDraftRecord(d);
+      if(!result.ok){
         state.isDirty=true;
-        setAutosave('Salvamento local pendente','local-saved');
-        return;
+        setAutosave('Salvo neste aparelho • sincronização pendente','local-saved');
+        setSyncStatus(navigator.onLine?'syncing':'offline');
+        clearTimeout(state.saveRetryTimer);
+        state.saveRetryTimer=setTimeout(()=>flushSave(),2500);
+        return false;
       }
-      state.current.local_only=false;
+
+      const idx=state.notes.findIndex(n=>n.id===d.id);
+      const remote=result.data||{};
+
+      // Uma resposta antiga da nuvem nunca pode sobrescrever uma digitação mais nova.
+      const latest=getDraft(d.id);
+      const unchangedRevision=state.editRevision===revisionAtStart;
+      const unchangedDraft=!latest||latest.updated_at===d.updated_at;
+
+      if(!unchangedRevision||!unchangedDraft){
+        const localNow=idx>=0?state.notes[idx]:state.current;
+        if(localNow){
+          localNow.local_only=false;
+          localNow.cloud_confirmed=true;
+          persistLocalNote(localNow);
+        }
+        state.current.local_only=false;
+        state.current.cloud_confirmed=true;
+        cacheNotes();
+        state.isDirty=true;
+        state.saveAgain=true;
+        setAutosave('Salvando alterações mais recentes...','local-saved');
+        return true;
+      }
+
+      const merged={
+        ...(idx>=0?state.notes[idx]:state.current),
+        ...remote,
+        local_only:false,cloud_confirmed:true
+      };
+      if(idx>=0)state.notes[idx]=merged;
+      state.current={...state.current,...merged};
+      await persistLocalNote(merged);
+      cacheNotes();
+      const localConfirmed=await verifyDurableLocalNote(d.id,merged);
+
+      clearDraft(d.id);
       state.isDirty=false;
-      await Promise.all([loadNotes(),loadLabels()]);
-      const fresh=state.notes.find(n=>n.id===d.id);
-      if(fresh)state.current=JSON.parse(JSON.stringify(fresh));
-      setAutosave(`Salvo e sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'local-saved');
+      clearTimeout(state.saveRetryTimer);
+      state.saveRetryTimer=null;
+      setAutosave(
+        localConfirmed
+          ? `Salvo e sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`
+          : `Sincronizado na nuvem ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} • cópia local pendente`,
+        localConfirmed?'cloud-saved':'local-saved'
+      );
       setSyncStatus('ok');
+      try{await loadLabels()}catch{}
       scheduleGoogleBackup(d.id);
-      return;
+      return true;
+    })();
+
+    state.saveInFlight=run;
+    let ok=false;
+    try{ok=await run}
+    finally{state.saveInFlight=null}
+
+    if(state.saveAgain){
+      state.saveAgain=false;
+      if(state.isDirty)return flushSave();
     }
-
-    await createVersionIfNeeded();
-
-    const patch={
-      title:d.title,content_html:d.content_html,color:d.color,
-      reminder_at:d.reminder_at,
-      patient_meta:d.patient_meta||state.current.patient_meta||{},
-      google_doc_id:d.google_doc_id||state.current.google_doc_id||null,
-      updated_at:d.updated_at
-    };
-
-    const {data:remote}=await supabase.from('notes').select('title,content_html,updated_at').eq('id',state.current.id).maybeSingle();
-    if(remote&&state.current.updated_at&&new Date(remote.updated_at).getTime()>new Date(state.current.updated_at).getTime()+500){
-      const changed=remote.title!==state.current.title||remote.content_html!==state.current.content_html;
-      if(changed){
-        await supabase.from('note_versions').insert({
-          note_id:state.current.id,user_id:state.user.id,
-          title:remote.title||'',content_html:remote.content_html||''
-        });
-      }
-    }
-
-    const {data:saved,error}=await supabase.from('notes')
-      .update(patch)
-      .eq('id',state.current.id)
-      .select('*')
-      .maybeSingle();
-
-    if(error||!saved){
-      state.isDirty=true;
-      persistDraftNow();
-      if(error)console.error('Falha ao salvar nota:',error);
-      setAutosave('Salvo neste aparelho • sincronização pendente','local-saved');
-      setSyncStatus(navigator.onLine?'syncing':'offline');
-      return;
-    }
-
-    const verify=await supabase.from('notes')
-      .select('id,title,content_html,updated_at')
-      .eq('id',state.current.id)
-      .maybeSingle();
-
-    const confirmed=!!verify.data &&
-      compactTitleForStorage(verify.data.title||'')===(compactTitleForStorage(d.title)||'Sem título') &&
-      compactHtmlForStorage(verify.data.content_html||'')===compactHtmlForStorage(d.content_html||'');
-
-    if(verify.error||!confirmed){
-      state.isDirty=true;
-      persistDraftNow();
-      if(verify.error)console.error('Falha ao confirmar salvamento:',verify.error);
-      setAutosave('Salvo neste aparelho • aguardando confirmação da nuvem','local-saved');
-      setSyncStatus(navigator.onLine?'syncing':'offline');
-      return;
-    }
-
-    await syncLabels(state.current.id);
-    Object.assign(state.current,patch,{local_only:false,cloud_confirmed:true,cloud_missing:false});
-    const cached=state.notes.find(n=>n.id===state.current.id);
-    if(cached)Object.assign(cached,patch,{local_only:false,cloud_confirmed:true,cloud_missing:false});
-    cacheNotes();
-
-    clearDraft(state.current.id);
-    state.isDirty=false;
-    setAutosave(`Salvo e sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`,'local-saved');
-    await loadLabels();
-    setSyncStatus('ok');
-    scheduleGoogleBackup(state.current.id);
+    return ok;
   }
 
   els.pin.addEventListener('click',async()=>{state.current.pinned=!state.current.pinned;await quickCurrent({pinned:state.current.pinned});});
@@ -9077,7 +9574,38 @@
     const n=state.notes.find(x=>x.id===state.current.id) || state.current;
     await deleteNoteForever(n,true);
   });
-  async function quickCurrent(p){if(!state.current)return;setSyncStatus('syncing');const{error}=await supabase.from('notes').update({...p,updated_at:new Date().toISOString()}).eq('id',state.current.id);if(error){showToast('Não foi possível atualizar a nota.');setSyncStatus('ok');return;}Object.assign(state.current,p);const local=state.notes.find(n=>n.id===state.current.id);if(local)Object.assign(local,p);updateActionLabels();setSyncStatus('ok');}
+  async function quickCurrent(p){
+    if(!state.current||!state.user?.id)return;
+    if(state.current.user_id&&state.current.user_id!==state.user.id)return;
+
+    const now=new Date().toISOString();
+    Object.assign(state.current,p,{updated_at:now});
+    const local=state.notes.find(n=>n.id===state.current.id);
+    if(local)Object.assign(local,p,{updated_at:now});
+    if(local)persistLocalNote(local);
+    cacheNotes();
+    updateActionLabels();
+
+    setSyncStatus('syncing');
+    const {data,error}=await supabase.from('notes')
+      .update({...p,updated_at:now})
+      .eq('id',state.current.id)
+      .select('*')
+      .maybeSingle();
+
+    if(error||!data){
+      if(error)console.error('Falha ao sincronizar ação da nota:',error);
+      showToast('Alteração salva neste aparelho; sincronização pendente.');
+      setSyncStatus(navigator.onLine?'syncing':'offline');
+      return;
+    }
+
+    Object.assign(state.current,data,{local_only:false,cloud_confirmed:true});
+    if(local)Object.assign(local,data,{local_only:false,cloud_confirmed:true});
+    if(local)persistLocalNote(local);
+    cacheNotes();
+    setSyncStatus('ok');
+  }
 
   els.duplicate.addEventListener('click',async()=>{
     await flushSave();const source=state.current;const m=randomMeta();
@@ -9970,7 +10498,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
   window.addEventListener('offline',()=>{
     if(state.current&&state.isDirty)persistDraftNow();
     setSyncStatus('offline');
-    if(state.current)setAutosave('Salvo e sincronizado','local-saved');
+    if(state.current)setAutosave(state.isDirty?'Salvo neste aparelho • offline':'Offline • última versão preservada neste aparelho','local-saved');
   });
   window.addEventListener('focus',()=>{syncFromCloud();});
   document.addEventListener('visibilitychange',()=>{
@@ -10552,7 +11080,7 @@ applyV42BrandingAndLayout();
 
 
 <script id="aghu-v57-release-marker">
-window.AGHU_NOTES_RELEASE=Object.freeze({version:'v62',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
+window.AGHU_NOTES_RELEASE=Object.freeze({version:'v63.3',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
 </script>
 </body>
 </html>
