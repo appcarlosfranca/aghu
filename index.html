@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- AGHU Notes CLOUD v61.2: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
+<!-- AGHU Notes CLOUD v62.2: Supabase vault_records + criptografia cliente + Pix + sessão exclusiva. -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -7769,21 +7769,20 @@
   }
 
   async function loadNotes(){
+    // Sempre parte do cache local do usuário. Atualização de código não o apaga.
+    const localById=new Map((state.localNotesCache||[]).map(n=>[n.id,{...n}]));
+
     if(!true){
-      state.notes=state.localNotesCache.length?state.localNotesCache.map(n=>({...n})):(state.notes||[]);
+      state.notes=[...localById.values()];
       for(const d of pendingDrafts()){
         const idx=state.notes.findIndex(n=>n.id===d.id);
         if(idx>=0){
-          if(d.patient_meta && Object.keys(d.patient_meta).length){
-            state.notes[idx].patient_meta=d.patient_meta;
-          }
-          if(!d.metadata_only){
-            Object.assign(state.notes[idx],{
-              title:d.title,content_html:d.content_html,color:d.color,
-              reminder_at:d.reminder_at,patient_meta:d.patient_meta||state.notes[idx].patient_meta||{},
-              updated_at:d.updated_at
-            });
-          }
+          if(d.patient_meta&&Object.keys(d.patient_meta).length)state.notes[idx].patient_meta=d.patient_meta;
+          if(!d.metadata_only)Object.assign(state.notes[idx],{
+            title:d.title,content_html:d.content_html,color:d.color,
+            reminder_at:d.reminder_at,patient_meta:d.patient_meta||state.notes[idx].patient_meta||{},
+            updated_at:d.updated_at,local_only:true
+          });
         }else if(d.pending_create){
           state.notes.unshift({
             id:d.id,user_id:d.user_id,title:d.title,content_html:d.content_html,
@@ -7792,10 +7791,11 @@
             synthetic_local:d.synthetic_local,synthetic_age:d.synthetic_age,
             synthetic_record:d.synthetic_record,patient_meta:d.patient_meta||{},
             pinned:false,archived:false,deleted:false,
-            local_only:true,note_labels:[],attachments:[]
+            local_only:true,cloud_confirmed:false,note_labels:[],attachments:[]
           });
         }
       }
+      cacheNotes();
       return;
     }
 
@@ -7804,41 +7804,68 @@
       .order('updated_at',{ascending:false});
 
     if(error){
-      console.error(error);
-      state.notes=state.localNotesCache.length?state.localNotesCache.map(n=>({...n})):(state.notes||[]);
-      return;
+      console.error('Falha ao carregar notas da nuvem:',error);
+      state.notes=[...localById.values()];
+    }else{
+      const remote=(data||[]).map(n=>({...n,local_only:false,cloud_confirmed:true}));
+      const merged=new Map();
+
+      // Primeiro: tudo que veio da nuvem.
+      for(const n of remote)merged.set(n.id,n);
+
+      // Depois: cache local nunca desaparece por uma leitura remota vazia/incompleta.
+      for(const [id,local] of localById){
+        const cloud=merged.get(id);
+        if(!cloud){
+          merged.set(id,{...local,cloud_missing:true});
+          continue;
+        }
+        const lt=new Date(local.updated_at||0).getTime();
+        const rt=new Date(cloud.updated_at||0).getTime();
+
+        // Se a cópia local for mais nova, mantém conteúdo local e metadados remotos auxiliares.
+        if(lt>rt){
+          merged.set(id,{
+            ...cloud,
+            ...local,
+            note_labels:cloud.note_labels||local.note_labels||[],
+            attachments:cloud.attachments||local.attachments||[],
+            cloud_confirmed:true
+          });
+        }
+      }
+
+      state.notes=[...merged.values()];
     }
 
-    state.notes=data||[];
-
+    // Rascunhos pendentes sempre têm prioridade sobre cache/nuvem.
     for(const d of pendingDrafts()){
       const idx=state.notes.findIndex(n=>n.id===d.id);
       if(idx>=0){
-        // Correções manuais de identificação nunca podem sumir enquanto
-        // houver uma cópia local pendente, mesmo que o refresh do armazenamento local
-        // aconteça a cada poucos segundos.
-        if(d.patient_meta && Object.keys(d.patient_meta).length){
+        if(d.patient_meta&&Object.keys(d.patient_meta).length){
           state.notes[idx].patient_meta=d.patient_meta;
         }
-
-        if(!d.metadata_only && new Date(d.updated_at||0)>new Date(state.notes[idx].updated_at||0)){
+        if(!d.metadata_only&&new Date(d.updated_at||0)>=new Date(state.notes[idx].updated_at||0)){
           Object.assign(state.notes[idx],{
             title:d.title,content_html:d.content_html,color:d.color,
             reminder_at:d.reminder_at,patient_meta:d.patient_meta||state.notes[idx].patient_meta||{},
-            updated_at:d.updated_at
+            updated_at:d.updated_at,local_only:!!d.pending_create
           });
         }
-      }else if(idx<0&&d.pending_create){
+      }else if(d.pending_create){
         state.notes.unshift({
           id:d.id,user_id:d.user_id,title:d.title,content_html:d.content_html,
           color:d.color||'#ffffff',reminder_at:d.reminder_at||null,
           created_at:d.created_at,updated_at:d.updated_at,
           synthetic_local:d.synthetic_local,synthetic_age:d.synthetic_age,
-          synthetic_record:d.synthetic_record,pinned:false,archived:false,deleted:false,
-          local_only:true,note_labels:[],attachments:[]
+          synthetic_record:d.synthetic_record,patient_meta:d.patient_meta||{},
+          pinned:false,archived:false,deleted:false,
+          local_only:true,cloud_confirmed:false,note_labels:[],attachments:[]
         });
       }
     }
+
+    state.notes.sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
     cacheNotes();
   }
 
@@ -8624,7 +8651,7 @@
     }).select().single();
 
     if(error){makeLocal();return;}
-    state.notes.unshift({...data,note_labels:[],attachments:[]});
+    state.notes.unshift({...data,local_only:false,cloud_confirmed:true,cloud_missing:false,note_labels:[],attachments:[]});
     cacheNotes();
     openNote(data.id);
   });
@@ -8674,6 +8701,11 @@
     els.editorPage.classList.add('hidden');
     els.keepPage.classList.remove('hidden');
     state.current=null;
+
+    // Mostra imediatamente a cópia durável local; a nuvem é mesclada em seguida.
+    if(state.localNotesCache?.length)state.notes=state.localNotesCache.map(n=>({...n}));
+    renderNotes();
+
     await loadNotes();
     renderNotes();
     applyKeepFocusMode(state.keepFocusMode);
@@ -8770,36 +8802,32 @@
   async function syncDraftRecord(d){
     if(!true||!state.user)return false;
 
-    // Uma correção manual de Nome/Idade/Prontuário é sincronizada de forma
-    // independente. Assim um rascunho antigo nunca sobrescreve o texto da nota.
-    if(d.metadata_only && !d.pending_create){
+    if(d.metadata_only&&!d.pending_create){
       const {data,error}=await supabase.from('notes')
         .update({
           patient_meta:d.patient_meta||{},
           updated_at:d.updated_at||new Date().toISOString()
         })
         .eq('id',d.id)
-        .select('id,patient_meta')
+        .select('id,patient_meta,updated_at')
         .maybeSingle();
 
-      if(error){
-        console.error('Falha ao sincronizar identificação:',error);
+      if(error||!data){
+        if(error)console.error('Falha ao sincronizar identificação:',error);
         return false;
       }
 
       const expected=JSON.stringify(d.patient_meta||{});
-      const confirmed=JSON.stringify(data?.patient_meta||{});
-      if(expected!==confirmed){
-        console.warn('Identificação não confirmada pelo armazenamento local.');
-        return false;
-      }
+      const confirmed=JSON.stringify(data.patient_meta||{});
+      if(expected!==confirmed)return false;
 
       clearDraft(d.id);
       return true;
     }
 
+    let write;
     if(d.pending_create){
-      const {error}=await supabase.from('notes').insert({
+      write=await supabase.from('notes').insert({
         id:d.id,user_id:state.user.id,title:compactTitleForStorage(d.title)||'Sem título',
         content_html:compactHtmlForStorage(d.content_html||''),color:d.color||'#ffffff',
         reminder_at:d.reminder_at||null,created_at:d.created_at||new Date().toISOString(),
@@ -8808,31 +8836,69 @@
         synthetic_age:Number(d.synthetic_age)||0,
         synthetic_record:Number(d.synthetic_record)||Math.floor(1000000+Math.random()*8999999),
         patient_meta:d.patient_meta||{}
-      });
-      if(error && !String(error.message||'').toLowerCase().includes('duplicate'))return false;
-      if(!error){
-        refreshAppCounters(true);
-        setTimeout(()=>refreshAppCounters(false),350);
+      }).select('*').maybeSingle();
+
+      // Se já existir, não considera sucesso às cegas: atualiza e confirma.
+      if(write.error&&String(write.error.message||'').toLowerCase().includes('duplicate')){
+        write=await supabase.from('notes').update({
+          title:compactTitleForStorage(d.title)||'Sem título',
+          content_html:compactHtmlForStorage(d.content_html||''),
+          color:d.color||'#ffffff',
+          reminder_at:d.reminder_at||null,
+          patient_meta:d.patient_meta||{},
+          updated_at:d.updated_at||new Date().toISOString()
+        }).eq('id',d.id).select('*').maybeSingle();
       }
     }else{
-      const {error}=await supabase.from('notes').update({
-        title:compactTitleForStorage(d.title)||'Sem título',content_html:compactHtmlForStorage(d.content_html||''),
-        color:d.color||'#ffffff',reminder_at:d.reminder_at||null,
+      write=await supabase.from('notes').update({
+        title:compactTitleForStorage(d.title)||'Sem título',
+        content_html:compactHtmlForStorage(d.content_html||''),
+        color:d.color||'#ffffff',
+        reminder_at:d.reminder_at||null,
         patient_meta:d.patient_meta||{},
         updated_at:d.updated_at||new Date().toISOString()
-      }).eq('id',d.id);
-      if(error)return false;
+      }).eq('id',d.id).select('*').maybeSingle();
     }
 
-    const names=(d.labels_text||'').split(',').map(x=>x.trim()).filter(Boolean);
-    const ids=await ensureLabels(names);
-    await supabase.from('note_labels').delete().eq('note_id',d.id);
-    if(ids.length){
-      await supabase.from('note_labels').insert(ids.map(label_id=>({
-        note_id:d.id,label_id,user_id:state.user.id
-      })));
+    if(write?.error||!write?.data){
+      if(write?.error)console.error('Falha ao gravar nota:',write.error);
+      return false;
     }
 
+    // Releitura independente: evita falso “Salvo e sincronizado”.
+    const verify=await supabase.from('notes')
+      .select('id,title,content_html,color,reminder_at,updated_at')
+      .eq('id',d.id)
+      .maybeSingle();
+
+    if(verify.error||!verify.data){
+      if(verify.error)console.error('Falha ao confirmar nota:',verify.error);
+      return false;
+    }
+
+    const sameTitle=compactTitleForStorage(verify.data.title||'')===(compactTitleForStorage(d.title)||'Sem título');
+    const sameHtml=compactHtmlForStorage(verify.data.content_html||'')===compactHtmlForStorage(d.content_html||'');
+    if(!sameTitle||!sameHtml){
+      console.warn('A nuvem respondeu, mas o conteúdo relido não corresponde ao rascunho.');
+      return false;
+    }
+
+    try{
+      const names=(d.labels_text||'').split(',').map(x=>x.trim()).filter(Boolean);
+      const ids=await ensureLabels(names);
+      await supabase.from('note_labels').delete().eq('note_id',d.id);
+      if(ids.length){
+        await supabase.from('note_labels').insert(ids.map(label_id=>({
+          note_id:d.id,label_id,user_id:state.user.id
+        })));
+      }
+    }catch(err){
+      console.warn('Nota salva; etiquetas ficarão para a próxima sincronização:',err);
+    }
+
+    const local=state.notes.find(n=>n.id===d.id);
+    if(local)Object.assign(local,write.data,{local_only:false,cloud_confirmed:true,cloud_missing:false});
+    cacheNotes();
     clearDraft(d.id);
     return true;
   }
@@ -8939,19 +9005,43 @@
       }
     }
 
-    const {error}=await supabase.from('notes').update(patch).eq('id',state.current.id);
-    if(error){
+    const {data:saved,error}=await supabase.from('notes')
+      .update(patch)
+      .eq('id',state.current.id)
+      .select('*')
+      .maybeSingle();
+
+    if(error||!saved){
       state.isDirty=true;
       persistDraftNow();
-      setAutosave('Salvamento local pendente','local-saved');
-      setSyncStatus(true?'syncing':'offline');
+      if(error)console.error('Falha ao salvar nota:',error);
+      setAutosave('Salvo neste aparelho • sincronização pendente','local-saved');
+      setSyncStatus(navigator.onLine?'syncing':'offline');
+      return;
+    }
+
+    const verify=await supabase.from('notes')
+      .select('id,title,content_html,updated_at')
+      .eq('id',state.current.id)
+      .maybeSingle();
+
+    const confirmed=!!verify.data &&
+      compactTitleForStorage(verify.data.title||'')===(compactTitleForStorage(d.title)||'Sem título') &&
+      compactHtmlForStorage(verify.data.content_html||'')===compactHtmlForStorage(d.content_html||'');
+
+    if(verify.error||!confirmed){
+      state.isDirty=true;
+      persistDraftNow();
+      if(verify.error)console.error('Falha ao confirmar salvamento:',verify.error);
+      setAutosave('Salvo neste aparelho • aguardando confirmação da nuvem','local-saved');
+      setSyncStatus(navigator.onLine?'syncing':'offline');
       return;
     }
 
     await syncLabels(state.current.id);
-    Object.assign(state.current,patch);
+    Object.assign(state.current,patch,{local_only:false,cloud_confirmed:true,cloud_missing:false});
     const cached=state.notes.find(n=>n.id===state.current.id);
-    if(cached)Object.assign(cached,patch);
+    if(cached)Object.assign(cached,patch,{local_only:false,cloud_confirmed:true,cloud_missing:false});
     cacheNotes();
 
     clearDraft(state.current.id);
@@ -10462,7 +10552,7 @@ applyV42BrandingAndLayout();
 
 
 <script id="aghu-v57-release-marker">
-window.AGHU_NOTES_RELEASE=Object.freeze({version:'v61',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
+window.AGHU_NOTES_RELEASE=Object.freeze({version:'v62',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
 </script>
 </body>
 </html>
