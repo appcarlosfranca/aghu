@@ -2,10 +2,10 @@
 window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPABASE_ANON_KEY:"sb_publishable_5-96i6Atx7piLOhmQujUlQ___-9fLwW",GOOGLE_CLIENT_ID:""};
 
 (function(){
+  document.documentElement.dataset.uiMode='original';
   try{
-    const saved=localStorage.getItem('aghuNotes.uiMode');
-    document.documentElement.dataset.uiMode=(saved==='original'||saved==='premium')?saved:'premium';
-  }catch(_){ document.documentElement.dataset.uiMode='premium'; }
+    localStorage.setItem('aghuNotes.uiMode','original');
+  }catch(_){}
 })();
 
 
@@ -2368,16 +2368,16 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
   }
 
   window.AGhuNoteActionIcon=window.AGhuNoteActionIcon||function(name){
-    const common='viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false"';
+    const common='viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"';
     const paths={
-      open:'<path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/>',
-      pin:'<path d="M8 3h8l-1.7 6.1 3.2 3.2v1.4H6.5v-1.4l3.2-3.2L8 3Z"/><path d="M12 13.7V21"/>',
-      archive:'<path d="M4 7h16v13H4z"/><path d="M3 3h18v4H3z"/><path d="M9 11h6"/>',
-      trash:'<path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M7 7l1 13h8l1-13"/><path d="M10 10v7M14 10v7"/>',
-      edit:'<path d="m4 20 4.1-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/><path d="m13.8 7.2 3 3"/>',
-      restore:'<path d="M4 8V3m0 0h5M4 3l4 4"/><path d="M5 13a7 7 0 1 0 2-5"/>'
+      open:'<path d="M2.75 12s3.55-6.05 9.25-6.05S21.25 12 21.25 12 17.7 18.05 12 18.05 2.75 12 2.75 12Z"/><circle cx="12" cy="12" r="3.05"/>',
+      pin:'<path d="M8.2 4.1h7.6l-1.45 5.05 2.55 2.55v1.2H7.1v-1.2l2.55-2.55L8.2 4.1Z"/><path d="M12 12.9v7"/>',
+      archive:'<rect x="3.75" y="6.5" width="16.5" height="13" rx="2.2"/><path d="M4.6 4.1h14.8v3H4.6z"/><path d="M9.5 11.1h5"/>',
+      trash:'<path d="M4.5 7.2h15"/><path d="M9 7.2V4.6h6v2.6"/><path d="M7.3 7.2l.9 11.1a1.8 1.8 0 0 0 1.8 1.65h4a1.8 1.8 0 0 0 1.8-1.65l.9-11.1"/><path d="M10.1 10.6v5.8M13.9 10.6v5.8"/>',
+      edit:'<path d="M4.25 19.75 8.6 18.7 18 9.3a2.15 2.15 0 1 0-3.05-3.05l-9.4 9.4-1.3 4.1Z"/><path d="m13.65 7.55 2.8 2.8"/>',
+      restore:'<path d="M7.3 7.3H4V4"/><path d="M4.15 7.15A8.2 8.2 0 1 1 3.8 13"/><path d="M9.2 11.3h5.3v5.1"/>'
     };
-    return `<svg ${common} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths[name]||paths.open}</svg>`;
+    return `<svg ${common} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths[name]||paths.open}</svg>`;
   };
 
   function updateSideActions(){
@@ -2722,21 +2722,9 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
       const age=safeCardMeta(meta.age);
       const record=safeCardMeta(meta.record);
 
-      return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}" style="--note-accent:${accent};--note-bg:${noteBg}">
+      return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}" style="--note-accent:#d6dbe1;--note-bg:#ffffff">
         <td data-label="Nome" class="patient-name-cell" data-name-cell="${n.id}">
-          <div class="note-card-idbar">
-            <span class="note-card-firstname" title="${esc(meta.name)}">${esc(firstName)}</span>
-            <div class="note-card-meta">
-              <span class="note-card-chip" title="Idade">Idade: ${esc(age)}</span>
-              <span class="note-card-chip" title="Prontuário / POL">Pront.: ${esc(record)}</span>
-              <label class="note-card-accent-wrap" title="Cor da nota">
-                <span class="note-card-accent-dot"></span>
-                <input class="note-card-accent-input" type="color" value="${accent}" data-card-accent="${n.id}" aria-label="Selecionar cor da nota">
-              </label>
-            </div>
-          </div>
-
-          <div class="patient-name-main">
+        <div class="patient-name-main">
             <strong>${esc(meta.name)}</strong>
             ${hint}
             <button class="quick-ref-add" type="button" data-add-quick-image="${n.id}" title="Adicionar imagem para consulta rápida">＋ imagem</button>
@@ -2773,18 +2761,6 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
       tr.addEventListener('dblclick',e=>{
         if(e.target.closest('.quick-ref-zone')||e.target.closest('button')||e.target.closest('input'))return;
         openNote(tr.dataset.id);
-      });
-    });
-
-    els.tbody.querySelectorAll('[data-card-accent]').forEach(input=>{
-      input.addEventListener('click',e=>e.stopPropagation());
-      input.addEventListener('input',e=>{
-        const tr=input.closest('tr[data-id]');
-        if(tr)tr.style.setProperty('--note-accent',input.value);
-      });
-      input.addEventListener('change',async e=>{
-        e.stopPropagation();
-        await updateCardAccent(input.dataset.cardAccent,input.value);
       });
     });
 
@@ -4600,10 +4576,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
     let text='#eef7ff';
     let muted='#bdd5ea';
 
-    if(document.documentElement.dataset.uiMode==='premium'){
-      text='#ffffff';
-      muted='#c5d5df';
-    }else if(theme==='white'){
+    if(theme==='white'){
       text='#111111';
       muted='#4f5963';
     }else if(theme==='navy'){
@@ -4744,7 +4717,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
 
 
 // v42 - rebrand, simplificação visual e menu interno corrigido
-window.AGhuBuildVersion='65.2';
+window.AGhuBuildVersion='69.15';
 const AGHU_V42_BRAND = 'Anotações Gerais de Histórias e Unidades';
 function applyV42BrandingAndLayout(){
   document.body.classList.add('v44-sidebar-menu');
@@ -4804,16 +4777,8 @@ renderNotes=function(){
     const hint=qrefs.length ? `<span class="quick-ref-count" title="Imagens para consulta rápida">${qrefs.length} img</span>` : '';
     const accent=noteAccentColor(n);
     const noteBg=noteCardBackground(n);
-    return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}" style="--note-accent:${accent};--note-bg:${noteBg}">
+    return `<tr data-id="${n.id}" class="${state.selectedId===n.id?'selected':''}" style="--note-accent:#d6dbe1;--note-bg:#ffffff">
       <td data-label="Nome" class="patient-name-cell" data-name-cell="${n.id}">
-        <div class="note-card-idbar">
-          <span class="note-card-firstname" title="${esc(title)}">${esc(title)}</span>
-          <div class="note-card-meta">
-            <label class="note-card-accent-wrap" title="Cor da nota">
-              <input class="note-card-accent-input" type="color" value="${accent}" data-card-accent="${n.id}" aria-label="Selecionar cor da nota">
-            </label>
-          </div>
-        </div>
         <div class="patient-name-main">
           <strong>${esc(title)}</strong>
           ${hint}
@@ -4847,18 +4812,6 @@ renderNotes=function(){
     tr.addEventListener('dblclick',e=>{
       if(e.target.closest('.quick-ref-zone')||e.target.closest('button')||e.target.closest('input'))return;
       openNote(tr.dataset.id);
-    });
-  });
-
-  els.tbody.querySelectorAll('[data-card-accent]').forEach(input=>{
-    input.addEventListener('click',e=>e.stopPropagation());
-    input.addEventListener('input',e=>{
-      const tr=input.closest('tr[data-id]');
-      if(tr)tr.style.setProperty('--note-accent',input.value);
-    });
-    input.addEventListener('change',async e=>{
-      e.stopPropagation();
-      await updateCardAccent(input.dataset.cardAccent,input.value);
     });
   });
 
@@ -5295,81 +5248,15 @@ window.AGHU_NOTES_RELEASE=Object.freeze({version:'v69.5',project:'imwwqdgovfxhnt
 
 
 (function(){
-  const KEY='aghuNotes.uiMode';
-  const PREMIUM_INIT='aghuNotes.premiumCardsInitialized';
-
-  function currentMode(){
-    const v=document.documentElement.dataset.uiMode;
-    return v==='original'?'original':'premium';
-  }
-
-  function updateControls(){
-    const mode=currentMode();
-    document.querySelectorAll('[data-ui-mode-choice]').forEach(btn=>{
-      const active=btn.dataset.uiModeChoice===mode;
-      btn.classList.toggle('active',active);
-      btn.setAttribute('aria-pressed',active?'true':'false');
-    });
-  }
-
-  function setMode(mode,persist=true){
-    mode=mode==='original'?'original':'premium';
-    document.documentElement.dataset.uiMode=mode;
-    const body=document.body;
-    if(mode==='premium'){
-      const fc=document.getElementById('fontColorInput');if(fc&&!/^#[0-9a-f]{6}$/i.test(fc.value||''))fc.value='#ffffff';
-      if(body){
-        body.style.setProperty('--aghu-dynamic-text','#ffffff','important');
-        body.style.setProperty('--aghu-dynamic-muted','#c5d5df','important');
-      }
-    }else if(body){
-      body.style.removeProperty('--aghu-dynamic-text');
-      body.style.removeProperty('--aghu-dynamic-muted');
-    }
-    if(persist){ try{localStorage.setItem(KEY,mode)}catch(_){} }
-    updateControls();
-
-    // Na primeira entrada Premium, privilegia os cards; depois respeita a escolha do usuário.
-    if(mode==='premium'){
-      try{
-        if(localStorage.getItem(PREMIUM_INIT)!=='1'){
-          const cards=document.getElementById('notesCardsViewBtn');
-          if(cards){cards.click();localStorage.setItem(PREMIUM_INIT,'1')}
-        }
+  function enforceOriginal(){
+    document.documentElement.dataset.uiMode='original';
+    try{
+      localStorage.setItem('aghuNotes.uiMode','original');
       }catch(_){}
-    }
-
-    window.dispatchEvent(new Event('resize'));
   }
-
-  window.AGhuSetUiMode=setMode;
-
-  function init(){
-    let saved='premium';
-    try{saved=localStorage.getItem(KEY)||'premium'}catch(_){}
-    setMode(saved,false);
-
-    document.querySelectorAll('[data-ui-mode-choice]').forEach(btn=>{
-      btn.addEventListener('click',()=>setMode(btn.dataset.uiModeChoice,true));
-    });
-
-    const nav=document.getElementById('premiumMobileNav');
-    nav?.querySelectorAll('[data-premium-action]').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        const action=btn.dataset.premiumAction;
-        if(action==='notes') document.getElementById('keepMenuBtn')?.click();
-        if(action==='calculator') document.getElementById('calculatorMenuBtn')?.click();
-        if(action==='new') document.getElementById('newNoteBtn')?.click();
-        if(action==='reminders'){
-          document.getElementById('keepMenuBtn')?.click();
-          const r=document.querySelector('.filter[data-filter="reminders"]');
-          r?.click();
-        }
-        if(action==='visual') setMode(currentMode()==='premium'?'original':'premium',true);
-      });
-    });
-  }
-
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
+  window.AGhuSetUiMode=function(){ enforceOriginal(); };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enforceOriginal,{once:true});
+  else enforceOriginal();
 })();
+
+
