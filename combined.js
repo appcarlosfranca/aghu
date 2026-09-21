@@ -381,7 +381,7 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
   // IndexedDB é o espelho local durável e o rascunho é o journal de edição.
   // O caminho crítico de notas NÃO depende mais do adaptador lógico `notes`.
   // ================================================================
-  const V64_CORE_VERSION='69.4';
+  const V64_CORE_VERSION='69.5';
   const v64Raw=window.AGhuCloudRaw;
   const V64_JOURNAL_PREFIX='aghuNotes.v64.journal:';
   // Espelho local ESTÁVEL: não é apagado após sincronizar. Ele existe para que
@@ -467,6 +467,59 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
     }
   }
 
+
+  // Tombstone durável de exclusão definitiva. Diferente da lixeira, este marcador
+  // sobrevive ao logout/reload e impede que snapshots/rascunhos locais antigos
+  // recriem uma nota que já foi apagada da nuvem.
+  const NOTE_HARD_DELETE_PREFIX='aghuNotes.hardDelete:';
+  function hardDeleteGuardKey(noteId,userId=state?.user?.id){
+    return userId&&noteId?`${NOTE_HARD_DELETE_PREFIX}${userId}:${noteId}`:'';
+  }
+  function writeHardDeleteGuard(noteOrId,userId=state?.user?.id){
+    const noteId=typeof noteOrId==='string'?noteOrId:noteOrId?.id;
+    const key=hardDeleteGuardKey(noteId,userId);if(!key)return false;
+    const payload={id:noteId,user_id:userId,deleted_forever:true,deleted_at:new Date().toISOString()};
+    try{localStorage.setItem(key,JSON.stringify(payload));return true}
+    catch(err){console.warn('Tombstone de exclusão definitiva:',err);return false}
+  }
+  function clearHardDeleteGuard(noteId,userId=state?.user?.id){
+    const key=hardDeleteGuardKey(noteId,userId);if(!key)return;
+    try{localStorage.removeItem(key)}catch{}
+  }
+  function readHardDeleteGuards(userId){
+    const out=[];const prefix=`${NOTE_HARD_DELETE_PREFIX}${userId}:`;
+    try{
+      for(let i=0;i<localStorage.length;i++){
+        const key=localStorage.key(i);if(!key||!key.startsWith(prefix))continue;
+        try{const v=JSON.parse(localStorage.getItem(key)||'null');if(v?.id&&v.user_id===userId)out.push(v)}catch{}
+      }
+    }catch{}
+    return out;
+  }
+  function hardDeletedIds(userId=state?.user?.id){
+    return new Set(readHardDeleteGuards(userId).map(x=>x.id).filter(Boolean));
+  }
+  function isHardDeleted(noteId,userId=state?.user?.id){
+    if(!noteId||!userId)return false;
+    try{return !!localStorage.getItem(hardDeleteGuardKey(noteId,userId))}catch{return false}
+  }
+  function purgeHardDeletedFromMap(targetMap,userId){
+    for(const id of hardDeletedIds(userId))targetMap.delete(id);
+  }
+  async function reconcileHardDeleteGuards(userId){
+    if(!userId||!navigator.onLine)return;
+    const ids=[...hardDeletedIds(userId)];
+    if(!ids.length)return;
+    try{
+      const main=await v64Raw.from('vault_records').delete()
+        .eq('user_id',userId).eq('kind','notes').in('record_id',ids);
+      if(main.error)throw main.error;
+      const deps=await v64Raw.from('vault_records').delete()
+        .eq('user_id',userId).in('kind',['note_labels','note_versions','attachments']).in('note_id',ids);
+      if(deps.error)throw deps.error;
+    }catch(err){console.warn('Reconciliação de exclusões definitivas:',err)}
+  }
+
   function v64Clone(value){
     try{return structuredClone(value)}catch{return JSON.parse(JSON.stringify(value))}
   }
@@ -490,6 +543,7 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
   }
   function v64WriteJournal(note){
     const key=v64JournalKey(note?.id); if(!key)return false;
+    if(isHardDeleted(note?.id,state.user?.id))return false;
     try{localStorage.setItem(key,JSON.stringify(v64JournalSnapshot(note)));return true}catch(err){console.warn('Journal v64:',err);return false}
   }
   function v64DeleteJournal(noteId){
@@ -1008,6 +1062,7 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
   function persistLocalNote(note){
     if(!note?.id||!state.user?.id)return Promise.resolve(false);
     const noteId=note.id;
+    if(isHardDeleted(noteId,state.user.id))return Promise.resolve(false);
     const snapshot=cloneLocalNote({...note,user_id:state.user.id});
 
     // Camada 1: espelho síncrono no localStorage. Esta gravação acontece mesmo
@@ -1203,6 +1258,17 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
         }
       }
 
+      // Exclusões definitivas sempre vencem snapshots, espelhos e rascunhos antigos.
+      const hardIds=hardDeletedIds(userId);
+      for(const id of hardIds){
+        merged.delete(id);
+        state.localDrafts.delete(id);
+        deleteStableMirror(id,userId);
+        try{localStorage.removeItem(`${V64_JOURNAL_PREFIX}${userId}:${id}`)}catch{}
+        idbDelete('notes',`${userId}:${id}`).catch(()=>{});
+        idbDelete('drafts',`${userId}:${id}`).catch(()=>{});
+      }
+
       state.localNotesCache=[...merged.values()].sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
       state.localLabelsCache=Array.isArray(labelsRec?.value)?labelsRec.value:[];
 
@@ -1225,7 +1291,9 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
   }
 
   function cacheNotes(){
-    state.localNotesCache=state.notes.map(n=>cloneLocalNote(n)).filter(Boolean);
+    state.localNotesCache=state.notes
+      .filter(n=>n?.id&&!isHardDeleted(n.id,state.user?.id))
+      .map(n=>cloneLocalNote(n)).filter(Boolean);
     if(!state.user||!state.localPersistenceReady)return;
 
     // Persistência por registro: uma leitura vazia da nuvem nunca apaga as notas locais.
@@ -1295,6 +1363,7 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
   function queueDraftWrite(d){
     if(!d||!state.localPersistenceReady||!state.user)return Promise.resolve(false);
     const noteId=d.id;
+    if(isHardDeleted(noteId,state.user.id))return Promise.resolve(false);
     const snapshot=JSON.parse(JSON.stringify(d));
     const previous=state.draftWriteChains.get(noteId)||Promise.resolve();
 
@@ -1378,7 +1447,7 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
 
   function pendingDrafts(){
     return [...state.localDrafts.values()]
-      .filter(Boolean)
+      .filter(d=>d&&d.id&&!isHardDeleted(d.id,state.user?.id))
       .sort((a,b)=>new Date(a.updated_at)-new Date(b.updated_at));
   }
 
@@ -2214,6 +2283,7 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
       localById.set(n.id,localById.has(n.id)?chooseNewer(n,localById.get(n.id)):v64Clone(n));
     }
     enforceTrashGuardsMap(localById,uid);
+    purgeHardDeletedFromMap(localById,uid);
 
     let remote=[];
     if(navigator.onLine){
@@ -2261,10 +2331,12 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
       merged.set(d.id,base);
     }
     enforceTrashGuardsMap(merged,uid);
+    purgeHardDeletedFromMap(merged,uid);
 
-    state.notes=[...merged.values()].filter(n=>n?.id&&n.user_id===uid);
+    state.notes=[...merged.values()].filter(n=>n?.id&&n.user_id===uid&&!isHardDeleted(n.id,uid));
     state.notes.sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
     cacheNotes();
+    if(navigator.onLine)reconcileHardDeleteGuards(uid).catch(()=>{});
   }
 
   async function loadLabels(){
@@ -3056,18 +3128,27 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
     if(ask&&!confirm('Excluir definitivamente esta nota? Esta ação não poderá ser desfeita.'))return;
 
     setSyncStatus('syncing');
+    const uid=state.user.id;
+    const snapshot=v64Clone(note);
 
-    // Primeiro exclui no cofre. Se falhar, a cópia local permanece intacta.
+    // O tombstone é gravado de forma síncrona antes da chamada remota. Assim,
+    // mesmo que a aba seja fechada imediatamente depois do clique, nenhum cache
+    // ou rascunho antigo poderá recriar esta nota no próximo login.
+    writeHardDeleteGuard(note,uid);
+    clearDraft(note.id);
+    await waitDraftWrite(note.id);
+
     const {error}=await supabase.from('notes').delete().eq('id',note.id);
     if(error){
-      alert('Não foi possível excluir definitivamente a nota.');
-      setSyncStatus('ok');
+      clearHardDeleteGuard(note.id,uid);
+      await persistLocalNote(snapshot).catch(()=>{});
+      alert('Não foi possível excluir definitivamente a nota. Tente novamente com conexão ativa.');
+      setSyncStatus(navigator.onLine?'ok':'offline');
       return;
     }
 
     try{await removeStorageFiles(note)}catch{}
-    clearDraft(note.id);
-    clearTrashGuard(note.id,state.user.id);
+    clearTrashGuard(note.id,uid);
     try{await deleteLocalAttachmentsForNote(note.id)}catch{}
     try{await removeLocalNote(note.id)}catch{}
 
@@ -3082,6 +3163,7 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
     }
 
     cacheNotes();
+    try{await state.cacheSnapshotChain}catch{}
     renderNotes();
     setSyncStatus('ok');
   }
@@ -3092,15 +3174,24 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
     if(!confirm(`Esvaziar a lixeira e excluir definitivamente ${trashed.length} nota(s)? Esta ação não poderá ser desfeita.`))return;
 
     setSyncStatus('syncing');
+    const uid=state.user.id;
+    let failed=0;
     for(const note of trashed){
+      const snapshot=v64Clone(note);
+      writeHardDeleteGuard(note,uid);
+      clearDraft(note.id);
+      await waitDraftWrite(note.id);
+
       const {error}=await supabase.from('notes').delete().eq('id',note.id);
       if(error){
+        clearHardDeleteGuard(note.id,uid);
+        await persistLocalNote(snapshot).catch(()=>{});
         console.warn('Falha ao excluir nota da lixeira',note.id,error);
+        failed++;
         continue;
       }
       try{await removeStorageFiles(note)}catch{}
-      clearDraft(note.id);
-      clearTrashGuard(note.id,state.user.id);
+      clearTrashGuard(note.id,uid);
       try{await deleteLocalAttachmentsForNote(note.id)}catch{}
       try{await removeLocalNote(note.id)}catch{}
       state.notes=state.notes.filter(n=>n.id!==note.id);
@@ -3108,8 +3199,10 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
     }
     state.selectedId=null;
     cacheNotes();
+    try{await state.cacheSnapshotChain}catch{}
     renderNotes();
-    setSyncStatus('ok');
+    if(failed)showToast(`${failed} nota(s) não puderam ser apagadas da nuvem e permaneceram na lixeira.`,5000);
+    setSyncStatus(navigator.onLine?'ok':'offline');
   });
 
 
@@ -5198,7 +5291,7 @@ applyV42BrandingAndLayout();
 })();
 
 
-window.AGHU_NOTES_RELEASE=Object.freeze({version:'v69.4',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
+window.AGHU_NOTES_RELEASE=Object.freeze({version:'v69.5',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
 
 
 (function(){

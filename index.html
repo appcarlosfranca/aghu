@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- AGHU Notes v68.6 — Premium azul/verde estrito, sem fundos brancos e sem cores livres nas notas. -->
+<!-- AGHU Notes v69.5 — exclusão definitiva durável + correções de layout mobile AGHU/Premium. -->
 <!-- AGHU Notes CLOUD v65.0: persistência reforçada com espelho local estável + Supabase. -->
 <html lang="pt-BR">
 <head>
@@ -8073,6 +8073,156 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
   -webkit-text-fill-color:currentColor!important;
 }
 </style>
+
+<style id="aghu-v69-5-mobile-stability">
+/* v69.5 — estabilidade mobile + isolamento correto entre login e app. */
+html,body{max-width:100%;overflow-x:hidden}
+#appShell,#appShell .workspace,#appShell .content,#appShell .page{min-width:0;max-width:100%}
+
+/* Elementos do aplicativo nunca aparecem por trás da tela de login. */
+#appShell.hidden ~ #premiumMobileNav{display:none!important}
+#appShell:not(.hidden) ~ #campaignJK{display:none!important}
+
+@media(max-width:720px){
+  #authScreen.auth-screen{
+    min-height:100dvh!important;
+    height:auto!important;
+    padding:max(18px,env(safe-area-inset-top)) 14px calc(76px + env(safe-area-inset-bottom))!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:10px!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+  }
+  #authScreen .auth-card{
+    width:min(360px,calc(100vw - 28px))!important;
+    max-width:100%!important;
+    min-height:0!important;
+    height:auto!important;
+    margin:clamp(18px,6vh,64px) auto 0!important;
+    padding:68px 22px 24px!important;
+    overflow:hidden!important;
+  }
+  #authScreen .auth-mode-switch.ui-mode-switch{
+    position:absolute!important;
+    top:14px!important;
+    right:14px!important;
+    bottom:auto!important;
+    left:auto!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:calc(100% - 28px)!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:44px!important;
+    margin:0!important;
+    padding:3px!important;
+    display:inline-flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:2px!important;
+    transform:none!important;
+    transform-origin:center!important;
+    border-radius:999px!important;
+    overflow:hidden!important;
+    z-index:20!important;
+  }
+  #authScreen .auth-mode-switch.ui-mode-switch button{
+    width:auto!important;
+    min-width:66px!important;
+    max-width:110px!important;
+    height:34px!important;
+    min-height:34px!important;
+    padding:0 10px!important;
+    margin:0!important;
+    flex:0 0 auto!important;
+    border-radius:999px!important;
+    font-size:10px!important;
+    line-height:34px!important;
+    white-space:nowrap!important;
+  }
+  #authScreen .auth-heading{margin-top:0!important}
+  #authScreen .auth-brand{width:100%!important;max-width:100%!important;overflow:hidden!important}
+  #authScreen .auth-card form,#authScreen .auth-card input,#authScreen .auth-card .btn,
+  #authScreen .purchase-access-btn{max-width:100%!important;min-width:0!important}
+  #authScreen .auth-disclaimer{
+    position:static!important;
+    inset:auto!important;
+    transform:none!important;
+    width:min(360px,calc(100vw - 32px))!important;
+    max-width:100%!important;
+    margin:0 auto!important;
+    padding:2px 6px!important;
+    background:transparent!important;
+    border:0!important;
+    text-align:center!important;
+    white-space:normal!important;
+    z-index:auto!important;
+  }
+  #campaignJK.campaign-jk.campaign-login-active{
+    left:14px!important;
+    right:14px!important;
+    bottom:calc(10px + env(safe-area-inset-bottom))!important;
+    width:auto!important;
+    max-width:none!important;
+    transform:none!important;
+    white-space:normal!important;
+    padding:9px 12px!important;
+    border-radius:14px!important;
+  }
+
+  #appShell .topbar{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+  }
+  #appShell .menu-search-wrap{flex:1 1 auto!important;min-width:0!important;max-width:100%!important}
+  #appShell .menu-search-wrap input{min-width:0!important}
+  #appShell .content{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+  #appShell .toolbar-row,#appShell .notes-view-toolbar{max-width:100%!important;min-width:0!important}
+  #appShell .search-notes{max-width:100%!important;min-width:0!important}
+  #appShell .table-wrap{max-width:100%!important}
+
+  html[data-ui-mode="premium"] #appShell .content{
+    padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
+  }
+  html[data-ui-mode="premium"] #keepPage .empty-state{
+    min-height:180px!important;
+    padding:28px 16px!important;
+  }
+  html[data-ui-mode="premium"] #keepPage .filters-row{margin-bottom:6px!important}
+  html[data-ui-mode="premium"] #premiumMobileNav,
+  html[data-ui-mode="premium"] #appShell:not(.hidden) ~ #premiumMobileNav{
+    left:12px!important;
+    right:12px!important;
+    bottom:calc(10px + env(safe-area-inset-bottom))!important;
+    width:auto!important;
+    max-width:none!important;
+    min-height:66px!important;
+    margin:0!important;
+    transform:none!important;
+  }
+
+  html[data-ui-mode="original"] #appShell .topbar-right{gap:5px!important;min-width:0!important}
+  html[data-ui-mode="original"] #appShell .user-badge{display:none!important}
+  html[data-ui-mode="original"] #appShell #syncStatus{font-size:8px!important;min-width:0!important;padding:4px 6px!important}
+  html[data-ui-mode="original"] #appShell #logoutBtn{font-size:9px!important;padding:5px 7px!important}
+  html[data-ui-mode="original"] #authScreen .auth-mode-switch.ui-mode-switch{
+    position:absolute!important;top:14px!important;right:14px!important;bottom:auto!important;
+  }
+}
+
+@media(max-width:420px){
+  #authScreen .auth-card{width:calc(100vw - 24px)!important;padding-left:18px!important;padding-right:18px!important}
+  #authScreen .auth-mode-switch.ui-mode-switch{right:10px!important;top:10px!important}
+  #authScreen .auth-mode-switch.ui-mode-switch button{min-width:60px!important;padding:0 8px!important}
+  html[data-ui-mode="premium"] #appShell .content{padding-left:10px!important;padding-right:10px!important}
+}
+</style>
+
 </head>
 <body>
   <div id="authScreen" class="auth-screen">
@@ -9163,7 +9313,7 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
   // IndexedDB é o espelho local durável e o rascunho é o journal de edição.
   // O caminho crítico de notas NÃO depende mais do adaptador lógico `notes`.
   // ================================================================
-  const V64_CORE_VERSION='69.4';
+  const V64_CORE_VERSION='69.5';
   const v64Raw=window.AGhuCloudRaw;
   const V64_JOURNAL_PREFIX='aghuNotes.v64.journal:';
   // Espelho local ESTÁVEL: não é apagado após sincronizar. Ele existe para que
@@ -9249,6 +9399,59 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
     }
   }
 
+
+  // Tombstone durável de exclusão definitiva. Diferente da lixeira, este marcador
+  // sobrevive ao logout/reload e impede que snapshots/rascunhos locais antigos
+  // recriem uma nota que já foi apagada da nuvem.
+  const NOTE_HARD_DELETE_PREFIX='aghuNotes.hardDelete:';
+  function hardDeleteGuardKey(noteId,userId=state?.user?.id){
+    return userId&&noteId?`${NOTE_HARD_DELETE_PREFIX}${userId}:${noteId}`:'';
+  }
+  function writeHardDeleteGuard(noteOrId,userId=state?.user?.id){
+    const noteId=typeof noteOrId==='string'?noteOrId:noteOrId?.id;
+    const key=hardDeleteGuardKey(noteId,userId);if(!key)return false;
+    const payload={id:noteId,user_id:userId,deleted_forever:true,deleted_at:new Date().toISOString()};
+    try{localStorage.setItem(key,JSON.stringify(payload));return true}
+    catch(err){console.warn('Tombstone de exclusão definitiva:',err);return false}
+  }
+  function clearHardDeleteGuard(noteId,userId=state?.user?.id){
+    const key=hardDeleteGuardKey(noteId,userId);if(!key)return;
+    try{localStorage.removeItem(key)}catch{}
+  }
+  function readHardDeleteGuards(userId){
+    const out=[];const prefix=`${NOTE_HARD_DELETE_PREFIX}${userId}:`;
+    try{
+      for(let i=0;i<localStorage.length;i++){
+        const key=localStorage.key(i);if(!key||!key.startsWith(prefix))continue;
+        try{const v=JSON.parse(localStorage.getItem(key)||'null');if(v?.id&&v.user_id===userId)out.push(v)}catch{}
+      }
+    }catch{}
+    return out;
+  }
+  function hardDeletedIds(userId=state?.user?.id){
+    return new Set(readHardDeleteGuards(userId).map(x=>x.id).filter(Boolean));
+  }
+  function isHardDeleted(noteId,userId=state?.user?.id){
+    if(!noteId||!userId)return false;
+    try{return !!localStorage.getItem(hardDeleteGuardKey(noteId,userId))}catch{return false}
+  }
+  function purgeHardDeletedFromMap(targetMap,userId){
+    for(const id of hardDeletedIds(userId))targetMap.delete(id);
+  }
+  async function reconcileHardDeleteGuards(userId){
+    if(!userId||!navigator.onLine)return;
+    const ids=[...hardDeletedIds(userId)];
+    if(!ids.length)return;
+    try{
+      const main=await v64Raw.from('vault_records').delete()
+        .eq('user_id',userId).eq('kind','notes').in('record_id',ids);
+      if(main.error)throw main.error;
+      const deps=await v64Raw.from('vault_records').delete()
+        .eq('user_id',userId).in('kind',['note_labels','note_versions','attachments']).in('note_id',ids);
+      if(deps.error)throw deps.error;
+    }catch(err){console.warn('Reconciliação de exclusões definitivas:',err)}
+  }
+
   function v64Clone(value){
     try{return structuredClone(value)}catch{return JSON.parse(JSON.stringify(value))}
   }
@@ -9272,6 +9475,7 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
   }
   function v64WriteJournal(note){
     const key=v64JournalKey(note?.id); if(!key)return false;
+    if(isHardDeleted(note?.id,state.user?.id))return false;
     try{localStorage.setItem(key,JSON.stringify(v64JournalSnapshot(note)));return true}catch(err){console.warn('Journal v64:',err);return false}
   }
   function v64DeleteJournal(noteId){
@@ -9790,6 +9994,7 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
   function persistLocalNote(note){
     if(!note?.id||!state.user?.id)return Promise.resolve(false);
     const noteId=note.id;
+    if(isHardDeleted(noteId,state.user.id))return Promise.resolve(false);
     const snapshot=cloneLocalNote({...note,user_id:state.user.id});
 
     // Camada 1: espelho síncrono no localStorage. Esta gravação acontece mesmo
@@ -9985,6 +10190,17 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
         }
       }
 
+      // Exclusões definitivas sempre vencem snapshots, espelhos e rascunhos antigos.
+      const hardIds=hardDeletedIds(userId);
+      for(const id of hardIds){
+        merged.delete(id);
+        state.localDrafts.delete(id);
+        deleteStableMirror(id,userId);
+        try{localStorage.removeItem(`${V64_JOURNAL_PREFIX}${userId}:${id}`)}catch{}
+        idbDelete('notes',`${userId}:${id}`).catch(()=>{});
+        idbDelete('drafts',`${userId}:${id}`).catch(()=>{});
+      }
+
       state.localNotesCache=[...merged.values()].sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
       state.localLabelsCache=Array.isArray(labelsRec?.value)?labelsRec.value:[];
 
@@ -10007,7 +10223,9 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
   }
 
   function cacheNotes(){
-    state.localNotesCache=state.notes.map(n=>cloneLocalNote(n)).filter(Boolean);
+    state.localNotesCache=state.notes
+      .filter(n=>n?.id&&!isHardDeleted(n.id,state.user?.id))
+      .map(n=>cloneLocalNote(n)).filter(Boolean);
     if(!state.user||!state.localPersistenceReady)return;
 
     // Persistência por registro: uma leitura vazia da nuvem nunca apaga as notas locais.
@@ -10077,6 +10295,7 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
   function queueDraftWrite(d){
     if(!d||!state.localPersistenceReady||!state.user)return Promise.resolve(false);
     const noteId=d.id;
+    if(isHardDeleted(noteId,state.user.id))return Promise.resolve(false);
     const snapshot=JSON.parse(JSON.stringify(d));
     const previous=state.draftWriteChains.get(noteId)||Promise.resolve();
 
@@ -10160,7 +10379,7 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
 
   function pendingDrafts(){
     return [...state.localDrafts.values()]
-      .filter(Boolean)
+      .filter(d=>d&&d.id&&!isHardDeleted(d.id,state.user?.id))
       .sort((a,b)=>new Date(a.updated_at)-new Date(b.updated_at));
   }
 
@@ -10996,6 +11215,7 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
       localById.set(n.id,localById.has(n.id)?chooseNewer(n,localById.get(n.id)):v64Clone(n));
     }
     enforceTrashGuardsMap(localById,uid);
+    purgeHardDeletedFromMap(localById,uid);
 
     let remote=[];
     if(navigator.onLine){
@@ -11043,10 +11263,12 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
       merged.set(d.id,base);
     }
     enforceTrashGuardsMap(merged,uid);
+    purgeHardDeletedFromMap(merged,uid);
 
-    state.notes=[...merged.values()].filter(n=>n?.id&&n.user_id===uid);
+    state.notes=[...merged.values()].filter(n=>n?.id&&n.user_id===uid&&!isHardDeleted(n.id,uid));
     state.notes.sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
     cacheNotes();
+    if(navigator.onLine)reconcileHardDeleteGuards(uid).catch(()=>{});
   }
 
   async function loadLabels(){
@@ -11838,18 +12060,27 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
     if(ask&&!confirm('Excluir definitivamente esta nota? Esta ação não poderá ser desfeita.'))return;
 
     setSyncStatus('syncing');
+    const uid=state.user.id;
+    const snapshot=v64Clone(note);
 
-    // Primeiro exclui no cofre. Se falhar, a cópia local permanece intacta.
+    // O tombstone é gravado de forma síncrona antes da chamada remota. Assim,
+    // mesmo que a aba seja fechada imediatamente depois do clique, nenhum cache
+    // ou rascunho antigo poderá recriar esta nota no próximo login.
+    writeHardDeleteGuard(note,uid);
+    clearDraft(note.id);
+    await waitDraftWrite(note.id);
+
     const {error}=await supabase.from('notes').delete().eq('id',note.id);
     if(error){
-      alert('Não foi possível excluir definitivamente a nota.');
-      setSyncStatus('ok');
+      clearHardDeleteGuard(note.id,uid);
+      await persistLocalNote(snapshot).catch(()=>{});
+      alert('Não foi possível excluir definitivamente a nota. Tente novamente com conexão ativa.');
+      setSyncStatus(navigator.onLine?'ok':'offline');
       return;
     }
 
     try{await removeStorageFiles(note)}catch{}
-    clearDraft(note.id);
-    clearTrashGuard(note.id,state.user.id);
+    clearTrashGuard(note.id,uid);
     try{await deleteLocalAttachmentsForNote(note.id)}catch{}
     try{await removeLocalNote(note.id)}catch{}
 
@@ -11864,6 +12095,7 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
     }
 
     cacheNotes();
+    try{await state.cacheSnapshotChain}catch{}
     renderNotes();
     setSyncStatus('ok');
   }
@@ -11874,15 +12106,24 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
     if(!confirm(`Esvaziar a lixeira e excluir definitivamente ${trashed.length} nota(s)? Esta ação não poderá ser desfeita.`))return;
 
     setSyncStatus('syncing');
+    const uid=state.user.id;
+    let failed=0;
     for(const note of trashed){
+      const snapshot=v64Clone(note);
+      writeHardDeleteGuard(note,uid);
+      clearDraft(note.id);
+      await waitDraftWrite(note.id);
+
       const {error}=await supabase.from('notes').delete().eq('id',note.id);
       if(error){
+        clearHardDeleteGuard(note.id,uid);
+        await persistLocalNote(snapshot).catch(()=>{});
         console.warn('Falha ao excluir nota da lixeira',note.id,error);
+        failed++;
         continue;
       }
       try{await removeStorageFiles(note)}catch{}
-      clearDraft(note.id);
-      clearTrashGuard(note.id,state.user.id);
+      clearTrashGuard(note.id,uid);
       try{await deleteLocalAttachmentsForNote(note.id)}catch{}
       try{await removeLocalNote(note.id)}catch{}
       state.notes=state.notes.filter(n=>n.id!==note.id);
@@ -11890,8 +12131,10 @@ html[data-ui-mode="premium"] body.aghu-readable-applied #editorPage #noteBody [d
     }
     state.selectedId=null;
     cacheNotes();
+    try{await state.cacheSnapshotChain}catch{}
     renderNotes();
-    setSyncStatus('ok');
+    if(failed)showToast(`${failed} nota(s) não puderam ser apagadas da nuvem e permaneceram na lixeira.`,5000);
+    setSyncStatus(navigator.onLine?'ok':'offline');
   });
 
 
@@ -13985,7 +14228,7 @@ applyV42BrandingAndLayout();
 
 
 <script id="aghu-v57-release-marker">
-window.AGHU_NOTES_RELEASE=Object.freeze({version:'v69.4',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
+window.AGHU_NOTES_RELEASE=Object.freeze({version:'v69.5',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
 </script>
 
 <script id="aghu-dual-ui-controller-v67">
