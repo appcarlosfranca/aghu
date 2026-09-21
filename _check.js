@@ -1,5 +1,6 @@
-
+//script 1
 window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPABASE_ANON_KEY:"sb_publishable_5-96i6Atx7piLOhmQujUlQ___-9fLwW",GOOGLE_CLIENT_ID:""};
+//script 2
 
 (function(){
   document.documentElement.dataset.uiMode='original';
@@ -8,6 +9,7 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
   }catch(_){}
 })();
 
+//script 3
 
 (()=>{
   const cfg=window.APP_CONFIG||{};
@@ -367,6 +369,7 @@ window.APP_CONFIG={SUPABASE_URL:"https://imwwqdgovfxhntsdkxlz.supabase.co",SUPAB
 })();
 
 
+//script 4
 
 (() => {
   const cfg=window.APP_CONFIG||{};
@@ -4868,6 +4871,7 @@ applyV42BrandingAndLayout();
 })();
 
   
+//script 5
 
 (function(){
   const KEY='aghuNotes.v51ResponsiveInitialized';
@@ -4911,6 +4915,7 @@ applyV42BrandingAndLayout();
   window.visualViewport?.addEventListener('resize',normalizeViewport,{passive:true});
 })();
 
+//script 6
 
 (()=>{
   const cfg=window.APP_CONFIG||{};
@@ -5243,9 +5248,11 @@ applyV42BrandingAndLayout();
   else setTimeout(openActivationFromUrl,0);
 })();
 
+//script 7
 
-window.AGHU_NOTES_RELEASE=Object.freeze({version:'v69.5',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
+window.AGHU_NOTES_RELEASE=Object.freeze({version:'v69.12',project:'imwwqdgovfxhntsdkxlz',storage:'vault_records',pix:true,exclusiveSession:true});
 
+//script 8
 
 (function(){
   function enforceOriginal(){
@@ -5255,8 +5262,6 @@ window.AGHU_NOTES_RELEASE=Object.freeze({version:'v69.5',project:'imwwqdgovfxhnt
       }catch(_){}
   }
   window.AGhuSetUiMode=function(){ enforceOriginal(); };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enforceOriginal,{once:true});
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',enforceOriginal,{once:true});
   else enforceOriginal();
 })();
-
-

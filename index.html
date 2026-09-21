@@ -11197,7 +11197,7 @@ ${stripHtml(els.body.innerHTML)}`.trim();}
 
 
 // v42 - rebrand, simplificação visual e menu interno corrigido
-window.AGhuBuildVersion='69.15';
+window.AGhuBuildVersion='69.16';
 const AGHU_V42_BRAND = 'Anotações Gerais de Histórias e Unidades';
 function applyV42BrandingAndLayout(){
   document.body.classList.add('v44-sidebar-menu');
@@ -12560,6 +12560,120 @@ window.AGHU_NOTES_RELEASE=Object.freeze({version:'v69.12',project:'imwwqdgovfxhn
     html body #appShell #keepPage.notes-view-cards .keep-card-preview{margin:0 10px 6px!important;max-height:42px!important}
     html body #appShell #keepPage.notes-view-cards .notes-table tr[data-id] > td.row-action{height:36px!important;min-height:36px!important}
     html body #appShell #keepPage.notes-view-cards .grid-icon-btn{height:35px!important;min-height:35px!important}
+  }
+</style>
+
+
+<style id="aghu-v69-16-quarter-size-note-cards">
+  /* v69.16 — blocos ~3/4 menores em área visual, preservando legibilidade e responsividade. */
+  html body #appShell #keepPage.notes-view-cards .notes-table tbody{
+    grid-template-columns:repeat(auto-fill,minmax(145px,165px))!important;
+    grid-auto-rows:max-content!important;
+    gap:7px!important;
+    align-items:start!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .notes-table tr[data-id]{
+    width:100%!important;
+    min-width:0!important;
+    max-width:165px!important;
+    min-height:0!important;
+    height:auto!important;
+    border-radius:9px!important;
+    align-self:start!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .patient-name-main{
+    min-height:0!important;
+    margin:0!important;
+    padding:6px 7px 3px!important;
+    gap:4px!important;
+    align-items:center!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .patient-name-main strong{
+    margin:0!important;
+    font-size:12px!important;
+    line-height:1.15!important;
+    font-weight:700!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .quick-ref-add{
+    font-size:7.5px!important;
+    line-height:1!important;
+    padding:2px 0!important;
+    white-space:nowrap!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .keep-card-preview{
+    min-height:0!important;
+    max-height:28px!important;
+    margin:0 7px 4px!important;
+    padding:0!important;
+    font-size:8.5px!important;
+    line-height:1.2!important;
+    -webkit-line-clamp:2!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .keep-card-preview:empty{display:none!important}
+  html body #appShell #keepPage.notes-view-cards .quick-ref-zone{
+    min-height:0!important;
+    margin:0 7px 4px!important;
+    padding:0!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .quick-ref-zone:has(.quick-ref-strip:empty){
+    margin:0!important;
+    height:0!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .quick-ref-thumb:first-child{
+    height:58px!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .quick-ref-thumb:not(:first-child){
+    width:28px!important;
+    height:28px!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .notes-table tr[data-id] > td.row-action,
+  html body.keep-focus-mode #appShell #keepPage.notes-view-cards .notes-table tr[data-id] > td.row-action{
+    min-height:26px!important;
+    height:26px!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .grid-icon-btn,
+  html body.keep-focus-mode #appShell #keepPage.notes-view-cards .grid-icon-btn{
+    min-height:25px!important;
+    height:25px!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .grid-icon-btn svg{
+    width:13px!important;
+    height:13px!important;
+  }
+  html body #appShell #keepPage.notes-view-cards .notes-group-row td{
+    height:20px!important;
+    min-height:20px!important;
+    padding:2px 0!important;
+    font-size:9px!important;
+  }
+
+  @media (max-width:1100px){
+    html body #appShell #keepPage.notes-view-cards .notes-table tbody{
+      grid-template-columns:repeat(auto-fill,minmax(145px,165px))!important;
+    }
+    html body #appShell #keepPage.notes-view-cards .notes-table tr[data-id]{max-width:165px!important}
+  }
+  @media (max-width:760px){
+    html body #appShell #keepPage.notes-view-cards .notes-table tbody{
+      grid-template-columns:repeat(2,minmax(0,1fr))!important;
+      gap:7px!important;
+    }
+    html body #appShell #keepPage.notes-view-cards .notes-table tr[data-id]{
+      width:100%!important;
+      max-width:none!important;
+    }
+  }
+  @media (max-width:420px){
+    html body #appShell #keepPage.notes-view-cards .notes-table tbody{
+      grid-template-columns:1fr 1fr!important;
+      gap:6px!important;
+    }
+    html body #appShell #keepPage.notes-view-cards .patient-name-main strong{font-size:11.5px!important}
+  }
+  @media (max-width:330px){
+    html body #appShell #keepPage.notes-view-cards .notes-table tbody{grid-template-columns:1fr!important}
   }
 </style>
 
